@@ -13,7 +13,7 @@ import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onA
 
 const firebaseConfig={
   apiKey:"AIzaSyDoSPSDr6DfQNa7DHV9Z4xl0Dkc36kd69o",
-  authDomain:"tzuyingg.github.io",
+  authDomain:"jenka-inventory.firebaseapp.com",
   databaseURL:"https://jenka-inventory-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId:"jenka-inventory",
   storageBucket:"jenka-inventory.firebasestorage.app",
@@ -24,7 +24,8 @@ const firebaseConfig={
 const ALLOWED_EMAILS = [
   'jenka.bf@gmail.com',
   'tz.yingg@gmail.com',
-  'dik29292@gmail.com'
+  'dik29292@gmail.com',
+  'huangkaka5@gmail.com'
 ];
 
 const app = initializeApp(firebaseConfig);
@@ -32,58 +33,78 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
+let appInitialized = false;
+
 function initApp(user) {
   const loginScreen = document.getElementById('loginScreen');
   const appContent = document.getElementById('appContent');
+  const errEl = document.getElementById('loginError');
+
   if (user && ALLOWED_EMAILS.includes(user.email)) {
+    // 授權成功
     loginScreen.style.display = 'none';
     appContent.style.display = 'block';
-    window._fb = {db, ref, set, get, onValue, update, remove};
-    window._fbReady = true;
-    window.dispatchEvent(new Event('fbReady'));
+    if (!appInitialized) {
+      appInitialized = true;
+      window._fb = {db, ref, set, get, onValue, update, remove};
+      window._fbReady = true;
+      window.dispatchEvent(new Event('fbReady'));
+    }
   } else if (user && !ALLOWED_EMAILS.includes(user.email)) {
+    // 未授權帳號
     signOut(auth);
     loginScreen.style.display = 'flex';
     appContent.style.display = 'none';
-    document.getElementById('loginError').textContent = '此帳號（' + user.email + '）未獲授權，請聯繫老闆。';
+    if (errEl) errEl.textContent = '此帳號（' + user.email + '）未獲授權，請聯繫老闆。';
   } else {
+    // 未登入
     loginScreen.style.display = 'flex';
     appContent.style.display = 'none';
   }
 }
 
-// 監聽登入狀態（主要邏輯）
-onAuthStateChanged(auth, user => {
-  initApp(user);
-});
-
-// 處理 redirect 登入結果
+// 先處理 redirect 結果，再監聽 auth 狀態
 getRedirectResult(auth).then(result => {
   if (result && result.user) {
-    console.log('Redirect login success:', result.user.email);
     initApp(result.user);
-  } else {
-    console.log('No redirect result, checking auth state...');
   }
 }).catch(err => {
-  console.warn('Redirect result error:', err.code, err.message);
+  console.warn('Redirect error:', err.code);
   const errEl = document.getElementById('loginError');
-  if (errEl) errEl.textContent = '登入失敗（' + err.code + '），請重試。';
+  if (errEl && err.code !== 'auth/no-auth-event') {
+    errEl.textContent = '登入失敗，請重試。錯誤：' + err.code;
+  }
+}).finally(() => {
+  // 無論如何都監聽 auth 狀態
+  onAuthStateChanged(auth, user => {
+    initApp(user);
+  });
 });
 
-// 登入按鈕
+// 登入按鈕 - 自動判斷裝置用 popup 或 redirect
 window.googleSignIn = function() {
   const errEl = document.getElementById('loginError');
-  if (errEl) errEl.textContent = '正在跳轉至 Google 登入...';
-  signInWithRedirect(auth, provider).catch(err => {
-    console.warn('SignIn error:', err);
-    if (errEl) errEl.textContent = '無法啟動登入，請確認網路連線。';
-  });
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  if (isMobile) {
+    if (errEl) errEl.textContent = '正在跳轉至 Google 登入...';
+    signInWithRedirect(auth, provider).catch(err => {
+      if (errEl) errEl.textContent = '登入失敗，請重試。';
+    });
+  } else {
+    import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js").then(({signInWithPopup}) => {
+      signInWithPopup(auth, provider).then(result => {
+        initApp(result.user);
+      }).catch(err => {
+        if (errEl) errEl.textContent = '登入失敗，請重試。';
+      });
+    });
+  }
 };
 
 // 登出
 window.googleSignOut = function() {
   signOut(auth).then(() => {
+    appInitialized = false;
     window.location.reload();
   });
 };
