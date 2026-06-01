@@ -357,8 +357,8 @@ window.dispatchEvent(new Event('fbReady'));
         onkeydown="if(event.key==='Enter')document.getElementById('loginPassword').focus()">
       <input id="loginPassword" type="password" placeholder="密碼" autocomplete="current-password"
         style="width:100%;height:44px;border-radius:10px;border:none;padding:0 14px;font-size:15px;font-family:'Noto Sans TC',sans-serif;background:rgba(255,255,255,.9);color:#1C1A14;outline:none;"
-        onkeydown="if(event.key==='Enter')doLogin()">
-      <button onclick="doLogin()"
+        onkeydown="if(event.key==='Enter')window.doLogin&&window.doLogin()">
+      <button onclick="window.doLogin&&window.doLogin()"
         style="width:100%;height:44px;border-radius:10px;border:none;background:#fff;color:var(--admin-accent);font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;margin-top:4px;touch-action:manipulation;">
         登入
       </button>
@@ -406,7 +406,7 @@ window.dispatchEvent(new Event('fbReady'));
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-top:4px;">
   <div class="date-badge" id="dateBadge">--</div>
-  <button onclick="doLogout()" style="font-size:10px;color:var(--ink3);background:none;border:1px solid var(--border);border-radius:20px;padding:4px 8px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">登出</button>
+  <button onclick="window.doLogout&&window.doLogout()" style="font-size:10px;color:var(--ink3);background:none;border:1px solid var(--border);border-radius:20px;padding:4px 8px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">登出</button>
 </div>
     </div>
     <div style="padding:0 20px 12px;">
@@ -756,8 +756,9 @@ window.dispatchEvent(new Event('fbReady'));
 // ── 系統設定種子預設值（Firebase 有資料時會被覆蓋）──
 let ALL_VENDORS=['豆漿','南北貨','毓品','廣弘','蔬菜','麵包'];
 let OPT_IN_VENDORS=['蔬菜','南北貨']; // 需管理員每日開啟才對員工顯示
-let shopName='庄腳';         // 店名，用於叫貨文字
-let orderGreeting='你好，以下是{shop} {date} 的叫貨內容，謝謝～'; // 叫貨問候語模板
+const ALWAYS_VENDORS=[];              // 保留相容性，永遠為空陣列
+let shopName='庄腳';
+let orderGreeting='你好，以下是{shop} {date} 的叫貨內容，謝謝～';
 const DAY_NAMES=['日','一','二','三','四','五','六'];
 
 let weeklySchedule={0:['廣弘'],1:['豆漿','麵包','毓品'],2:[],3:['廣弘'],4:['豆漿','毓品','麵包'],5:[],6:[]};
@@ -1323,43 +1324,7 @@ function toggleScheduleVendor(dow,vendor){
   const c=document.getElementById(`scount-${dow}`);
   if(c)c.textContent=`${scheduleDraft[dow].length} 個廠商`;
 }
-var saveSchedule = function(){weeklySchedule=JSON.parse(JSON.stringify(scheduleDraft));orderQty=buildDefaultOrders();showToast('✓ 排程已儲存');// iOS Safari fix: event delegation for dynamic content
-document.addEventListener('click', function(e) {
-  // vendor status row
-  const row = e.target.closest('.vendor-status-row');
-  if (row) {
-    const onclick = row.getAttribute('onclick');
-    if (onclick) { try { eval(onclick); } catch(err) {} }
-    return;
-  }
-  // day cell
-  const cell = e.target.closest('.day-cell');
-  if (cell) {
-    const onclick = cell.getAttribute('onclick');
-    if (onclick) { try { eval(onclick); } catch(err) {} }
-    return;
-  }
-});
-
-// Also add touchend for iOS
-document.addEventListener('touchend', function(e) {
-  const row = e.target.closest('.vendor-status-row');
-  if (row) {
-    e.preventDefault();
-    const onclick = row.getAttribute('onclick');
-    if (onclick) { try { eval(onclick); } catch(err) {} }
-    return;
-  }
-  const cell = e.target.closest('.day-cell');
-  if (cell) {
-    e.preventDefault();
-    const onclick = cell.getAttribute('onclick');
-    if (onclick) { try { eval(onclick); } catch(err) {} }
-    return;
-  }
-}, {passive: false});
-
-renderDayStrip();renderOverview();}
+var saveSchedule = function(){weeklySchedule=JSON.parse(JSON.stringify(scheduleDraft));orderQty=buildDefaultOrders();showToast('✓ 排程已儲存');}
 function resetSchedule(){scheduleDraft={0:['廣弘'],1:['豆漿','麵包','毓品'],2:[],3:['廣弘'],4:['豆漿','毓品','麵包'],5:[],6:[]};renderScheduleEditor();showToast('已重設為預設排程');}
 
 // ── Qty ──
