@@ -89,9 +89,15 @@ window.dispatchEvent(new Event('fbReady'));
 
   .alert-banner{margin:10px 20px 0;background:#FFF8EE;border:1px solid #F0D49A;border-radius:10px;padding:9px 14px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--warn);}
   .alert-banner.hidden{display:none;}
+  .completion-banner{margin:10px 20px 0;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:500;line-height:1.5;text-align:center;animation:fadeInDown .4s ease;}
+  .completion-banner.hidden{display:none;}
+  .completion-banner.order-done{background:linear-gradient(135deg,#E8F5EE,#D4EDDF);border:1px solid #8DC9A8;color:#2A6B47;}
+  .completion-banner.all-done{background:linear-gradient(135deg,#FFF8EE,#FFE8C0);border:1px solid #F0C060;color:#8B5A00;}
+  @keyframes fadeInDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
 
-  .vendor-status-bar{margin:12px 20px 0;display:flex;flex-direction:column;gap:6px;}
-  .vendor-status-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;transition:border-color .15s;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;appearance:none;-webkit-appearance:none;outline:none;}
+  /* ── 廠商列表 ── */
+  .vendor-status-bar{margin:14px 20px 0;display:flex;flex-direction:column;gap:8px;}
+  .vendor-status-row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:13px 16px;cursor:pointer;transition:border-color .15s;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;appearance:none;-webkit-appearance:none;outline:none;}
   .vendor-status-row:hover{border-color:var(--accent);}
   .vendor-status-row.submitted{border-color:var(--ok);background:#F4FAF7;}
   .vendor-status-row.rechecked{border-color:var(--warn);background:#FFFBF2;}
@@ -102,24 +108,34 @@ window.dispatchEvent(new Event('fbReady'));
   .vsr-icon.in-progress{background:#FFF8EE;}
   .vsr-icon.unlocked{background:#FFF8EE;}
   .vsr-left{flex:1;min-width:0;}
-  .vsr-name{font-weight:500;font-size:13.5px;}
-  .vsr-sub{font-size:11px;color:var(--ink3);margin-top:2px;}
+  .vsr-name{font-weight:600;font-size:14px;letter-spacing:.1px;}
+  .vsr-sub{font-size:11.5px;color:var(--ink3);margin-top:3px;letter-spacing:.1px;}
   .vsr-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-  .vsr-badge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;white-space:nowrap;}
-  .badge-pending{background:#FFF0EB;color:var(--accent);}
-  .badge-progress{background:#FFF8EE;color:var(--warn);}
-  .badge-done{background:#E8F5EE;color:var(--ok);}
-  .badge-recheck{background:#FFF8EE;color:var(--warn);border:1px solid #F0D49A;}
+  .vsr-badge{font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;display:inline-block;text-align:center;min-width:64px;letter-spacing:.2px;}
+  /* 尚未點貨 → 磚紅 */
+  .badge-pending{background:#FDECEA;color:#C0392B;border:1.5px solid #E8A49A;}
+  /* 點貨中 */
+  .badge-progress{background:#FFF8EE;color:var(--warn);border:1.5px solid #F0D49A;}
+  /* 已送出（尚未叫貨）→ 森林綠，保留動畫 */
+  .badge-done{background:#EAF3EE;color:#3A7D5E;border:1.5px solid #8DC9A8;}
+  /* 已重點 */
+  .badge-recheck{background:#FFF8EE;color:var(--warn);border:1.5px solid #F0D49A;}
   .badge-opt{background:var(--opt-bg);color:var(--ink3);border:1px solid var(--opt-border);}
   .vsr-chevron{color:var(--ink3);font-size:16px;}
   .no-vendor-state{text-align:center;padding:40px 20px;color:var(--ink3);}
   .no-vendor-state p{font-size:13px;line-height:1.8;margin-top:8px;}
 
-  .summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px 20px 0;}
-  .stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 12px;}
-  .stat .label{font-size:11px;color:var(--ink3);}
-  .stat .value{font-size:20px;font-weight:700;font-family:'DM Mono',monospace;margin-top:2px;}
-  .stat.ok .value{color:var(--ok);}.stat.warn .value{color:var(--warn);}.stat.danger .value{color:var(--danger);}
+  .summary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:14px 20px 0;}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:11px 14px;transition:opacity .3s;}
+  .stat .label{font-size:10.5px;color:var(--ink3);letter-spacing:.5px;font-weight:500;}
+  .stat .value{font-size:22px;font-weight:700;font-family:'DM Mono',monospace;margin-top:3px;}
+  /* 尚未點貨 → 磚紅；尚未叫貨 → 森林綠；已叫貨 → 棕褐 */
+  .stat.danger .value{color:#C0392B;}
+  .stat.warn .value{color:#3A7D5E;}
+  .stat.ok .value{color:#7A6A58;}
+  /* 歸零時整張卡變淡 */
+  .stat.dimmed{opacity:0.28;}
+  .stat.dimmed .value{color:var(--ink3)!important;}
   .progress-bar{height:4px;background:var(--border);border-radius:2px;margin:10px 20px 0;}
   .progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;}
 
@@ -171,7 +187,7 @@ window.dispatchEvent(new Event('fbReady'));
   .qty-unit{font-size:11px;color:var(--ink3);min-width:16px;}
 
   .submit-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:680px;padding:10px 20px;background:var(--cream);border-top:1px solid var(--border);display:flex;gap:10px;}
-  .btn-submit{flex:1;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:13px;font-family:'Noto Sans TC',sans-serif;font-size:15px;font-weight:700;cursor:pointer;}
+  .btn-submit{flex:1;background:#3D2B1F;color:#fff;border:none;border-radius:12px;padding:14px;font-family:'Noto Sans TC',sans-serif;font-size:15px;font-weight:600;cursor:pointer;letter-spacing:.3px;}
   .btn-submit:disabled{background:var(--ok);opacity:.85;cursor:default;}
   .btn-clear{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 14px;font-family:'Noto Sans TC',sans-serif;font-size:13px;color:var(--ink2);cursor:pointer;white-space:nowrap;}
   .btn-admin-save{flex:1;background:var(--admin-accent);color:#fff;border:none;border-radius:12px;padding:13px;font-family:'Noto Sans TC',sans-serif;font-size:15px;font-weight:700;cursor:pointer;}
@@ -190,7 +206,7 @@ window.dispatchEvent(new Event('fbReady'));
   .need{font-family:'DM Mono',monospace;font-weight:500;color:var(--accent);}
   .need.ok{color:var(--ok);}
   .modal-actions{display:flex;gap:10px;margin-top:20px;}
-  .btn-order{flex:1;background:var(--accent);color:#fff;border:none;border-radius:12px;padding:13px;font-family:'Noto Sans TC',sans-serif;font-size:15px;font-weight:700;cursor:pointer;}
+  .btn-order{flex:1;background:#3D2B1F;color:#fff;border:none;border-radius:12px;padding:14px;font-family:'Noto Sans TC',sans-serif;font-size:15px;font-weight:600;cursor:pointer;letter-spacing:.3px;}
   .btn-cancel{background:var(--tag-bg);border:none;border-radius:12px;padding:13px 18px;font-family:'Noto Sans TC',sans-serif;font-size:14px;color:var(--ink2);cursor:pointer;}
   .no-need{text-align:center;padding:20px;color:var(--ink3);font-size:13px;}
 
@@ -281,22 +297,23 @@ window.dispatchEvent(new Event('fbReady'));
   .btn-copy-line{flex:1;background:#06C755;color:#fff;border:none;border-radius:10px;padding:11px;font-family:'Noto Sans TC',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
 
   /* ── 已叫貨狀態 ── */
-  .vendor-status-row.ordered{border-color:#5B8ED6;background:#F0F4FF;}
-  .badge-ordered{background:#E8EFFF;color:#3A6BC4;}
-  .vsr-icon.ordered{background:#E8EFFF;}
+  .vendor-status-row.ordered{border-color:#C8BFB0;background:#FAFAF8;}
+  .badge-ordered{background:#EDE9E3;color:#7A6A58;border:1px solid #C8BFB0;}
+  .vsr-icon.ordered{background:#EDE9E3;}
 
   /* 總覽頁叫貨按鈕區 */
   .order-action-bar{margin:10px 20px 0;display:flex;gap:8px;}
   .btn-export-all{flex:1;background:var(--ink);color:var(--cream);border:none;border-radius:12px;padding:12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
   .btn-export-all:disabled{opacity:.4;cursor:default;}
 
-  /* 廠商列裡的「已叫貨」按鈕 */
-  .btn-mark-ordered{font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px;border:1.5px solid #5B8ED6;background:#F0F4FF;color:#3A6BC4;cursor:pointer;white-space:nowrap;font-family:'Noto Sans TC',sans-serif;flex-shrink:0;}
-  .btn-mark-ordered.done{border-color:var(--ok);background:#E8F5EE;color:var(--ok);cursor:default;}
-
-  /* opt-in 廠商按鈕 */
-  .btn-opt-in-toggle{font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;border:1.5px solid #3A6BC4;background:#E8EFFF;color:#3A6BC4;cursor:pointer;white-space:nowrap;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;}
-  .btn-opt-cancel{font-size:11px;padding:3px 10px;border-radius:20px;border:1.5px solid var(--border);background:var(--cream);color:var(--ink3);cursor:pointer;white-space:nowrap;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;}
+  /* 三狀態 badge + opt-in 按鈕：統一尺寸 */
+  .badge-pending{background:#FDECEA;color:#C0392B;border:1.5px solid #E8A49A;}
+  .badge-need-order{background:#EAF3EE;color:#3A7D5E;border:1.5px solid #3A7D5E;font-weight:700;animation:pulse-green 1.6s infinite;display:inline-block;padding:5px 12px;border-radius:20px;font-size:11px;min-width:64px;text-align:center;letter-spacing:.2px;}
+  .badge-ordered-done{background:#EDE9E3;color:#7A6A58;border:1.5px solid #C8BFB0;font-weight:600;padding:5px 12px;border-radius:20px;font-size:11px;min-width:64px;text-align:center;display:inline-block;letter-spacing:.2px;}
+  .btn-mark-ordered{display:none;}
+  @keyframes pulse-green{0%,100%{box-shadow:0 0 0 0 rgba(58,125,94,0.35);background:#EAF3EE;}50%{box-shadow:0 0 0 5px rgba(58,125,94,0);background:#D4EBE0;}}
+  .btn-opt-in-toggle{font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;border:1.5px solid #3A6BC4;background:#E8EFFF;color:#3A6BC4;cursor:pointer;white-space:nowrap;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;min-width:64px;text-align:center;letter-spacing:.2px;}
+  .btn-opt-cancel{font-size:11px;padding:5px 10px;border-radius:20px;border:1.5px solid var(--border);background:var(--cream);color:var(--ink3);cursor:pointer;white-space:nowrap;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;}
 
   /* ── 歷史查詢頁面 ── */
   #historyPage{display:none;}
@@ -411,8 +428,8 @@ window.dispatchEvent(new Event('fbReady'));
     </div>
     <div style="padding:0 20px 12px;">
       <div class="page-switcher">
-        <button class="page-btn" onclick="requestAdmin()" style="background:var(--tag-bg);color:var(--admin-accent);font-weight:700;">⚙️ 後台管理</button>
-        <button class="page-btn" id="historyPageBtn" onclick="showHistoryPage()" style="color:var(--ink2);">📊 歷史查詢</button>
+        <button class="page-btn" onclick="requestAdmin()" style="background:var(--tag-bg);color:var(--admin-accent);font-weight:700;">後台管理</button>
+        <button class="page-btn" id="historyPageBtn" onclick="showHistoryPage()" style="color:var(--ink2);">歷史查詢</button>
       </div>
     </div>
 
@@ -420,12 +437,13 @@ window.dispatchEvent(new Event('fbReady'));
     <div id="overviewView">
       <div class="day-strip" id="dayStrip"></div>
       <div class="alert-banner hidden" id="alertBanner">⚠️ <span id="alertText"></span></div>
+      <div class="completion-banner hidden" id="completionBanner"></div>
       <div class="vendor-status-bar" id="vendorStatusBar"></div>
       <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
       <div class="summary">
-        <div class="stat ok"><div class="label">已送出</div><div class="value" id="statDone">0</div></div>
-        <div class="stat warn"><div class="label">點貨中</div><div class="value" id="statProgress">0</div></div>
-        <div class="stat danger"><div class="label">未開始</div><div class="value" id="statPending">0</div></div>
+        <div class="stat danger"><div class="label">尚未點貨</div><div class="value" id="statPending">0</div></div>
+        <div class="stat warn"><div class="label">尚未叫貨</div><div class="value" id="statProgress">0</div></div>
+        <div class="stat ok"><div class="label">已叫貨</div><div class="value" id="statDone">0</div></div>
       </div>
     </div>
 
@@ -464,11 +482,11 @@ window.dispatchEvent(new Event('fbReady'));
   <div class="submit-bar">
     <div id="overviewBar" style="display:flex;gap:10px;width:100%;">
       <button class="btn-clear" onclick="showAllOrders()">總覽</button>
-      <button class="btn-export-all" id="exportAllBtn" onclick="showExportAll()">📋 匯出全部叫貨文字</button>
+      <button class="btn-export-all" id="exportAllBtn" onclick="showExportAll()">匯出全部叫貨文字</button>
     </div>
     <div id="vendorBar" style="display:none;gap:10px;width:100%;">
       <button class="btn-clear" onclick="clearVendor()">清除</button>
-      <button class="btn-submit" id="vendorSubmitBtn" onclick="submitVendor()">送出叫貨單 →</button>
+      <button class="btn-submit" id="vendorSubmitBtn" onclick="submitVendor()">送出點貨單</button>
     </div>
   </div>
 </div>
@@ -489,13 +507,13 @@ window.dispatchEvent(new Event('fbReady'));
       </div>
     </div>
     <div class="admin-nav">
-      <button class="admin-nav-btn active" id="navRecheck" onclick="switchAdminNav('recheck')">🔓 重點</button>
-      <button class="admin-nav-btn" id="navSchedule" onclick="switchAdminNav('schedule')">📅 排程</button>
-      <button class="admin-nav-btn" id="navQty" onclick="switchAdminNav('qty')">📦 叫貨量</button>
-      <button class="admin-nav-btn" id="navItems" onclick="switchAdminNav('items')">🗂️ 品項</button>
-      <button class="admin-nav-btn" id="navChecker" onclick="switchAdminNav('checker')">👤 點貨人</button>
-      <button class="admin-nav-btn" id="navPin" onclick="switchAdminNav('pin')">👥 帳號</button>
-      <button class="admin-nav-btn" id="navSystem" onclick="switchAdminNav('system')">⚙️ 系統</button>
+      <button class="admin-nav-btn active" id="navRecheck" onclick="switchAdminNav('recheck')">重點</button>
+      <button class="admin-nav-btn" id="navSchedule" onclick="switchAdminNav('schedule')">排程</button>
+      <button class="admin-nav-btn" id="navQty" onclick="switchAdminNav('qty')">叫貨量</button>
+      <button class="admin-nav-btn" id="navItems" onclick="switchAdminNav('items')">品項</button>
+      <button class="admin-nav-btn" id="navChecker" onclick="switchAdminNav('checker')">點貨人</button>
+      <button class="admin-nav-btn" id="navPin" onclick="switchAdminNav('pin')">帳號</button>
+      <button class="admin-nav-btn" id="navSystem" onclick="switchAdminNav('system')">系統</button>
     </div>
 
     <div id="recheckAdminView">
@@ -653,17 +671,17 @@ window.dispatchEvent(new Event('fbReady'));
     <div id="recheckBar" style="width:100%;"><div style="font-size:12px;color:var(--ink3);text-align:center;padding:13px 0;">點擊「解鎖重點」後員工即可重新填寫</div></div>
     <div id="scheduleBar" style="display:none;gap:10px;width:100%;">
       <button class="btn-clear" onclick="resetSchedule()">重設預設</button>
-      <button class="btn-admin-save" onclick="saveSchedule()">儲存排程 ✓</button>
+      <button class="btn-admin-save" onclick="saveSchedule()">儲存排程</button>
     </div>
     <div id="qtyBar" style="display:none;gap:10px;width:100%;">
       <button class="btn-clear" onclick="adminReset()">重設此廠商</button>
-      <button class="btn-admin-save" onclick="adminSave()">儲存叫貨量 ✓</button>
+      <button class="btn-admin-save" onclick="adminSave()">儲存叫貨量</button>
     </div>
     <div id="itemsBar" style="display:none;width:100%;"><div style="font-size:12px;color:var(--ink3);text-align:center;padding:13px 0;">新增或刪除品項後立即生效</div></div>
     <div id="checkerBar" style="display:none;width:100%;"><div style="font-size:12px;color:var(--ink3);text-align:center;padding:13px 0;">異動即時生效</div></div>
     <div id="pinBar" style="display:none;width:100%;"><div style="font-size:12px;color:var(--ink3);text-align:center;padding:13px 0;">新增或異動帳號後立即生效</div></div>
     <div id="systemBar" style="display:none;gap:10px;width:100%;">
-      <button class="btn-admin-save" onclick="saveSystemSettings()">儲存系統設定 ✓</button>
+      <button class="btn-admin-save" onclick="saveSystemSettings()">儲存系統設定</button>
     </div>
   </div>
 </div>
@@ -679,8 +697,8 @@ window.dispatchEvent(new Event('fbReady'));
       <button onclick="showPage('inventory')" style="font-size:12px;color:var(--ink3);background:none;border:1px solid var(--border);border-radius:20px;padding:6px 12px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">← 返回點貨</button>
     </div>
     <div class="hist-nav">
-      <button class="hist-nav-btn active" id="histNavDetail" onclick="switchHistTab('detail')">📋 叫貨明細</button>
-      <button class="hist-nav-btn" id="histNavTrend" onclick="switchHistTab('trend')">📈 消耗趨勢</button>
+      <button class="hist-nav-btn active" id="histNavDetail" onclick="switchHistTab('detail')">叫貨明細</button>
+      <button class="hist-nav-btn" id="histNavTrend" onclick="switchHistTab('trend')">消耗趨勢</button>
     </div>
 
     <!-- 叫貨明細 -->
@@ -995,9 +1013,9 @@ function renderOverview(){
     : [...visibleScheduled, ...activeOptIn];
 
   const pending = visibleScheduled.filter(v => { const s = vendorState(v, viewDow); return s === 'pending' || s === 'progress'; });
-  const banner = document.getElementById('alertBanner');
-  if(pending.length > 0){ banner.classList.remove('hidden'); document.getElementById('alertText').textContent = `尚未送出叫貨：${pending.join('、')}`; }
-  else banner.classList.add('hidden');
+  const alertBanner = document.getElementById('alertBanner');
+  if(pending.length > 0){ alertBanner.classList.remove('hidden'); document.getElementById('alertText').textContent = `尚未送出叫貨：${pending.join('、')}`; }
+  else alertBanner.classList.add('hidden');
 
   const bar = document.getElementById('vendorStatusBar');
   if(vendors.length === 0){
@@ -1026,7 +1044,7 @@ function renderOverview(){
       }
 
       // opt-in 廠商已開啟 → 正常顯示，管理員多一個「取消」按鈕
-      let icon='📋', iconCls='pending', badgeText='未開始', badgeCls='badge-pending', rowCls='';
+      let icon='–', iconCls='pending', badgeText='尚未點貨', badgeCls='badge-pending', rowCls='';
       let subText = `${vitems.length} 項待點貨`;
       if(state === 'done'){
         icon='✓'; iconCls='done'; rowCls='submitted';
@@ -1034,7 +1052,7 @@ function renderOverview(){
         badgeText = isRe ? '已重點' : '已送出'; badgeCls = isRe ? 'badge-recheck' : 'badge-done';
         if(isRe) rowCls = 'rechecked';
         subText = `${sub.checker} · ${sub.time}`;
-        if(ordered[viewDow][v]){ iconCls='ordered'; subText = `${sub.checker} · ${sub.time} ｜ 已叫貨 ${ordered[viewDow][v].time}`; }
+        if(ordered[viewDow][v]){ iconCls='ordered'; subText = `${sub.checker} · ${sub.time} ｜ 已點貨 ${ordered[viewDow][v].time}`; }
       } else if(state === 'unlocked'){
         icon='✎'; iconCls='unlocked'; badgeText='可重點'; badgeCls='badge-recheck'; rowCls='rechecked';
         subText = '管理員已解鎖，等待重點';
@@ -1054,11 +1072,16 @@ function renderOverview(){
           <div class="vsr-sub">${subText}</div>
         </div>
         <div class="vsr-right">
-          ${state === 'done' ? `<button class="btn-mark-ordered${ordered[viewDow][v] ? ' done' : ''}"
-            onclick="event.stopPropagation();markOrdered('${v}')">${ordered[viewDow][v] ? '✓ 已叫貨' : '叫貨完成'}</button>` : ''}
           ${isOptIn && isEnabled && isAdmin && state !== 'done'
             ? `<button class="btn-opt-cancel" onclick="event.stopPropagation();toggleOptIn(${viewDow},'${v}')">取消</button>` : ''}
-          <span class="vsr-badge ${ordered[viewDow][v] ? 'badge-ordered' : badgeCls}">${ordered[viewDow][v] ? '已叫貨' : badgeText}</span>
+          ${state === 'done'
+            ? `<span class="vsr-badge ${ordered[viewDow][v] ? 'badge-ordered-done' : 'badge-need-order'}"
+                onclick="event.stopPropagation();${ordered[viewDow][v] ? '' : `markOrdered('${v}')`}"
+                style="cursor:${ordered[viewDow][v] ? 'default' : 'pointer'};">
+                ${ordered[viewDow][v] ? '✓ 已叫貨' : '請叫貨'}
+              </span>`
+            : `<span class="vsr-badge ${badgeCls}">${badgeText}</span>`
+          }
           <span class="vsr-chevron">›</span>
         </div>
       </button>`;
@@ -1066,14 +1089,55 @@ function renderOverview(){
   }
 
   const allVisible = [...visibleScheduled, ...activeOptIn];
-  const done = allVisible.filter(v => vendorState(v, viewDow) === 'done').length;
-  const prog = allVisible.filter(v => { const s = vendorState(v, viewDow); return s === 'progress' || s === 'unlocked'; }).length;
-  const pend = allVisible.filter(v => vendorState(v, viewDow) === 'pending').length;
-  document.getElementById('statDone').textContent = done;
-  document.getElementById('statProgress').textContent = prog;
-  document.getElementById('statPending').textContent = pend;
-  document.getElementById('subtitle').textContent = `週${DAY_NAMES[viewDow]} · ${done}/${allVisible.length} 廠商已送出`;
-  document.getElementById('progressFill').style.width = allVisible.length > 0 ? (done / allVisible.length * 100).toFixed(0) + '%' : '0%';
+  // 統計：尚未點貨 / 尚未叫貨（已送出但未叫貨）/ 已叫貨
+  const statPending = allVisible.filter(v => { const s = vendorState(v, viewDow); return s === 'pending' || s === 'progress'; }).length;
+  const statUnordered = allVisible.filter(v => vendorState(v, viewDow) === 'done' && !ordered[viewDow][v]).length;
+  const statOrdered = allVisible.filter(v => !!ordered[viewDow][v]).length;
+
+  document.getElementById('statPending').textContent = statPending;
+  document.getElementById('statProgress').textContent = statUnordered;
+  document.getElementById('statDone').textContent = statOrdered;
+  document.getElementById('subtitle').textContent = `週${DAY_NAMES[viewDow]} · ${statOrdered}/${allVisible.length} 廠商已叫貨`;
+  document.getElementById('progressFill').style.width = allVisible.length > 0 ? (statOrdered / allVisible.length * 100).toFixed(0) + '%' : '0%';
+
+  // 歸零的統計卡變淡
+  document.querySelector('.stat.danger').classList.toggle('dimmed', statPending === 0);
+  document.querySelector('.stat.warn').classList.toggle('dimmed', statUnordered === 0);
+  // 已叫貨：還沒開始叫（全0）時也變淡，全叫完才顯眼
+  document.querySelector('.stat.ok').classList.toggle('dimmed', statOrdered === 0);
+
+  // ── 完成提醒 banner ──
+  const MSGS_ORDER_DONE = [
+    '🎉 點貨全部完成！可以通知老闆叫貨了',
+    '👏 今日點貨 100%，等待叫貨中',
+    '✅ 今天所有廠商都點完囉，辛苦了！',
+  ];
+  const MSGS_ALL_DONE = [
+    '🎊 今天的叫貨全部完成囉！',
+    '✨ 今日叫貨搞定，明天食材不用擔心～',
+    '🙌 所有廠商都叫貨完畢，收工！',
+    '🎉 今天該叫的貨都叫好囉，辛苦了！',
+    '🌟 叫貨任務完成，明天開店沒問題！',
+  ];
+  const banner = document.getElementById('completionBanner');
+  const allSubmitted = allVisible.length > 0 && allVisible.every(v => vendorState(v, viewDow) === 'done');
+  const allOrdered = allVisible.length > 0 && allVisible.every(v => !!ordered[viewDow][v]);
+
+  if (allOrdered) {
+    // 今天種子訊息固定（避免每次 render 都換），用日期當 seed
+    const seed = new Date().getDate() * 7 + viewDow;
+    const msg = MSGS_ALL_DONE[seed % MSGS_ALL_DONE.length];
+    banner.className = 'completion-banner all-done';
+    banner.textContent = msg;
+  } else if (allSubmitted) {
+    const seed = new Date().getDate() * 3 + viewDow;
+    const msg = MSGS_ORDER_DONE[seed % MSGS_ORDER_DONE.length];
+    banner.className = 'completion-banner order-done';
+    banner.textContent = msg;
+  } else {
+    banner.className = 'completion-banner hidden';
+    banner.textContent = '';
+  }
 }
 
 // ── Vendor detail ──
@@ -1112,7 +1176,7 @@ function renderVendorDetail(){
   } else notice.classList.add('hidden');
 
   const btn=document.getElementById('vendorSubmitBtn');
-  btn.textContent=isSubmitted&&!isUnlocked?'✓ 已送出':'送出叫貨單 →';
+  btn.textContent=isSubmitted&&!isUnlocked?'✓ 已送出':'送出點貨單';
   btn.disabled=isSubmitted&&!isUnlocked;
 
   const sel=document.getElementById('checkerName');
@@ -1199,6 +1263,26 @@ function submitVendor(){
   const checker=document.getElementById('checkerName').value;
   if(!checker){showToast('⚠️ 請先選擇點貨人');return;}
   const vitems=ITEMS_DEF.filter(i=>i.vendor===activeVendor);
+
+  // ── 防呆：所有品項必須填數字 ──
+  const unfilledItems=vitems.filter(i=>{
+    const o=calcOrderAmt(i,viewDow);
+    if(o===null)return false; // 今日不叫，不需填
+    return qty[i.id]===''||qty[i.id]===undefined||qty[i.id]===null||isNaN(parseFloat(qty[i.id]));
+  });
+  if(unfilledItems.length>0){
+    showToast(`⚠️ 尚有 ${unfilledItems.length} 項未填數量`);
+    // 標示未填的品項
+    unfilledItems.forEach(i=>{
+      const el=document.getElementById(`input-${i.id}`);
+      if(el){el.style.borderColor='var(--danger)';el.style.background='#FFF0F0';}
+    });
+    // 捲到第一個未填的品項
+    const firstEl=document.getElementById(`item-${unfilledItems[0].id}`);
+    if(firstEl)firstEl.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+
   const needItems=vitems.filter(i=>{const o=calcOrderAmt(i,viewDow);return o!==null&&o>0;});
   const okItems=vitems.filter(i=>{const o=calcOrderAmt(i,viewDow);return o!==null&&o===0;});
   const timeStr=formatTime(new Date());
@@ -1206,7 +1290,7 @@ function submitVendor(){
 
   let html=`<h2>${activeVendor} 叫貨單</h2>
     <div class="modal-sub">週${DAY_NAMES[viewDow]}${isRecheck?' · 重新點貨':''}</div>
-    <div class="modal-meta"><span>👤 ${checker}</span><span>🕐 ${timeStr}</span>${isRecheck?'<span style="color:var(--warn)">⚠️ 重點</span>':''}</div>`;
+    <div class="modal-meta"><span>${checker}</span><span>${timeStr}</span>${isRecheck?'<span style="color:var(--warn)">⚠️ 重點</span>':''}</div>`;
   if(needItems.length>0){
     html+=`<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);text-transform:uppercase;padding:4px 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px;">需叫貨 ${needItems.length} 項</div>`;
     html+=needItems.map(item=>{
@@ -1221,7 +1305,14 @@ function submitVendor(){
     html+=`<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);text-transform:uppercase;padding:12px 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px;">庫存充足 ${okItems.length} 項</div>`;
     html+=okItems.map(i=>`<div class="order-item"><div>${i.name}</div><div class="need ok">✓</div></div>`).join('');
   }
-  if(needItems.length===0&&okItems.length===0)html+=`<div class="no-need">所有品項皆未盤點，仍要送出？</div>`;
+  if(needItems.length===0&&okItems.length===0)html+=`<div class="no-need">今日所有品項庫存充足</div>`;
+
+  // ── 備註欄位 ──
+  html+=`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+    <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);text-transform:uppercase;margin-bottom:6px;">備註（選填）</div>
+    <textarea id="submitNote" placeholder="有額外狀況可在此留言給老闆..." style="width:100%;height:72px;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'Noto Sans TC',sans-serif;font-size:13px;background:var(--cream);color:var(--ink);outline:none;resize:none;line-height:1.6;"></textarea>
+  </div>`;
+
   html+=`<div class="modal-actions">
     <button class="btn-cancel" onclick="closeModal()">返回修改</button>
     <button class="btn-order" onclick="confirmVendorSubmit('${activeVendor}','${checker}','${timeStr}',${isRecheck})">確認送出</button>
@@ -1229,12 +1320,14 @@ function submitVendor(){
   document.getElementById('modal').innerHTML=html;
   document.getElementById('overlay').classList.add('open');
 }
+
 var confirmVendorSubmit = function(vendor,checker,time,isRecheck){
+  const note=(document.getElementById('submitNote')?.value||'').trim();
   const prev=submitted[viewDow][vendor];
   const history=prev?[...prev.history]:[];
-  if(isRecheck&&prev)history.push({checker:prev.checker,time:prev.time,type:'recheck-original'});
-  history.push({checker,time,type:isRecheck?'recheck':'original'});
-  submitted[viewDow][vendor]={checker,time,history};
+  if(isRecheck&&prev)history.push({checker:prev.checker,time:prev.time,type:'recheck-original',note:prev.note||''});
+  history.push({checker,time,type:isRecheck?'recheck':'original',note});
+  submitted[viewDow][vendor]={checker,time,history,note};
   if(unlockedRecheck[viewDow])unlockedRecheck[viewDow][vendor]=false;
   closeModal();
   showToast(`✓ ${vendor} 點貨完成`);
@@ -1593,12 +1686,19 @@ function showOrderView(vendor){
   const isRe=sub.history&&sub.history.length>1;
 
   let html=`<h2>${vendor} 點貨內容</h2>
-    <div class="modal-sub">👤 ${sub.checker} · ${sub.time}${isRe?' · 已重點':''}</div>`;
+    <div class="modal-sub">${sub.checker} · ${sub.time}${isRe?' · 已重點':''}</div>`;
+
+  // 備註顯示
+  if(sub.note){
+    html+=`<div style="background:#F5F0FF;border:1px solid #D0B8FF;border-radius:10px;padding:10px 14px;margin:10px 0 4px;font-size:13px;color:var(--ink2);line-height:1.6;">
+      <span style="font-size:11px;font-weight:700;color:#7B5EA7;letter-spacing:1px;">備註</span><br>${sub.note}
+    </div>`;
+  }
 
   // 叫貨狀態卡片
   if(isOrdered){
     html+=`<div style="background:#E8F5EE;border:1px solid var(--ok);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--ok);font-weight:500;">
-      ✓ 已叫貨完成　${ordered[viewDow][vendor].time}
+      ✓ 已點貨　${ordered[viewDow][vendor].time}
     </div>`;
   } else {
     html+=`<div style="background:#FFF8EE;border:1px solid #F0D49A;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--warn);">
@@ -1606,16 +1706,43 @@ function showOrderView(vendor){
     </div>`;
   }
 
-  // 需叫貨品項
+  // 需叫貨品項（含老闆調整欄）
   if(needItems.length>0){
+    // 初始化老闆調整量（以計算出的叫貨量為預設）
+    const adjKey = `orderAdj_${vendor}_${viewDow}`;
+    if(!window._orderAdj) window._orderAdj = {};
+    if(!window._orderAdj[adjKey]){
+      window._orderAdj[adjKey] = {};
+      needItems.forEach(item => {
+        window._orderAdj[adjKey][item.id] = calcOrderAmt(item, viewDow);
+      });
+    }
+
     html+=`<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);text-transform:uppercase;padding:4px 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px;">需叫貨 ${needItems.length} 項</div>`;
+
+    html+=`<div style="display:grid;grid-template-columns:1fr auto auto auto auto;gap:8px;align-items:center;padding:0 0 6px;border-bottom:1px solid var(--border);margin-bottom:4px;">
+      <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;">品項</span>
+      <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;text-align:center;min-width:56px;">現有數量</span>
+      <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;text-align:center;min-width:56px;">需備庫存</span>
+      <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;text-align:center;min-width:72px;">系統建議叫貨量</span>
+      <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;text-align:center;min-width:96px;">實際叫貨</span>
+    </div>`;
+
     html+=needItems.map(item=>{
-      const o=calcOrderAmt(item,viewDow);
-      const cur=qty[item.id]!==''?qty[item.id]:'—';
-      return`<div class="order-item">
-        <div><span style="font-weight:500">${item.name}</span><br>
-          <span style="color:var(--ink3);font-size:11px">現有 ${cur}${item.unit} · 需備 ${safeQty[item.id]}${item.unit}</span></div>
-        <div class="need">叫 ${o}${item.unit}</div>
+      const o = calcOrderAmt(item, viewDow);
+      const cur = qty[item.id]!==''?qty[item.id]:'—';
+      const adjVal = window._orderAdj[adjKey][item.id] ?? o;
+      return`<div style="display:grid;grid-template-columns:1fr auto auto auto auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);">
+        <div style="font-weight:500;font-size:13px;">${item.name}</div>
+        <div style="text-align:center;min-width:56px;font-size:13px;color:var(--ink2);">${cur} <span style="font-size:11px;color:var(--ink3);">${item.unit}</span></div>
+        <div style="text-align:center;min-width:56px;font-size:13px;color:var(--ink2);">${safeQty[item.id]} <span style="font-size:11px;color:var(--ink3);">${item.unit}</span></div>
+        <div style="text-align:center;min-width:72px;font-size:13px;color:var(--ink3);">${o} <span style="font-size:11px;">${item.unit}</span></div>
+        <div style="display:flex;align-items:center;gap:4px;min-width:96px;justify-content:center;">
+          <button onclick="adjOrderQty('${adjKey}',${item.id},-${item.step||1},'${item.unit}','${vendor}')" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--cream);cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;font-family:monospace;flex-shrink:0;">−</button>
+          <span id="adj-${adjKey}-${item.id}" style="font-size:13px;font-weight:600;min-width:28px;text-align:center;color:var(--accent);">${adjVal}</span>
+          <span style="font-size:11px;color:var(--ink3);">${item.unit}</span>
+          <button onclick="adjOrderQty('${adjKey}',${item.id},${item.step||1},'${item.unit}','${vendor}')" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--cream);cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;font-family:monospace;flex-shrink:0;">+</button>
+        </div>
       </div>`;
     }).join('');
   }
@@ -1633,19 +1760,59 @@ function showOrderView(vendor){
     <div class="export-box" id="exportBoxView">${exportTxt||'今日庫存充足，無需叫貨'}</div>
     <div class="export-actions">
       <button class="btn-copy" id="copyBtnView" onclick="copyText('exportBoxView','copyBtnView')">複製文字</button>
-      <button class="btn-copy-line" onclick="copyText('exportBoxView',null,true)">複製貼 Line</button>
     </div>
   </div>`;
 
-  // 叫貨完成按鈕
   html+=`<div class="modal-actions" style="margin-top:14px;">
     <button class="btn-cancel" onclick="closeModal()">關閉</button>
-    ${!isOrdered?`<button class="btn-order" onclick="markOrdered('${vendor}');closeModal();">✓ 叫貨完成</button>`
-    :`<button class="btn-order" style="background:var(--ok);cursor:default;" disabled>✓ 已叫貨完成</button>`}
+    ${!isOrdered?`<button class="btn-order" onclick="markOrdered('${vendor}');closeModal();">叫貨完成</button>`
+    :`<button class="btn-order" style="background:#7A6A58;cursor:default;opacity:.85;" disabled>✓ 已叫貨完成</button>`}
   </div>`;
 
   document.getElementById('modal').innerHTML=html;
   document.getElementById('overlay').classList.add('open');
+}
+
+// ── 老闆調整叫貨量 ──
+function adjOrderQty(adjKey, itemId, delta, unit, vendor) {
+  if(!window._orderAdj) window._orderAdj = {};
+  if(!window._orderAdj[adjKey]) window._orderAdj[adjKey] = {};
+  const cur = window._orderAdj[adjKey][itemId] ?? 0;
+  const nv = Math.max(0, +(cur + delta).toFixed(1));
+  window._orderAdj[adjKey][itemId] = nv;
+
+  // 更新顯示數字
+  const el = document.getElementById(`adj-${adjKey}-${itemId}`);
+  if(el) el.textContent = nv;
+
+  // 重新產生叫貨文字
+  updateExportBoxView(vendor);
+}
+
+function updateExportBoxView(vendor) {
+  const box = document.getElementById('exportBoxView');
+  if(!box) return;
+  const sub = submitted[viewDow][vendor];
+  if(!sub) return;
+
+  const adjKey = `orderAdj_${vendor}_${viewDow}`;
+  const vitems = ITEMS_DEF.filter(i => i.vendor === vendor);
+  const needItems = vitems.filter(i => {
+    const adj = window._orderAdj?.[adjKey]?.[i.id];
+    return adj !== undefined ? adj > 0 : (calcOrderAmt(i, viewDow) ?? 0) > 0;
+  });
+
+  if(needItems.length === 0){ box.textContent = '今日庫存充足，無需叫貨'; return; }
+
+  const d = new Date(now); d.setDate(now.getDate() - todayDow + viewDow);
+  const dateStr = `${d.getMonth()+1}/${d.getDate()}`;
+  let txt = orderGreeting.replace('{shop}', shopName).replace('{date}', dateStr) + '\n\n';
+  needItems.forEach(item => {
+    const o = window._orderAdj?.[adjKey]?.[item.id] ?? calcOrderAmt(item, viewDow);
+    txt += `・${item.name}　${o} ${item.unit}\n`;
+  });
+  if(sub.note) txt += `\n備註：${sub.note}`;
+  box.textContent = txt.trimEnd();
 }
 
 // ── 已叫貨 ──
@@ -1672,6 +1839,7 @@ function buildExportText(vendor,dow){
     const o=calcOrderAmt(item,dow);
     txt+=`・${item.name}　${o} ${item.unit}\n`;
   });
+  if(sub.note) txt+=`\n備註：${sub.note}`;
   return txt.trimEnd();
 }
 
@@ -1680,18 +1848,17 @@ function showExportSingle(vendor){
   if(!txt){showToast('此廠商尚未送出點貨單');return;}
   const sub=submitted[viewDow][vendor];
   const isOrdered=!!ordered[viewDow][vendor];
-  let html=`<h2>📋 ${vendor} 叫貨文字</h2>
+  let html=`<h2>${vendor} 叫貨文字</h2>
     <div class="modal-sub">點貨人：${sub.checker} · ${sub.time}</div>
     <div class="export-box" id="exportBox-${vendor}">${txt}</div>
     <div class="export-actions">
       <button class="btn-copy" id="copyBtn-${vendor}" onclick="copyText('exportBox-${vendor}','copyBtn-${vendor}')">複製文字</button>
-      <button class="btn-copy-line" onclick="copyText('exportBox-${vendor}',null,true)">複製貼 Line</button>
     </div>
     <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
       <div style="font-size:12px;color:var(--ink3);margin-bottom:8px;">叫貨狀態</div>
       <button class="btn-mark-ordered${isOrdered?' done':''}" style="font-size:13px;padding:8px 20px;border-radius:10px;"
         onclick="${isOrdered?'':('markOrdered(\''+vendor+'\');closeModal()')}">
-        ${isOrdered?`✓ 已叫貨（${ordered[viewDow][vendor].time}）`:'確認叫貨完成 →'}
+        ${isOrdered?`✓ 已叫貨（${ordered[viewDow][vendor].time}）`:'請叫貨！'}
       </button>
     </div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeModal()">關閉</button></div>`;
@@ -1745,7 +1912,7 @@ function showExportAll(){
       <div style="display:flex;align-items:center;gap:6px;">
         <button class="btn-mark-ordered${isOrdered?' done':''}" id="ob-${v}"
           onclick="${isOrdered?'':('markOrderedModal(\''+v+'\')')}">
-          ${isOrdered?`✓ ${ordered[viewDow][v].time}`:'標記叫貨完成'}
+          ${isOrdered?`✓ ${ordered[viewDow][v].time}`:'請叫貨'}
         </button>
         <button style="font-size:11px;color:var(--accent);background:none;border:none;cursor:pointer;padding:4px 6px;" onclick="showExportSingle('${v}')">匯出 ›</button>
       </div>
@@ -1760,7 +1927,6 @@ function showExportAll(){
       <div class="export-box" id="exportBoxAll">${combined}</div>
       <div class="export-actions">
         <button class="btn-copy" id="copyBtnAll" onclick="copyText('exportBoxAll','copyBtnAll')">複製文字</button>
-        <button class="btn-copy-line" onclick="copyText('exportBoxAll',null,true)">複製貼 Line</button>
       </div>
     </div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeModal()">關閉</button></div>`;
@@ -2175,7 +2341,7 @@ async function queryHistory() {
 // ── 匯出 CSV ──
 function exportHistoryCSV() {
   if (!histCachedResults.length) return;
-  const header = ['日期', '星期', '廠商', '點貨人', '點貨時間', '品項', '叫貨量', '單位', '已叫貨'];
+  const header = ['日期', '星期', '廠商', '點貨人', '點貨時間', '品項', '叫貨量', '單位', '已點貨'];
   const rows = histCachedResults.map(r => {
     const d = new Date(r.date + 'T00:00:00');
     return [
@@ -2560,6 +2726,8 @@ toggleOptIn = function(dow, vendor) {
   _origToggleOptIn(dow, vendor);
   // fbSave already called inside toggleOptIn
 };
+
+const _origMarkOrdered = markOrdered;
 markOrdered = function(vendor) {
   _origMarkOrdered(vendor);
   fbSave(viewDow);
