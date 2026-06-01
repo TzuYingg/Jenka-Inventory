@@ -290,6 +290,54 @@ window.dispatchEvent(new Event('fbReady'));
   /* 廠商列裡的「已叫貨」按鈕 */
   .btn-mark-ordered{font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px;border:1.5px solid #5B8ED6;background:#F0F4FF;color:#3A6BC4;cursor:pointer;white-space:nowrap;font-family:'Noto Sans TC',sans-serif;flex-shrink:0;}
   .btn-mark-ordered.done{border-color:var(--ok);background:#E8F5EE;color:var(--ok);cursor:default;}
+
+  /* opt-in 廠商按鈕 */
+  .btn-opt-in-toggle{font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;border:1.5px solid #3A6BC4;background:#E8EFFF;color:#3A6BC4;cursor:pointer;white-space:nowrap;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;}
+  .btn-opt-cancel{font-size:11px;padding:3px 10px;border-radius:20px;border:1.5px solid var(--border);background:var(--cream);color:var(--ink3);cursor:pointer;white-space:nowrap;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;}
+
+  /* ── 歷史查詢頁面 ── */
+  #historyPage{display:none;}
+  .hist-header{padding:20px 20px 0;display:flex;align-items:center;justify-content:space-between;}
+  .hist-header h1{font-size:22px;font-weight:700;}
+  .hist-nav{display:flex;gap:0;margin:12px 20px 0;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--card);}
+  .hist-nav-btn{flex:1;padding:9px 0;text-align:center;font-size:12px;font-weight:500;cursor:pointer;color:var(--ink2);border:none;background:none;font-family:'Noto Sans TC',sans-serif;transition:all .15s;}
+  .hist-nav-btn.active{background:var(--ink);color:#fff;}
+  .hist-section{margin:14px 20px 0;}
+  .hist-filter-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
+  .hist-filter-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+  .hist-filter-label{font-size:11px;color:var(--ink3);margin-bottom:4px;}
+  .hist-filter-input{width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);color:var(--ink);outline:none;}
+  .hist-filter-input:focus{border-color:var(--accent);}
+  .hist-filter-select{width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'Noto Sans TC',sans-serif;font-size:13px;background:var(--cream);color:var(--ink);outline:none;}
+  .btn-hist-query{width:100%;height:38px;background:var(--ink);color:#fff;border:none;border-radius:10px;font-family:'Noto Sans TC',sans-serif;font-size:14px;font-weight:700;cursor:pointer;touch-action:manipulation;}
+  .btn-hist-export{width:100%;height:38px;background:var(--ok);color:#fff;border:none;border-radius:10px;font-family:'Noto Sans TC',sans-serif;font-size:13px;font-weight:700;cursor:pointer;touch-action:manipulation;margin-top:8px;}
+  .hist-loading{text-align:center;padding:30px;color:var(--ink3);font-size:13px;}
+  .hist-day-block{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden;}
+  .hist-day-header{padding:10px 14px;background:var(--tag-bg);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+  .hist-day-title{font-size:13px;font-weight:700;}
+  .hist-day-meta{font-size:11px;color:var(--ink3);font-family:'DM Mono',monospace;}
+  .hist-vendor-row{padding:10px 14px;border-bottom:1px solid var(--border);}
+  .hist-vendor-row:last-child{border-bottom:none;}
+  .hist-vendor-name{font-weight:500;font-size:13px;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+  .hist-vendor-checker{font-size:11px;color:var(--ink3);}
+  .hist-item-list{margin-top:6px;display:flex;flex-direction:column;gap:3px;}
+  .hist-item-row{display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:3px 0;}
+  .hist-item-name{color:var(--ink2);}
+  .hist-item-qty{font-family:'DM Mono',monospace;font-weight:500;color:var(--accent);}
+  .hist-item-qty.zero{color:var(--ink3);}
+  .hist-empty{text-align:center;padding:40px 20px;color:var(--ink3);font-size:13px;line-height:1.8;}
+
+  /* 趨勢圖 */
+  .hist-trend-filter{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
+  .hist-chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;}
+  .hist-chart-title{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+  .hist-chart-subtitle{font-size:11px;color:var(--ink3);font-weight:400;}
+  .hist-chart-svg{width:100%;overflow:visible;}
+  .hist-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+  .hist-legend-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--ink2);}
+  .hist-legend-dot{width:8px;height:8px;border-radius:50%;}
+  .hist-safe-line-label{font-size:10px;fill:var(--ink3);}
+  .hist-group-badge{font-size:10px;background:var(--tag-bg);color:var(--ink2);padding:1px 7px;border-radius:10px;font-weight:400;}
 </style>
 </head>
 <body>
@@ -361,6 +409,7 @@ window.dispatchEvent(new Event('fbReady'));
     <div style="padding:0 20px 12px;">
       <div class="page-switcher">
         <button class="page-btn" onclick="requestAdmin()" style="background:var(--tag-bg);color:var(--admin-accent);font-weight:700;">⚙️ 後台管理（需 PIN）</button>
+        <button class="page-btn" id="historyPageBtn" onclick="showHistoryPage()" style="color:var(--ink2);">📊 歷史查詢</button>
       </div>
     </div>
 
@@ -450,7 +499,7 @@ window.dispatchEvent(new Event('fbReady'));
       <div class="recheck-admin"><div class="recheck-admin-title">本週點貨紀錄</div><div id="recheckDayList"></div></div>
     </div>
     <div id="scheduleAdminView" style="display:none;">
-      <p class="admin-desc" style="margin-top:10px;">點廠商名稱開啟或關閉進貨。蔬菜和南北貨為不定期，每天固定顯示。</p>
+      <p class="admin-desc" style="margin-top:10px;">點廠商名稱開啟或關閉進貨。蔬菜和南北貨可自由設定哪天出現，不需要的日期取消勾選即可。</p>
       <div class="schedule-editor" id="scheduleEditor"></div>
     </div>
     <div id="qtyAdminView" style="display:none;">
@@ -564,11 +613,93 @@ window.dispatchEvent(new Event('fbReady'));
   </div>
 </div>
 
+<!-- HISTORY PAGE -->
+<div id="historyPage" style="display:none;">
+  <div class="app">
+    <div class="hist-header">
+      <div>
+        <h1>歷史查詢</h1>
+        <div style="font-size:12px;color:var(--ink3);margin-top:2px;font-family:'DM Mono',monospace;">叫貨明細 ＆ 消耗趨勢</div>
+      </div>
+      <button onclick="showPage('inventory')" style="font-size:12px;color:var(--ink3);background:none;border:1px solid var(--border);border-radius:20px;padding:6px 12px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">← 返回點貨</button>
+    </div>
+    <div class="hist-nav">
+      <button class="hist-nav-btn active" id="histNavDetail" onclick="switchHistTab('detail')">📋 叫貨明細</button>
+      <button class="hist-nav-btn" id="histNavTrend" onclick="switchHistTab('trend')">📈 消耗趨勢</button>
+    </div>
+
+    <!-- 叫貨明細 -->
+    <div id="histDetailView" class="hist-section">
+      <div class="hist-filter-card">
+        <div class="hist-filter-row">
+          <div>
+            <div class="hist-filter-label">開始日期</div>
+            <input type="date" class="hist-filter-input" id="histDateFrom">
+          </div>
+          <div>
+            <div class="hist-filter-label">結束日期</div>
+            <input type="date" class="hist-filter-input" id="histDateTo">
+          </div>
+        </div>
+        <div class="hist-filter-row" style="margin-bottom:10px;">
+          <div>
+            <div class="hist-filter-label">廠商篩選</div>
+            <select class="hist-filter-select" id="histVendorFilter">
+              <option value="">全部廠商</option>
+            </select>
+          </div>
+          <div>
+            <div class="hist-filter-label">點貨人篩選</div>
+            <select class="hist-filter-select" id="histCheckerFilter">
+              <option value="">全部人員</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-hist-query" onclick="queryHistory()">🔍 查詢</button>
+        <button class="btn-hist-export" id="histExportBtn" onclick="exportHistoryCSV()" style="display:none;">⬇ 匯出 Excel（CSV）</button>
+      </div>
+      <div id="histDetailResult"></div>
+    </div>
+
+    <!-- 消耗趨勢 -->
+    <div id="histTrendView" class="hist-section" style="display:none;">
+      <div class="hist-trend-filter">
+        <div style="margin-bottom:10px;">
+          <div class="hist-filter-label">品項（消耗量分析）</div>
+          <select class="hist-filter-select" id="histTrendItem" onchange="onTrendItemChange()">
+            <option value="">— 請選擇品項 —</option>
+          </select>
+        </div>
+        <div style="margin-bottom:10px;" id="trendGroupHint">
+          <div class="hist-filter-label">廠商來源篩選</div>
+          <select class="hist-filter-select" id="histTrendVendor">
+            <option value="__all__">合計所有廠商（精準消耗量）</option>
+          </select>
+        </div>
+        <div class="hist-filter-row">
+          <div>
+            <div class="hist-filter-label">開始日期</div>
+            <input type="date" class="hist-filter-input" id="trendDateFrom">
+          </div>
+          <div>
+            <div class="hist-filter-label">結束日期</div>
+            <input type="date" class="hist-filter-input" id="trendDateTo">
+          </div>
+        </div>
+        <button class="btn-hist-query" onclick="queryTrend()" style="margin-top:2px;">📈 產生趨勢圖</button>
+      </div>
+      <div id="histTrendResult"></div>
+    </div>
+    <div style="height:30px;"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <div class="overlay" id="overlay" onclick="closeOverlay(event)"><div class="modal" id="modal"></div></div>
 
 <script>
-const ALWAYS_VENDORS=['蔬菜','南北貨'];
+const ALWAYS_VENDORS=[];
+const OPT_IN_VENDORS=['蔬菜','南北貨']; // 需管理員每日開啟才對員工顯示
 const ALL_VENDORS=['豆漿','南北貨','毓品','廣弘','蔬菜','麵包'];
 const DAY_NAMES=['日','一','二','三','四','五','六'];
 
@@ -651,7 +782,9 @@ let activeVendor=null;
 const qty={};
 ITEMS_DEF.forEach(i=>qty[i.id]='');
 
-// submitted[dow][vendor] = { checker, time, history:[] }
+// optInToday[dow][vendor] = true/false — 管理員今日開啟需點貨
+const optInToday={};
+for(let d=0;d<7;d++) optInToday[d]={};
 const submitted={};
 for(let d=0;d<7;d++) submitted[d]={};
 // unlockedRecheck[dow][vendor] = bool
@@ -704,12 +837,14 @@ function logoutAdmin(){showPage('inventory');}
 function showPage(page){
   document.getElementById('inventoryPage').style.display=page==='inventory'?'block':'none';
   document.getElementById('adminPage').style.display=page==='admin'?'block':'none';
+  document.getElementById('historyPage').style.display=page==='history'?'block':'none';
   if(page==='admin'){
     scheduleDraft=JSON.parse(JSON.stringify(weeklySchedule));
     adminDraft=JSON.parse(JSON.stringify(orderQty));
     switchAdminNav(adminNav);
   }
   if(page==='inventory')backToOverview();
+  if(page==='history')initHistoryPage();
 }
 
 function switchAdminNav(nav){
@@ -772,60 +907,97 @@ function vendorState(vendor,dow){
 }
 
 function renderOverview(){
-  const vendors=[...(weeklySchedule[viewDow]||[]),...ALWAYS_VENDORS];
-  const fixedV=weeklySchedule[viewDow]||[];
-  const pending=fixedV.filter(v=>{ const s=vendorState(v,viewDow); return s==='pending'||s==='progress'; });
-  const banner=document.getElementById('alertBanner');
-  if(pending.length>0){banner.classList.remove('hidden');document.getElementById('alertText').textContent=`尚未送出叫貨：${pending.join('、')}`;}
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  const schedVendors = weeklySchedule[viewDow] || [];
+
+  // 員工只看到排程廠商 + 已開啟的 opt-in 廠商
+  // 管理員看到排程廠商 + 全部 opt-in 廠商（含開關）
+  const activeOptIn = OPT_IN_VENDORS.filter(v => optInToday[viewDow][v]);
+  const visibleScheduled = schedVendors;
+  const vendors = isAdmin
+    ? [...visibleScheduled, ...OPT_IN_VENDORS]
+    : [...visibleScheduled, ...activeOptIn];
+
+  const pending = visibleScheduled.filter(v => { const s = vendorState(v, viewDow); return s === 'pending' || s === 'progress'; });
+  const banner = document.getElementById('alertBanner');
+  if(pending.length > 0){ banner.classList.remove('hidden'); document.getElementById('alertText').textContent = `尚未送出叫貨：${pending.join('、')}`; }
   else banner.classList.add('hidden');
 
-  const bar=document.getElementById('vendorStatusBar');
-  if(vendors.length===0){
-    bar.innerHTML=`<div class="no-vendor-state"><div style="font-size:32px">📭</div><p>今日無進貨廠商<br>可至後台設定新增</p></div>`;
+  const bar = document.getElementById('vendorStatusBar');
+  if(vendors.length === 0){
+    bar.innerHTML = `<div class="no-vendor-state"><div style="font-size:32px">📭</div><p>今日無進貨廠商<br>可至後台設定新增</p></div>`;
   } else {
-    bar.innerHTML=vendors.map(v=>{
-      const state=vendorState(v,viewDow);
-      const opt=ALWAYS_VENDORS.includes(v);
-      const vitems=ITEMS_DEF.filter(i=>i.vendor===v);
-      const filled=vitems.filter(i=>qty[i.id]!=='').length;
-      const sub=submitted[viewDow][v];
-      let icon='📋',iconCls='pending',badgeText='未開始',badgeCls='badge-pending',rowCls='';
-      let subText=opt?`不定期 · ${vitems.length} 項`:`${vitems.length} 項待點貨`;
-      if(state==='done'){
-        icon='✓';iconCls='done';rowCls='submitted';
-        const isRe=sub.history&&sub.history.length>1;
-        badgeText=isRe?'已重點':'已送出';badgeCls=isRe?'badge-recheck':'badge-done';
-        if(isRe)rowCls='rechecked';
-        subText=`${sub.checker} · ${sub.time}`;
-        if(ordered[viewDow][v]){iconCls='ordered';subText=`${sub.checker} · ${sub.time} ｜ 已叫貨 ${ordered[viewDow][v].time}`;}
-      } else if(state==='unlocked'){
-        icon='✎';iconCls='unlocked';badgeText='可重點';badgeCls='badge-recheck';rowCls='rechecked';
-        subText='管理員已解鎖，等待重點';
-      } else if(state==='progress'){
-        icon='✎';iconCls='in-progress';badgeText=`${filled}/${vitems.length}`;badgeCls='badge-progress';
-        subText=`已填 ${filled} 項`;
+    bar.innerHTML = vendors.map(v => {
+      const isOptIn = OPT_IN_VENDORS.includes(v);
+      const isEnabled = optInToday[viewDow][v];
+      const state = isOptIn && !isEnabled ? 'opt-off' : vendorState(v, viewDow);
+      const vitems = ITEMS_DEF.filter(i => i.vendor === v);
+      const filled = vitems.filter(i => qty[i.id] !== '').length;
+      const sub = submitted[viewDow][v];
+
+      // opt-in 廠商且未開啟 → 只有管理員能看到，顯示開關卡
+      if(isOptIn && !isEnabled && isAdmin){
+        return `<div class="vendor-status-row opt-off-row" style="border:1.5px dashed var(--border);background:var(--cream);opacity:0.75;">
+          <div class="vsr-icon" style="background:var(--tag-bg);font-size:13px;">🔕</div>
+          <div class="vsr-left">
+            <div class="vsr-name" style="color:var(--ink3);">${v}</div>
+            <div class="vsr-sub" style="color:var(--ink3);">今日未啟用 · 員工不會看到</div>
+          </div>
+          <div class="vsr-right">
+            <button class="btn-opt-in-toggle" onclick="toggleOptIn(${viewDow},'${v}')">今日需點貨</button>
+          </div>
+        </div>`;
       }
-      return`<button class="vendor-status-row${rowCls?' '+rowCls:''}${opt?' optional-row':''}${ordered[viewDow][v]?' ordered':''}" onclick="openVendor('${v}')" style="width:100%;text-align:left;border:1px solid var(--border);font-family:'Noto Sans TC',sans-serif;">
+
+      // opt-in 廠商已開啟 → 正常顯示，管理員多一個「取消」按鈕
+      let icon='📋', iconCls='pending', badgeText='未開始', badgeCls='badge-pending', rowCls='';
+      let subText = `${vitems.length} 項待點貨`;
+      if(state === 'done'){
+        icon='✓'; iconCls='done'; rowCls='submitted';
+        const isRe = sub.history && sub.history.length > 1;
+        badgeText = isRe ? '已重點' : '已送出'; badgeCls = isRe ? 'badge-recheck' : 'badge-done';
+        if(isRe) rowCls = 'rechecked';
+        subText = `${sub.checker} · ${sub.time}`;
+        if(ordered[viewDow][v]){ iconCls='ordered'; subText = `${sub.checker} · ${sub.time} ｜ 已叫貨 ${ordered[viewDow][v].time}`; }
+      } else if(state === 'unlocked'){
+        icon='✎'; iconCls='unlocked'; badgeText='可重點'; badgeCls='badge-recheck'; rowCls='rechecked';
+        subText = '管理員已解鎖，等待重點';
+      } else if(state === 'progress'){
+        icon='✎'; iconCls='in-progress'; badgeText=`${filled}/${vitems.length}`; badgeCls='badge-progress';
+        subText = `已填 ${filled} 項`;
+      }
+
+      const optInTag = isOptIn && isEnabled && isAdmin
+        ? `<span style="font-size:10px;background:#E8EFFF;color:#3A6BC4;padding:1px 7px;border-radius:10px;margin-right:4px;cursor:pointer;" onclick="event.stopPropagation();toggleOptIn(${viewDow},'${v}')">✓ 今日點貨 ×</span>`
+        : '';
+
+      return `<button class="vendor-status-row${rowCls ? ' '+rowCls : ''}${ordered[viewDow][v] ? ' ordered' : ''}" onclick="openVendor('${v}')" style="width:100%;text-align:left;border:1px solid var(--border);font-family:'Noto Sans TC',sans-serif;">
         <div class="vsr-icon ${iconCls}">${icon}</div>
-        <div class="vsr-left"><div class="vsr-name">${v}</div><div class="vsr-sub">${subText}</div></div>
+        <div class="vsr-left">
+          <div class="vsr-name">${v}${isOptIn && isEnabled ? '<span style="font-size:9px;background:#E8EFFF;color:#3A6BC4;padding:1px 6px;border-radius:8px;margin-left:6px;font-weight:400;">今日點貨</span>' : ''}</div>
+          <div class="vsr-sub">${subText}</div>
+        </div>
         <div class="vsr-right">
-          ${state==='done'?`<button class="btn-mark-ordered${ordered[viewDow][v]?' done':''}"
-            onclick="event.stopPropagation();markOrdered('${v}')">${ordered[viewDow][v]?'✓ 已叫貨':'叫貨完成'}</button>`:''}
-          <span class="vsr-badge ${opt&&state==='pending'?'badge-opt':ordered[viewDow][v]?'badge-ordered':badgeCls}">${opt&&state==='pending'?'不定期':ordered[viewDow][v]?'已叫貨':badgeText}</span>
+          ${state === 'done' ? `<button class="btn-mark-ordered${ordered[viewDow][v] ? ' done' : ''}"
+            onclick="event.stopPropagation();markOrdered('${v}')">${ordered[viewDow][v] ? '✓ 已叫貨' : '叫貨完成'}</button>` : ''}
+          ${isOptIn && isEnabled && isAdmin && state !== 'done'
+            ? `<button class="btn-opt-cancel" onclick="event.stopPropagation();toggleOptIn(${viewDow},'${v}')">取消</button>` : ''}
+          <span class="vsr-badge ${ordered[viewDow][v] ? 'badge-ordered' : badgeCls}">${ordered[viewDow][v] ? '已叫貨' : badgeText}</span>
           <span class="vsr-chevron">›</span>
         </div>
       </button>`;
     }).join('');
   }
 
-  const done=vendors.filter(v=>vendorState(v,viewDow)==='done').length;
-  const prog=vendors.filter(v=>{const s=vendorState(v,viewDow);return s==='progress'||s==='unlocked';}).length;
-  const pend=vendors.filter(v=>vendorState(v,viewDow)==='pending').length;
-  document.getElementById('statDone').textContent=done;
-  document.getElementById('statProgress').textContent=prog;
-  document.getElementById('statPending').textContent=pend;
-  document.getElementById('subtitle').textContent=`週${DAY_NAMES[viewDow]} · ${done}/${vendors.length} 廠商已送出`;
-  document.getElementById('progressFill').style.width=vendors.length>0?(done/vendors.length*100).toFixed(0)+'%':'0%';
+  const allVisible = [...visibleScheduled, ...activeOptIn];
+  const done = allVisible.filter(v => vendorState(v, viewDow) === 'done').length;
+  const prog = allVisible.filter(v => { const s = vendorState(v, viewDow); return s === 'progress' || s === 'unlocked'; }).length;
+  const pend = allVisible.filter(v => vendorState(v, viewDow) === 'pending').length;
+  document.getElementById('statDone').textContent = done;
+  document.getElementById('statProgress').textContent = prog;
+  document.getElementById('statPending').textContent = pend;
+  document.getElementById('subtitle').textContent = `週${DAY_NAMES[viewDow]} · ${done}/${allVisible.length} 廠商已送出`;
+  document.getElementById('progressFill').style.width = allVisible.length > 0 ? (done / allVisible.length * 100).toFixed(0) + '%' : '0%';
 }
 
 // ── Vendor detail ──
@@ -847,15 +1019,14 @@ function formatTime(d){return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHou
 
 function renderVendorDetail(){
   if(!activeVendor)return;
-  const opt=ALWAYS_VENDORS.includes(activeVendor);
   const state=vendorState(activeVendor,viewDow);
   const isSubmitted=state==='done';
   const isUnlocked=state==='unlocked';
   const vitems=ITEMS_DEF.filter(i=>i.vendor===activeVendor);
   document.getElementById('vendorViewTitle').textContent=activeVendor;
   const badge=document.getElementById('vendorViewBadge');
-  badge.textContent=opt?'不定期':'今日進貨';
-  badge.className=`section-badge ${opt?'badge-opt-sm':'badge-fixed'}`;
+  badge.textContent='今日進貨';
+  badge.className='section-badge badge-fixed';
 
   const notice=document.getElementById('recheckNotice');
   if(isUnlocked){
@@ -890,7 +1061,7 @@ function renderVendorDetail(){
     else if(qty[item.id]==='')otag=`<span class="order-tag need">未填，上限叫 ${oAmt}${item.unit}</span>`;
     else otag=`<span class="order-tag need">叫 ${oAmt}${item.unit}</span>`;
     const locked=isSubmitted&&!isUnlocked;
-    return`<div class="item status-${st}${opt?' opt-item':''}${locked?' submitted-item':''}" id="item-${item.id}">
+    return`<div class="item status-${st}${locked?' submitted-item':''}" id="item-${item.id}">
       <div><div class="item-name">${item.name}</div>
         <div class="item-meta"><span class="safe-tag">備 ${safeQty[item.id]}${item.unit}</span>
           <span id="otag-${item.id}">${otag}</span>
@@ -916,9 +1087,8 @@ var updateQty = function(id,val){
   const st=getItemStatus(item);
   const state=vendorState(item.vendor,viewDow);
   const locked=state==='done';
-  const opt=ALWAYS_VENDORS.includes(item.vendor);
   const el=document.getElementById(`item-${id}`);
-  if(el)el.className=`item status-${st}${opt?' opt-item':''}${locked?' submitted-item':''}`;
+  if(el)el.className=`item status-${st}${locked?' submitted-item':''}`;
   const dot=document.getElementById(`dot-${id}`);
   if(dot)dot.className=`status-dot dot-${st}`;
   const oAmt=calcOrderAmt(item,viewDow);
@@ -997,11 +1167,20 @@ var confirmVendorSubmit = function(vendor,checker,time,isRecheck){
 
 function showAllOrders(){showExportAll();}
 
+// ── Opt-in 廠商開關（蔬菜、南北貨）──
+var toggleOptIn = function(dow, vendor) {
+  optInToday[dow][vendor] = !optInToday[dow][vendor];
+  const isOn = optInToday[dow][vendor];
+  showToast(isOn ? `✓ ${vendor} 今日已開啟，員工可點貨` : `${vendor} 今日已關閉`);
+  fbSave(dow);
+  renderOverview();
+};
+
 // ── Recheck admin ──
 function renderRecheckAdmin(){
   let html='';
   [0,1,2,3,4,5,6].forEach(dow=>{
-    const vendors=[...(weeklySchedule[dow]||[]),...ALWAYS_VENDORS];
+    const vendors=[...(weeklySchedule[dow]||[])];
     const subVendors=vendors.filter(v=>submitted[dow][v]);
     if(!subVendors.length)return;
     const d=new Date(now);d.setDate(now.getDate()-todayDow+dow);
@@ -1051,14 +1230,12 @@ function renderScheduleEditor(){
     const cur=scheduleDraft[dow]||[];
     const toggles=fixedOnly.map(v=>`<div class="vendor-toggle${cur.includes(v)?' on':''}"
       onclick="toggleScheduleVendor(${dow},'${v}')" id="stoggle-${dow}-${v}">${v}</div>`).join('');
-    const always=ALWAYS_VENDORS.map(v=>`<div class="vendor-toggle always" style="background:var(--opt-bg);color:var(--ink2);border-color:var(--opt-border)">${v}</div>`).join('');
     return`<div class="schedule-day-card">
       <div class="sdc-header">
         <div class="sdc-day${isToday?' is-today':''}">週${DAY_NAMES[dow]}${isToday?' · 今天':''}</div>
-        <div class="sdc-count" id="scount-${dow}">${cur.length} 個固定廠商</div>
+        <div class="sdc-count" id="scount-${dow}">${cur.length} 個廠商</div>
       </div>
-      <div class="vendor-toggle-grid">${toggles}${always}</div>
-      <div class="always-note">蔬菜、南北貨不定期，每天固定顯示</div>
+      <div class="vendor-toggle-grid">${toggles}</div>
     </div>`;
   }).join('');
 }
@@ -1069,7 +1246,7 @@ function toggleScheduleVendor(dow,vendor){
   const el=document.getElementById(`stoggle-${dow}-${vendor}`);
   if(el)el.className='vendor-toggle'+(scheduleDraft[dow].includes(vendor)?' on':'');
   const c=document.getElementById(`scount-${dow}`);
-  if(c)c.textContent=`${scheduleDraft[dow].length} 個固定廠商`;
+  if(c)c.textContent=`${scheduleDraft[dow].length} 個廠商`;
 }
 var saveSchedule = function(){weeklySchedule=JSON.parse(JSON.stringify(scheduleDraft));orderQty=buildDefaultOrders();showToast('✓ 排程已儲存');// iOS Safari fix: event delegation for dynamic content
 document.addEventListener('click', function(e) {
@@ -1280,7 +1457,6 @@ function showOrderView(vendor){
   const needItems=vitems.filter(i=>{const o=calcOrderAmt(i,viewDow);return o!==null&&o>0;});
   const okItems=vitems.filter(i=>{const o=calcOrderAmt(i,viewDow);return o!==null&&o===0;});
   const exportTxt=buildExportText(vendor,viewDow);
-  const opt=ALWAYS_VENDORS.includes(vendor);
   const isRe=sub.history&&sub.history.length>1;
 
   let html=`<h2>${vendor} 點貨內容</h2>
@@ -1389,7 +1565,7 @@ function showExportSingle(vendor){
 }
 
 function showExportAll(){
-  const vendors=[...(weeklySchedule[viewDow]||[]),...ALWAYS_VENDORS];
+  const vendors=[...(weeklySchedule[viewDow]||[])];
   const submittedVendors=vendors.filter(v=>submitted[viewDow][v]);
   if(submittedVendors.length===0){showToast('今日尚無已送出的叫貨單');return;}
 
@@ -1530,6 +1706,9 @@ window.doLogin = function() {
   // 若是管理員，顯示後台按鈕；若是員工則隱藏
   const adminBtn = document.querySelector('.page-switcher button');
   if (adminBtn) adminBtn.style.display = acc.role === 'admin' ? '' : 'none';
+  // 歷史查詢僅管理員可用
+  const histBtn = document.getElementById('historyPageBtn');
+  if (histBtn) histBtn.style.display = acc.role === 'admin' ? '' : 'none';
 
   // 更新 checkerNames 以當前登入者為主
   if (!checkerNames.includes(acc.name)) checkerNames.push(acc.name);
@@ -1622,6 +1801,471 @@ function renderAccountList() {
   `).join('');
 }
 
+// ══════════════════════════════════════════
+// 歷史查詢功能
+// ══════════════════════════════════════════
+
+let historyData = {}; // { 'YYYY-MM-DD': { submitted, ordered, qty, ... } }
+let histCachedResults = []; // 最近一次查詢結果，供匯出用
+let histActiveTab = 'detail';
+
+function showHistoryPage() {
+  if (!currentUser || currentUser.role !== 'admin') {
+    showToast('⚠️ 需要管理員權限');
+    return;
+  }
+  showPage('history');
+}
+
+function initHistoryPage() {
+  // 預設日期：近 14 天
+  const today = new Date();
+  const from = new Date(today);
+  from.setDate(today.getDate() - 13);
+  const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  document.getElementById('histDateFrom').value = fmt(from);
+  document.getElementById('histDateTo').value = fmt(today);
+  document.getElementById('trendDateFrom').value = fmt(from);
+  document.getElementById('trendDateTo').value = fmt(today);
+
+  // 填廠商選單
+  const vSel = document.getElementById('histVendorFilter');
+  vSel.innerHTML = '<option value="">全部廠商</option>' + ALL_VENDORS.map(v=>`<option value="${v}">${v}</option>`).join('');
+
+  // 填點貨人選單
+  const cSel = document.getElementById('histCheckerFilter');
+  cSel.innerHTML = '<option value="">全部人員</option>' + checkerNames.map(n=>`<option value="${n}">${n}</option>`).join('');
+
+  // 趨勢品項選單（含 itemGroup 合併說明）
+  buildTrendItemSelect();
+}
+
+function buildTrendItemSelect() {
+  // 建立 itemGroup → items 的 map
+  // itemGroup 預設 = name，但若品項有 itemGroup 屬性則用之
+  const groupMap = {}; // groupName → [item, ...]
+  ITEMS_DEF.forEach(item => {
+    const g = item.itemGroup || item.name;
+    if (!groupMap[g]) groupMap[g] = [];
+    groupMap[g].push(item);
+  });
+
+  const sel = document.getElementById('histTrendItem');
+  sel.innerHTML = '<option value="">— 請選擇品項 —</option>';
+
+  // 按廠商分組排列
+  ALL_VENDORS.forEach(vendor => {
+    const groups = Object.entries(groupMap).filter(([g, items]) => items.some(i => i.vendor === vendor));
+    if (!groups.length) return;
+    const og = document.createElement('optgroup');
+    og.label = vendor;
+    groups.forEach(([g, items]) => {
+      const opt = document.createElement('option');
+      opt.value = g;
+      // 若同 group 有多廠商，標示
+      const multiVendor = [...new Set(items.map(i=>i.vendor))].length > 1;
+      opt.textContent = multiVendor ? `${g} ★多廠商` : g;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  });
+}
+
+function onTrendItemChange() {
+  const g = document.getElementById('histTrendItem').value;
+  const groupMap = {};
+  ITEMS_DEF.forEach(item => {
+    const grp = item.itemGroup || item.name;
+    if (!groupMap[grp]) groupMap[grp] = [];
+    groupMap[grp].push(item);
+  });
+  const items = groupMap[g] || [];
+  const vendors = [...new Set(items.map(i=>i.vendor))];
+
+  const vSel = document.getElementById('histTrendVendor');
+  const hint = document.getElementById('trendGroupHint');
+  vSel.innerHTML = '<option value="__all__">合計所有廠商（精準消耗量）</option>' +
+    vendors.map(v=>`<option value="${v}">${v}</option>`).join('');
+
+  // 只有多廠商時才顯示廠商選擇
+  hint.style.display = vendors.length > 1 ? 'block' : 'none';
+}
+
+function switchHistTab(tab) {
+  histActiveTab = tab;
+  document.getElementById('histNavDetail').className = 'hist-nav-btn' + (tab==='detail'?' active':'');
+  document.getElementById('histNavTrend').className = 'hist-nav-btn' + (tab==='trend'?' active':'');
+  document.getElementById('histDetailView').style.display = tab==='detail'?'block':'none';
+  document.getElementById('histTrendView').style.display = tab==='trend'?'block':'none';
+}
+
+// 從 Firebase 撈取日期範圍內的資料
+async function fetchDateRange(fromStr, toStr) {
+  if (!window._fb) return {};
+  const { db, ref, get } = window._fb;
+  const from = new Date(fromStr);
+  const to = new Date(toStr);
+  const keys = [];
+  const cur = new Date(from);
+  while (cur <= to) {
+    const k = `${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`;
+    keys.push(k);
+    cur.setDate(cur.getDate()+1);
+  }
+  const result = {};
+  // 批次讀取（Promise.all）
+  await Promise.all(keys.map(async k => {
+    try {
+      const snap = await get(ref(db, `jenka/${k}`));
+      if (snap.exists()) result[k] = snap.val();
+    } catch(e) {}
+  }));
+  return result;
+}
+
+// ── 叫貨明細查詢 ──
+async function queryHistory() {
+  const fromStr = document.getElementById('histDateFrom').value;
+  const toStr = document.getElementById('histDateTo').value;
+  if (!fromStr || !toStr || fromStr > toStr) {
+    showToast('⚠️ 請選擇有效日期範圍');
+    return;
+  }
+  const dayDiff = (new Date(toStr) - new Date(fromStr)) / 86400000;
+  if (dayDiff > 90) { showToast('⚠️ 查詢範圍最多 90 天'); return; }
+
+  const filterVendor = document.getElementById('histVendorFilter').value;
+  const filterChecker = document.getElementById('histCheckerFilter').value;
+
+  const resultEl = document.getElementById('histDetailResult');
+  resultEl.innerHTML = '<div class="hist-loading">⏳ 查詢中...</div>';
+  document.getElementById('histExportBtn').style.display = 'none';
+
+  const data = await fetchDateRange(fromStr, toStr);
+  histCachedResults = [];
+
+  // 整理每天資料
+  const days = Object.keys(data).sort();
+  let html = '';
+
+  days.forEach(dateKey => {
+    const dayData = data[dateKey];
+    if (!dayData || !dayData.submitted) return;
+
+    const sub = dayData.submitted;
+    const ord = dayData.ordered || {};
+    const qtySnap = dayData.qty || {};
+    const snapOrderQty = dayData.orderQty || orderQty;
+    const snapSafe = dayData.safeQty || safeQty;
+
+    const d = new Date(dateKey + 'T00:00:00');
+    const dayLabel = `${d.getMonth()+1}/${d.getDate()} 週${DAY_NAMES[d.getDay()]}`;
+
+    // 找這天有哪些廠商已送出
+    let vendorsThisDay = ALL_VENDORS.filter(v => sub[v]);
+    if (filterVendor) vendorsThisDay = vendorsThisDay.filter(v => v === filterVendor);
+    if (filterChecker) vendorsThisDay = vendorsThisDay.filter(v => sub[v]?.checker === filterChecker);
+    if (!vendorsThisDay.length) return;
+
+    let vendorRows = '';
+    vendorsThisDay.forEach(vendor => {
+      const s = sub[vendor];
+      if (!s) return;
+
+      // 計算每個品項的叫貨量
+      const vitems = ITEMS_DEF.filter(i => i.vendor === vendor);
+      const itemRows = vitems.map(item => {
+        const dow = d.getDay();
+        const maxQty = snapOrderQty?.[item.id]?.[dow];
+        if (maxQty === null || maxQty === undefined) return null;
+        const cur = parseFloat(qtySnap[item.id]);
+        let ordAmt;
+        if (isNaN(cur) || qtySnap[item.id] === '' || qtySnap[item.id] === undefined) {
+          ordAmt = maxQty;
+        } else {
+          ordAmt = Math.max(0, Math.min((snapSafe[item.id] || safeQty[item.id] || 0) - cur, maxQty));
+        }
+        return { itemName: item.name, unit: item.unit, qty: ordAmt, cur, vendor, itemId: item.id };
+      }).filter(Boolean);
+
+      const needItems = itemRows.filter(r => r.qty > 0);
+      const isOrdered = !!ord[vendor];
+
+      // 加入匯出資料
+      itemRows.forEach(r => {
+        histCachedResults.push({
+          date: dateKey, dayLabel, vendor, checker: s.checker, time: s.time,
+          itemName: r.itemName, unit: r.unit, orderedQty: r.qty, isOrdered
+        });
+      });
+
+      vendorRows += `<div class="hist-vendor-row">
+        <div class="hist-vendor-name">
+          ${vendor}
+          ${isOrdered ? '<span style="font-size:10px;background:#E8F5EE;color:var(--ok);padding:1px 7px;border-radius:10px;">已叫貨</span>' : ''}
+        </div>
+        <div class="hist-vendor-checker">👤 ${s.checker} · ${s.time}</div>
+        <div class="hist-item-list">
+          ${needItems.length ? needItems.map(r =>
+            `<div class="hist-item-row">
+              <span class="hist-item-name">${r.itemName}</span>
+              <span class="hist-item-qty">${r.qty} ${r.unit}</span>
+            </div>`).join('') :
+            '<div style="font-size:11px;color:var(--ink3);padding:4px 0;">庫存充足，無需叫貨</div>'
+          }
+        </div>
+      </div>`;
+    });
+
+    if (!vendorRows) return;
+
+    const totalVendors = vendorsThisDay.length;
+    html += `<div class="hist-day-block">
+      <div class="hist-day-header">
+        <div class="hist-day-title">${dayLabel}</div>
+        <div class="hist-day-meta">${totalVendors} 家廠商</div>
+      </div>
+      ${vendorRows}
+    </div>`;
+  });
+
+  if (!html) {
+    resultEl.innerHTML = `<div class="hist-empty">📭<br>此期間無叫貨紀錄<br><span style="font-size:12px">請確認日期範圍是否正確</span></div>`;
+  } else {
+    resultEl.innerHTML = html;
+    document.getElementById('histExportBtn').style.display = 'block';
+  }
+}
+
+// ── 匯出 CSV ──
+function exportHistoryCSV() {
+  if (!histCachedResults.length) return;
+  const header = ['日期', '星期', '廠商', '點貨人', '點貨時間', '品項', '叫貨量', '單位', '已叫貨'];
+  const rows = histCachedResults.map(r => {
+    const d = new Date(r.date + 'T00:00:00');
+    return [
+      r.date,
+      `週${DAY_NAMES[d.getDay()]}`,
+      r.vendor,
+      r.checker,
+      r.time,
+      r.itemName,
+      r.orderedQty,
+      r.unit,
+      r.isOrdered ? '是' : '否'
+    ];
+  });
+  const csv = [header, ...rows].map(row => row.map(c => `"${c}"`).join(',')).join('\n');
+  const bom = '\uFEFF'; // BOM for Excel UTF-8
+  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `叫貨明細_${document.getElementById('histDateFrom').value}_${document.getElementById('histDateTo').value}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('✓ 已匯出 CSV，可用 Excel 開啟');
+}
+
+// ── 消耗趨勢圖 ──
+async function queryTrend() {
+  const fromStr = document.getElementById('trendDateFrom').value;
+  const toStr = document.getElementById('trendDateTo').value;
+  const groupName = document.getElementById('histTrendItem').value;
+  const filterVendor = document.getElementById('histTrendVendor').value;
+
+  if (!groupName) { showToast('⚠️ 請選擇品項'); return; }
+  if (!fromStr || !toStr || fromStr > toStr) { showToast('⚠️ 請選擇有效日期範圍'); return; }
+  const dayDiff = (new Date(toStr) - new Date(fromStr)) / 86400000;
+  if (dayDiff > 90) { showToast('⚠️ 查詢範圍最多 90 天'); return; }
+
+  const resultEl = document.getElementById('histTrendResult');
+  resultEl.innerHTML = '<div class="hist-loading">⏳ 載入中...</div>';
+
+  const data = await fetchDateRange(fromStr, toStr);
+
+  // 找所有屬於此 group 的品項
+  const groupItems = ITEMS_DEF.filter(item => (item.itemGroup || item.name) === groupName);
+  const targetItems = filterVendor === '__all__' ? groupItems : groupItems.filter(i => i.vendor === filterVendor);
+  const unit = targetItems[0]?.unit || '';
+
+  // 多廠商說明
+  const vendorNames = [...new Set(groupItems.map(i=>i.vendor))];
+  const isMultiVendor = vendorNames.length > 1;
+
+  // 建立日期序列
+  const days = [];
+  const cur = new Date(fromStr + 'T00:00:00');
+  const end = new Date(toStr + 'T00:00:00');
+  while (cur <= end) {
+    const k = `${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`;
+    const dayData = data[k];
+    let total = 0;
+    let hasData = false;
+
+    if (dayData && dayData.submitted) {
+      const qtySnap = dayData.qty || {};
+      const snapOQ = dayData.orderQty || orderQty;
+      const snapSafe = dayData.safeQty || safeQty;
+      const dow = cur.getDay();
+
+      targetItems.forEach(item => {
+        if (!dayData.submitted[item.vendor]) return; // 這天沒送出
+        const maxQ = snapOQ?.[item.id]?.[dow];
+        if (maxQ === null || maxQ === undefined) return;
+        const curQ = parseFloat(qtySnap[item.id]);
+        let ordAmt;
+        if (isNaN(curQ) || qtySnap[item.id] === '' || qtySnap[item.id] === undefined) {
+          ordAmt = maxQ;
+        } else {
+          ordAmt = Math.max(0, Math.min((snapSafe[item.id] || safeQty[item.id] || 0) - curQ, maxQ));
+        }
+        total += ordAmt;
+        hasData = true;
+      });
+    }
+
+    days.push({
+      date: k,
+      label: `${cur.getMonth()+1}/${cur.getDate()}`,
+      dow: DAY_NAMES[cur.getDay()],
+      qty: hasData ? total : null,
+    });
+    cur.setDate(cur.getDate()+1);
+  }
+
+  // 找安全庫存
+  const safeVal = targetItems.reduce((s,i) => s + (safeQty[i.id]||0), 0);
+
+  renderTrendChart(days, groupName, unit, safeVal, filterVendor, isMultiVendor, vendorNames);
+}
+
+function renderTrendChart(days, groupName, unit, safeVal, filterVendor, isMultiVendor, vendorNames) {
+  const resultEl = document.getElementById('histTrendResult');
+  const hasAny = days.some(d => d.qty !== null);
+  if (!hasAny) {
+    resultEl.innerHTML = `<div class="hist-empty">📭<br>此期間無叫貨紀錄</div>`;
+    return;
+  }
+
+  // 計算統計
+  const vals = days.filter(d => d.qty !== null).map(d => d.qty);
+  const avg = (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1);
+  const maxV = Math.max(...vals, safeVal);
+  const minV = 0;
+
+  // SVG 尺寸
+  const W = 320, H = 160, padL = 28, padR = 10, padT = 16, padB = 28;
+  const chartW = W - padL - padR;
+  const chartH = H - padT - padB;
+  const n = days.length;
+  const xStep = chartW / Math.max(n-1, 1);
+
+  const scaleY = v => padT + chartH - (chartH * (v - minV) / Math.max(maxV - minV, 1));
+  const scaleX = i => padL + (n === 1 ? chartW/2 : i * xStep);
+
+  // 折線 points
+  const dataPoints = days.map((d, i) => d.qty !== null ? { x: scaleX(i), y: scaleY(d.qty), qty: d.qty } : null);
+
+  // 建立 path
+  let pathD = '';
+  let areaD = '';
+  dataPoints.forEach((p, i) => {
+    if (!p) return;
+    if (!pathD) { pathD = `M${p.x},${p.y}`; areaD = `M${p.x},${padT+chartH} L${p.x},${p.y}`; }
+    else { pathD += ` L${p.x},${p.y}`; areaD += ` L${p.x},${p.y}`; }
+  });
+  // 閉合 area
+  const lastP = [...dataPoints].reverse().find(p=>p);
+  if (lastP) areaD += ` L${lastP.x},${padT+chartH} Z`;
+
+  // 安全庫存線 y
+  const safeY = scaleY(safeVal);
+  // 平均線 y
+  const avgY = scaleY(parseFloat(avg));
+
+  // X 軸標籤（間隔顯示避免太密）
+  const showEvery = n <= 14 ? 1 : n <= 30 ? 3 : 7;
+  const xLabels = days.map((d, i) => {
+    if (i % showEvery !== 0 && i !== n-1) return '';
+    return `<text x="${scaleX(i)}" y="${H-6}" text-anchor="middle" font-size="9" fill="var(--ink3)">${d.label}</text>`;
+  }).join('');
+
+  // Y 軸標籤
+  const yTicks = 4;
+  const yLabels = Array.from({length:yTicks+1},(_,i)=>{
+    const v = minV + (maxV-minV)*(i/yTicks);
+    return `<text x="${padL-3}" y="${scaleY(v)+3}" text-anchor="end" font-size="9" fill="var(--ink3)">${v.toFixed(v<1?1:0)}</text>`;
+  }).join('');
+
+  // 圓點
+  const dots = dataPoints.map((p,i) => p ? `<circle cx="${p.x}" cy="${p.y}" r="3" fill="var(--accent)" stroke="#fff" stroke-width="1.5"/>` : '').join('');
+
+  const vendorNote = isMultiVendor && filterVendor === '__all__'
+    ? `<div style="font-size:11px;color:var(--ok);margin-top:6px;">✓ 已合計所有廠商（${vendorNames.join('、')}）的叫貨量，反映真實消耗</div>`
+    : isMultiVendor
+    ? `<div style="font-size:11px;color:var(--ink3);margin-top:6px;">⚠ 僅顯示單一廠商，切換至「合計所有廠商」可查看完整消耗量</div>`
+    : '';
+
+  resultEl.innerHTML = `
+    <div class="hist-chart-wrap">
+      <div class="hist-chart-title">
+        ${groupName}
+        <span class="hist-chart-subtitle">近期叫貨量趨勢</span>
+      </div>
+      <svg class="hist-chart-svg" viewBox="0 0 ${W} ${H}">
+        <defs>
+          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="var(--accent)" stop-opacity="0.01"/>
+          </linearGradient>
+        </defs>
+        <!-- Grid -->
+        ${Array.from({length:yTicks+1},(_,i)=>{
+          const y = scaleY(minV+(maxV-minV)*(i/yTicks));
+          return `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--border)" stroke-width="0.5"/>`;
+        }).join('')}
+        <!-- 安全庫存線 -->
+        ${safeVal > 0 ? `<line x1="${padL}" y1="${safeY}" x2="${W-padR}" y2="${safeY}" stroke="var(--ok)" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="${W-padR+2}" y="${safeY+3}" font-size="8" fill="var(--ok)">備${safeVal}</text>` : ''}
+        <!-- 平均線 -->
+        <line x1="${padL}" y1="${avgY}" x2="${W-padR}" y2="${avgY}" stroke="var(--warn)" stroke-width="1" stroke-dasharray="3,2"/>
+        <!-- Area -->
+        <path d="${areaD}" fill="url(#areaGrad)"/>
+        <!-- Line -->
+        <path d="${pathD}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+        <!-- Dots -->
+        ${dots}
+        <!-- Y labels -->
+        ${yLabels}
+        <!-- X labels -->
+        ${xLabels}
+      </svg>
+      <div class="hist-legend">
+        <div class="hist-legend-item"><div class="hist-legend-dot" style="background:var(--accent);"></div>叫貨量（${unit}）</div>
+        ${safeVal > 0 ? `<div class="hist-legend-item"><div style="width:12px;height:2px;background:var(--ok);border-top:1px dashed var(--ok);"></div>需備庫存 ${safeVal}${unit}</div>` : ''}
+        <div class="hist-legend-item"><div style="width:12px;height:2px;background:var(--warn);border-top:1px dashed var(--warn);"></div>平均 ${avg}${unit}</div>
+      </div>
+      ${vendorNote}
+    </div>
+    <div class="hist-filter-card" style="margin-top:0;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+        <div class="stat" style="background:var(--cream);border:1px solid var(--border);border-radius:10px;padding:9px 12px;">
+          <div style="font-size:11px;color:var(--ink3);">平均叫貨量</div>
+          <div style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;margin-top:2px;">${avg}<span style="font-size:11px;font-weight:400;color:var(--ink3);"> ${unit}</span></div>
+        </div>
+        <div class="stat" style="background:var(--cream);border:1px solid var(--border);border-radius:10px;padding:9px 12px;">
+          <div style="font-size:11px;color:var(--ink3);">最高單日</div>
+          <div style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;color:var(--accent);margin-top:2px;">${Math.max(...vals)}<span style="font-size:11px;font-weight:400;color:var(--ink3);"> ${unit}</span></div>
+        </div>
+        <div class="stat" style="background:var(--cream);border:1px solid var(--border);border-radius:10px;padding:9px 12px;">
+          <div style="font-size:11px;color:var(--ink3);">有叫貨天數</div>
+          <div style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;margin-top:2px;">${vals.length}<span style="font-size:11px;font-weight:400;color:var(--ink3);"> 天</span></div>
+        </div>
+      </div>
+    </div>`;
+}
+
 function fbSaveAccounts() {
   if (!window._fb) return;
   const { db, ref, set } = window._fb;
@@ -1654,7 +2298,8 @@ function fbSave(dow) {
     adminPin,
     safeQty,
     orderQty,
-    unlockedRecheck: unlockedRecheck[dow] || {}
+    unlockedRecheck: unlockedRecheck[dow] || {},
+    optInToday: optInToday[dow] || {}
   };
   set(ref(db, `jenka/${key}`), data).catch(e => console.warn('FB write error', e));
 }
@@ -1736,6 +2381,7 @@ function fbInit() {
         if (data.submitted) submitted[d] = data.submitted;
         if (data.ordered) ordered[d] = data.ordered;
         if (data.unlockedRecheck) unlockedRecheck[d] = data.unlockedRecheck;
+        if (data.optInToday) optInToday[d] = data.optInToday;
         // qty 只同步今天
         if (d === viewDow && data.qty) Object.assign(qty, data.qty);
         // 重新渲染
@@ -1755,7 +2401,11 @@ confirmVendorSubmit = function(vendor, checker, time, isRecheck) {
   fbSave(viewDow);
 };
 
-const _origMarkOrdered = markOrdered;
+const _origToggleOptIn = toggleOptIn;
+toggleOptIn = function(dow, vendor) {
+  _origToggleOptIn(dow, vendor);
+  // fbSave already called inside toggleOptIn
+};
 markOrdered = function(vendor) {
   _origMarkOrdered(vendor);
   fbSave(viewDow);
