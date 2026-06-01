@@ -3,13 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JenKa Inventory｜庄腳備料站</title>
+<title>JenKa Inventory｜庄腳點貨系統</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getDatabase, ref, set, get, onValue, update, remove } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
-import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
 const firebaseConfig={
   apiKey:"AIzaSyDoSPSDr6DfQNa7DHV9Z4xl0Dkc36kd69o",
@@ -21,93 +20,11 @@ const firebaseConfig={
   appId:"1:1051643046922:web:f0c0a053aabe88581643f3"
 };
 
-const ALLOWED_EMAILS = [
-  'jenka.bf@gmail.com',
-  'tz.yingg@gmail.com',
-  'dik29292@gmail.com',
-  'huangkaka5@gmail.com'
-];
-
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
-let appInitialized = false;
-
-function initApp(user) {
-  const loginScreen = document.getElementById('loginScreen');
-  const appContent = document.getElementById('appContent');
-  const errEl = document.getElementById('loginError');
-
-  if (user && ALLOWED_EMAILS.includes(user.email)) {
-    // 授權成功
-    loginScreen.style.display = 'none';
-    appContent.style.display = 'block';
-    if (!appInitialized) {
-      appInitialized = true;
-      window._fb = {db, ref, set, get, onValue, update, remove};
-      window._fbReady = true;
-      window.dispatchEvent(new Event('fbReady'));
-    }
-  } else if (user && !ALLOWED_EMAILS.includes(user.email)) {
-    // 未授權帳號
-    signOut(auth);
-    loginScreen.style.display = 'flex';
-    appContent.style.display = 'none';
-    if (errEl) errEl.textContent = '此帳號（' + user.email + '）未獲授權，請聯繫老闆。';
-  } else {
-    // 未登入
-    loginScreen.style.display = 'flex';
-    appContent.style.display = 'none';
-  }
-}
-
-// 先處理 redirect 結果，再監聽 auth 狀態
-getRedirectResult(auth).then(result => {
-  if (result && result.user) {
-    initApp(result.user);
-  }
-}).catch(err => {
-  console.warn('Redirect error:', err.code);
-  const errEl = document.getElementById('loginError');
-  if (errEl && err.code !== 'auth/no-auth-event') {
-    errEl.textContent = '登入失敗，請重試。錯誤：' + err.code;
-  }
-}).finally(() => {
-  // 無論如何都監聽 auth 狀態
-  onAuthStateChanged(auth, user => {
-    initApp(user);
-  });
-});
-
-// 登入按鈕 - 自動判斷裝置用 popup 或 redirect
-window.googleSignIn = function() {
-  const errEl = document.getElementById('loginError');
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  if (isMobile) {
-    if (errEl) errEl.textContent = '正在跳轉至 Google 登入...';
-    signInWithRedirect(auth, provider).catch(err => {
-      if (errEl) errEl.textContent = '登入失敗，請重試。';
-    });
-  } else {
-    import("https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js").then(({signInWithPopup}) => {
-      signInWithPopup(auth, provider).then(result => {
-        initApp(result.user);
-      }).catch(err => {
-        if (errEl) errEl.textContent = '登入失敗，請重試。';
-      });
-    });
-  }
-};
-
-// 登出
-window.googleSignOut = function() {
-  signOut(auth).then(() => {
-    appInitialized = false;
-    window.location.reload();
-  });
-};
+window._fb = {db, ref, set, get, onValue, update, remove};
+window._fbReady = true;
+window.dispatchEvent(new Event('fbReady'));
 </script>
 <style>
   :root {
@@ -378,20 +295,29 @@ window.googleSignOut = function() {
 <body>
 
 <!-- LOGIN SCREEN -->
-<div id="loginScreen" style="display:none;position:fixed;inset:0;background:var(--admin-accent);z-index:300;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;">
+<div id="loginScreen" style="display:flex;position:fixed;inset:0;background:var(--admin-accent);z-index:300;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;">
   <div style="font-size:48px;margin-bottom:16px;">🥣</div>
-  <div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:6px;">JenKa Inventory</div>
-  <div style="font-size:13px;color:rgba(255,255,255,.65);margin-bottom:8px;font-family:'DM Mono',monospace;">庄腳備料站</div>
-  <div style="font-size:12px;color:rgba(255,255,255,.5);margin-bottom:36px;">請登入授權帳號以繼續</div>
-  <button onclick="googleSignIn()" style="display:flex;align-items:center;gap:10px;background:#fff;border:none;border-radius:14px;padding:14px 28px;font-size:15px;font-weight:600;color:#1C1A14;cursor:pointer;font-family:'Noto Sans TC',sans-serif;box-shadow:0 4px 20px rgba(0,0,0,.2);">
-    <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-    使用 Google 帳號登入
-  </button>
-  <div id="loginError" style="color:#FFB3A3;font-size:12px;margin-top:16px;max-width:280px;line-height:1.6;"></div>
+  <div style="font-size:24px;font-weight:700;color:#fff;margin-bottom:4px;">JenKa Inventory</div>
+  <div style="font-size:13px;color:rgba(255,255,255,.55);margin-bottom:32px;font-family:'DM Mono',monospace;">庄腳點貨系統</div>
+  <div style="background:rgba(255,255,255,.12);border-radius:16px;padding:24px 20px;width:100%;max-width:320px;">
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <input id="loginUsername" type="text" placeholder="帳號" autocomplete="username"
+        style="width:100%;height:44px;border-radius:10px;border:none;padding:0 14px;font-size:15px;font-family:'Noto Sans TC',sans-serif;background:rgba(255,255,255,.9);color:#1C1A14;outline:none;"
+        onkeydown="if(event.key==='Enter')document.getElementById('loginPassword').focus()">
+      <input id="loginPassword" type="password" placeholder="密碼" autocomplete="current-password"
+        style="width:100%;height:44px;border-radius:10px;border:none;padding:0 14px;font-size:15px;font-family:'Noto Sans TC',sans-serif;background:rgba(255,255,255,.9);color:#1C1A14;outline:none;"
+        onkeydown="if(event.key==='Enter')doLogin()">
+      <button onclick="doLogin()"
+        style="width:100%;height:44px;border-radius:10px;border:none;background:#fff;color:var(--admin-accent);font-size:15px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;margin-top:4px;touch-action:manipulation;">
+        登入
+      </button>
+    </div>
+    <div id="loginError" style="color:#FFB3A3;font-size:12px;margin-top:12px;line-height:1.6;min-height:18px;"></div>
+  </div>
 </div>
 
 <!-- APP CONTENT (shown after login) -->
-<div id="appContent" style="display:none;">
+<div id="appContent" style="display:none;"><!-- app -->
 
 <!-- PIN SCREEN -->
 <div id="pinScreen">
@@ -427,7 +353,10 @@ window.googleSignOut = function() {
         <h1>每日點貨</h1>
         <div class="subtitle" id="subtitle">載入中...</div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-top:4px;"><div class="date-badge" id="dateBadge">--</div><button onclick="googleSignOut()" style="font-size:10px;color:var(--ink3);background:none;border:1px solid var(--border);border-radius:20px;padding:4px 8px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;" id="logoutBtn" title="登出">登出</button></div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;margin-top:4px;">
+  <div class="date-badge" id="dateBadge">--</div>
+  <button onclick="doLogout()" style="font-size:10px;color:var(--ink3);background:none;border:1px solid var(--border);border-radius:20px;padding:4px 8px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">登出</button>
+</div>
     </div>
     <div style="padding:0 20px 12px;">
       <div class="page-switcher">
@@ -512,7 +441,7 @@ window.googleSignOut = function() {
       <button class="admin-nav-btn" id="navSchedule" onclick="switchAdminNav('schedule')">📅 排程</button>
       <button class="admin-nav-btn" id="navQty" onclick="switchAdminNav('qty')">📦 叫貨量</button>
       <button class="admin-nav-btn" id="navChecker" onclick="switchAdminNav('checker')">👤 點貨人</button>
-      <button class="admin-nav-btn" id="navPin" onclick="switchAdminNav('pin')">🔐 PIN</button>
+      <button class="admin-nav-btn" id="navPin" onclick="switchAdminNav('pin')">👥 帳號</button>
     </div>
 
     <div id="recheckAdminView">
@@ -539,16 +468,40 @@ window.googleSignOut = function() {
       </div>
     </div>
     <div id="pinAdminView" style="display:none;">
-      <div class="pin-change-section">
-        <div class="pin-change-card">
-          <div class="pin-change-title">修改管理員 PIN 碼</div>
-          <p style="font-size:12px;color:var(--ink3);margin-bottom:10px;">目前 PIN：<span style="font-family:'DM Mono',monospace;letter-spacing:3px;">****</span>（預設 1234）</p>
-          <div class="pin-change-row">
-            <input class="pin-change-input" id="newPinInput" type="password" maxlength="4" placeholder="新 PIN" inputmode="numeric">
-            <input class="pin-change-input" id="confirmPinInput" type="password" maxlength="4" placeholder="確認" inputmode="numeric">
-            <button class="pin-change-btn" onclick="changePin()">更新</button>
+      <div style="margin:14px 20px 0;">
+        <!-- 帳號列表 -->
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--ink3);text-transform:uppercase;margin-bottom:10px;">帳號管理</div>
+        <div id="accountListEl"></div>
+
+        <!-- 新增帳號 -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:10px;">
+          <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:10px;">新增帳號</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div>
+                <div style="font-size:11px;color:var(--ink3);margin-bottom:4px;">姓名</div>
+                <input id="newAccName" placeholder="例：小美" style="width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'Noto Sans TC',sans-serif;font-size:13px;background:var(--cream);outline:none;">
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--ink3);margin-bottom:4px;">帳號</div>
+                <input id="newAccUsername" placeholder="例：xiaomei" style="width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);outline:none;">
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div>
+                <div style="font-size:11px;color:var(--ink3);margin-bottom:4px;">密碼</div>
+                <input id="newAccPassword" placeholder="例：jenka@mei" style="width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);outline:none;">
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--ink3);margin-bottom:4px;">權限</div>
+                <select id="newAccRole" style="width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'Noto Sans TC',sans-serif;font-size:13px;background:var(--cream);outline:none;">
+                  <option value="staff">員工（僅點貨）</option>
+                  <option value="admin">管理員（點貨＋後台）</option>
+                </select>
+              </div>
+            </div>
+            <button onclick="addAccount()" style="width:100%;height:38px;background:var(--admin-accent);color:#fff;border:none;border-radius:10px;font-family:'Noto Sans TC',sans-serif;font-size:14px;font-weight:700;cursor:pointer;touch-action:manipulation;">新增帳號</button>
           </div>
-          <p style="font-size:11px;color:var(--ink3);margin-top:8px;">請輸入 4 位數字</p>
         </div>
       </div>
     </div>
@@ -565,7 +518,7 @@ window.googleSignOut = function() {
       <button class="btn-admin-save" onclick="adminSave()">儲存叫貨量 ✓</button>
     </div>
     <div id="checkerBar" style="display:none;width:100%;"><div style="font-size:12px;color:var(--ink3);text-align:center;padding:13px 0;">異動即時生效</div></div>
-    <div id="pinBar" style="display:none;width:100%;"><div style="font-size:12px;color:var(--ink3);text-align:center;padding:13px 0;">儲存後立即生效</div></div>
+    <div id="pinBar" style="display:none;width:100%;"><div style="font-size:12px;color:var(--ink3);text-align:center;padding:13px 0;">新增或異動帳號後立即生效</div></div>
   </div>
 </div>
 
@@ -673,12 +626,11 @@ document.getElementById('dateBadge').textContent=
 
 // ── PIN ──
 function requestAdmin(){
-  if(isAdminLoggedIn){showPage('admin');return;}
-  pinBuffer='';pinAttempts=0;
-  document.getElementById('pinError').textContent='';
-  document.getElementById('pinCancelBtn').style.display='block';
-  updatePinDots();
-  document.getElementById('pinScreen').classList.add('show');
+  if(currentUser && currentUser.role === 'admin'){
+    showPage('admin');
+  } else {
+    showToast('⚠️ 需要管理員權限');
+  }
 }
 function cancelPin(){document.getElementById('pinScreen').classList.remove('show');}
 function updatePinDots(){for(let i=0;i<4;i++)document.getElementById('pd'+i).className='pin-dot'+(i<pinBuffer.length?' filled':'');}
@@ -705,17 +657,8 @@ function checkPin(){
     }
   }
 }
-var changePin = function(){
-  const np=document.getElementById('newPinInput').value;
-  const cp=document.getElementById('confirmPinInput').value;
-  if(!/^\d{4}$/.test(np)){showToast('⚠️ 請輸入 4 位數字');return;}
-  if(np!==cp){showToast('⚠️ 兩次輸入不一致');return;}
-  adminPin=np;
-  document.getElementById('newPinInput').value='';
-  document.getElementById('confirmPinInput').value='';
-  showToast('✓ PIN 碼已更新');
-}
-function logoutAdmin(){isAdminLoggedIn=false;showPage('inventory');showToast('已登出管理員');}
+var changePin = function(){ /* replaced by account system */ };
+function logoutAdmin(){showPage('inventory');}
 
 // ── Pages ──
 function showPage(page){
@@ -742,6 +685,7 @@ function switchAdminNav(nav){
   if(nav==='schedule')renderScheduleEditor();
   if(nav==='qty'){renderAdminTabs();renderAdminItems();}
   if(nav==='checker')renderCheckerAdmin();
+  if(nav==='pin')renderAccountList();
 }
 
 // ── Overview ──
@@ -1383,6 +1327,145 @@ function closeModal(){document.getElementById('overlay').classList.remove('open'
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
 
 
+// ══════════════════════════════════════════
+// 帳號系統
+// ══════════════════════════════════════════
+
+// 預設帳號（存在 Firebase，這裡只是初始值）
+const DEFAULT_ACCOUNTS = {
+  'kaka': { name:'KaKa', password:'jenka@kaka', role:'admin', active:true },
+  'xiaomei': { name:'小美', password:'jenka@mei', role:'staff', active:true },
+  'azhi': { name:'阿志', password:'jenka@zhi', role:'staff', active:true },
+  'xiaolin': { name:'小林', password:'jenka@lin', role:'staff', active:true },
+};
+
+let accounts = JSON.parse(JSON.stringify(DEFAULT_ACCOUNTS));
+let currentUser = null; // { username, name, role }
+
+// 登入
+window.doLogin = function() {
+  const username = document.getElementById('loginUsername').value.trim().toLowerCase();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+
+  if (!username || !password) {
+    errEl.textContent = '請輸入帳號和密碼';
+    return;
+  }
+
+  const acc = accounts[username];
+  if (!acc) { errEl.textContent = '帳號不存在'; return; }
+  if (!acc.active) { errEl.textContent = '此帳號已停用，請聯繫管理員'; return; }
+  if (acc.password !== password) { errEl.textContent = '密碼錯誤'; return; }
+
+  // 登入成功
+  currentUser = { username, name: acc.name, role: acc.role };
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appContent').style.display = 'block';
+  document.getElementById('loginPassword').value = '';
+  errEl.textContent = '';
+
+  // 若是管理員，顯示後台按鈕；若是員工則隱藏
+  const adminBtn = document.querySelector('.page-switcher button');
+  if (adminBtn) adminBtn.style.display = acc.role === 'admin' ? '' : 'none';
+
+  // 更新 checkerNames 以當前登入者為主
+  if (!checkerNames.includes(acc.name)) checkerNames.push(acc.name);
+
+  // 觸發 Firebase 初始化
+  if (window._fbReady) {
+    window.dispatchEvent(new Event('fbReady'));
+  }
+};
+
+// 登出
+window.doLogout = function() {
+  currentUser = null;
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appContent').style.display = 'none';
+  document.getElementById('loginUsername').value = '';
+  document.getElementById('loginPassword').value = '';
+  backToOverview();
+};
+
+// 帳號管理（後台）
+window.addAccount = function() {
+  const name = document.getElementById('newAccName').value.trim();
+  const username = document.getElementById('newAccUsername').value.trim().toLowerCase();
+  const password = document.getElementById('newAccPassword').value.trim();
+  const role = document.getElementById('newAccRole').value;
+  if (!name || !username || !password) { showToast('⚠️ 請填寫所有欄位'); return; }
+  if (accounts[username]) { showToast('⚠️ 此帳號已存在'); return; }
+  accounts[username] = { name, password, role, active: true };
+  fbSaveAccounts();
+  if (!checkerNames.includes(name)) { checkerNames.push(name); fbSaveGlobal(); }
+  document.getElementById('newAccName').value = '';
+  document.getElementById('newAccUsername').value = '';
+  document.getElementById('newAccPassword').value = '';
+  renderAccountList();
+  showToast(`✓ 已新增帳號：${name}`);
+};
+
+window.toggleAccountActive = function(username) {
+  if (username === currentUser?.username) { showToast('⚠️ 不能停用自己的帳號'); return; }
+  accounts[username].active = !accounts[username].active;
+  fbSaveAccounts();
+  renderAccountList();
+  showToast(accounts[username].active ? `✓ 已啟用：${accounts[username].name}` : `已停用：${accounts[username].name}`);
+};
+
+window.changeAccountPassword = function(username) {
+  const newPwd = prompt(`請輸入「${accounts[username].name}」的新密碼：`);
+  if (!newPwd || newPwd.trim() === '') return;
+  accounts[username].password = newPwd.trim();
+  fbSaveAccounts();
+  showToast(`✓ 已更新 ${accounts[username].name} 的密碼`);
+};
+
+window.changeAccountRole = function(username, role) {
+  if (username === currentUser?.username && role !== 'admin') { showToast('⚠️ 不能降低自己的權限'); return; }
+  accounts[username].role = role;
+  fbSaveAccounts();
+  renderAccountList();
+  showToast(`✓ 已更新 ${accounts[username].name} 的權限`);
+};
+
+function renderAccountList() {
+  const el = document.getElementById('accountListEl');
+  if (!el) return;
+  const list = Object.entries(accounts);
+  el.innerHTML = list.map(([username, acc]) => `
+    <div style="background:var(--card);border:1px solid ${acc.active?'var(--border)':'var(--opt-border)'};border-radius:12px;padding:12px 14px;margin-bottom:8px;opacity:${acc.active?1:0.6};">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div>
+          <span style="font-weight:500;font-size:14px;">${acc.name}</span>
+          <span style="font-size:11px;color:var(--ink3);font-family:'DM Mono',monospace;margin-left:8px;">@${username}</span>
+          <span style="font-size:10px;padding:1px 7px;border-radius:10px;margin-left:6px;${acc.role==='admin'?'background:#FFF0EB;color:var(--accent);':'background:var(--tag-bg);color:var(--ink3);'}">
+            ${acc.role==='admin'?'管理員':'員工'}
+          </span>
+          ${!acc.active?'<span style="font-size:10px;background:#FFE8E8;color:var(--danger);padding:1px 7px;border-radius:10px;margin-left:4px;">已停用</span>':''}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <select onchange="changeAccountRole('${username}',this.value)" style="height:30px;border:1px solid var(--border);border-radius:8px;padding:0 8px;font-size:12px;font-family:'Noto Sans TC',sans-serif;background:var(--cream);outline:none;">
+          <option value="staff" ${acc.role==='staff'?'selected':''}>員工</option>
+          <option value="admin" ${acc.role==='admin'?'selected':''}>管理員</option>
+        </select>
+        <button onclick="changeAccountPassword('${username}')" style="padding:0 10px;height:30px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'Noto Sans TC',sans-serif;background:var(--cream);cursor:pointer;">改密碼</button>
+        <button onclick="toggleAccountActive('${username}')" style="padding:0 10px;height:30px;border:1.5px solid ${acc.active?'var(--danger)':'var(--ok)'};border-radius:8px;font-size:12px;font-family:'Noto Sans TC',sans-serif;background:${acc.active?'#FFF0EB':'#E8F5EE'};color:${acc.active?'var(--danger)':'var(--ok)'};cursor:pointer;">
+          ${acc.active?'停用':'啟用'}
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function fbSaveAccounts() {
+  if (!window._fb) return;
+  const { db, ref, set } = window._fb;
+  set(ref(db, 'jenka/accounts'), accounts).catch(e => console.warn('FB accounts write error', e));
+}
+
 // ── Firebase 同步 ──
 function dateKey(dow) {
   // 取得本週某天的日期 key (YYYY-MM-DD)
@@ -1431,6 +1514,16 @@ function fbSaveGlobal() {
 function fbInit() {
   if (!window._fb) return;
   const { db, ref, onValue } = window._fb;
+
+  // 載入帳號
+  onValue(ref(db, 'jenka/accounts'), snap => {
+    const d = snap.val();
+    if (d) accounts = d;
+    else {
+      // 第一次使用，存預設帳號
+      fbSaveAccounts();
+    }
+  });
 
   // 全域設定
   onValue(ref(db, 'jenka/global'), snap => {
