@@ -24,6 +24,14 @@ window.dispatchEvent(new Event("fbReady"));
     --opt-bg:#F5F3EE;--opt-border:#D8D3C8;--admin-accent:#6B4F3A;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
+
+  /* iOS Safari touch fix */
+  button, [onclick] {
+    -webkit-tap-highlight-color: rgba(0,0,0,.05);
+    touch-action: manipulation;
+  }
+  * { -webkit-touch-callout: none; }
+
   body{font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--ink);font-size:14px;}
   .app{max-width:680px;margin:0 auto;padding:0 0 100px;}
 
@@ -56,7 +64,7 @@ window.dispatchEvent(new Event("fbReady"));
 
   .day-strip{display:flex;gap:4px;padding:0 20px;overflow-x:auto;scrollbar-width:none;}
   .day-strip::-webkit-scrollbar{display:none;}
-  .day-cell{flex-shrink:0;width:44px;padding:6px 0;border-radius:10px;text-align:center;cursor:pointer;border:1px solid var(--border);background:var(--card);transition:all .15s;}
+  .day-cell{flex-shrink:0;width:44px;padding:6px 0;border-radius:10px;text-align:center;cursor:pointer;border:1px solid var(--border);background:var(--card);transition:all .15s;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;}
   .day-cell .day-name{font-size:10px;color:var(--ink3);}
   .day-cell .day-num{font-size:14px;font-weight:700;font-family:'DM Mono',monospace;}
   .day-cell.today{border-color:var(--accent);}
@@ -70,7 +78,7 @@ window.dispatchEvent(new Event("fbReady"));
   .alert-banner.hidden{display:none;}
 
   .vendor-status-bar{margin:12px 20px 0;display:flex;flex-direction:column;gap:6px;}
-  .vendor-status-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;transition:border-color .15s;}
+  .vendor-status-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;transition:border-color .15s;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;}
   .vendor-status-row:hover{border-color:var(--accent);}
   .vendor-status-row.submitted{border-color:var(--ok);background:#F4FAF7;}
   .vendor-status-row.rechecked{border-color:var(--warn);background:#FFFBF2;}
@@ -211,7 +219,7 @@ window.dispatchEvent(new Event("fbReady"));
   .sdc-day.is-today{color:var(--accent);}
   .sdc-count{font-size:11px;color:var(--ink3);font-family:'DM Mono',monospace;}
   .vendor-toggle-grid{display:flex;flex-wrap:wrap;gap:6px;}
-  .vendor-toggle{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--opt-bg);color:var(--ink3);transition:all .15s;user-select:none;}
+  .vendor-toggle{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:var(--opt-bg);color:var(--ink3);transition:all .15s;user-select:none;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;}
   .vendor-toggle.on{background:#FFF0EB;color:var(--accent);border-color:var(--accent);}
   .vendor-toggle.always{opacity:.7;cursor:default;}
   .always-note{font-size:11px;color:var(--ink3);margin-top:8px;}
@@ -969,7 +977,43 @@ function toggleScheduleVendor(dow,vendor){
   const c=document.getElementById(`scount-${dow}`);
   if(c)c.textContent=`${scheduleDraft[dow].length} 個固定廠商`;
 }
-var saveSchedule = function(){weeklySchedule=JSON.parse(JSON.stringify(scheduleDraft));orderQty=buildDefaultOrders();showToast('✓ 排程已儲存');renderDayStrip();renderOverview();}
+var saveSchedule = function(){weeklySchedule=JSON.parse(JSON.stringify(scheduleDraft));orderQty=buildDefaultOrders();showToast('✓ 排程已儲存');// iOS Safari fix: event delegation for dynamic content
+document.addEventListener('click', function(e) {
+  // vendor status row
+  const row = e.target.closest('.vendor-status-row');
+  if (row) {
+    const onclick = row.getAttribute('onclick');
+    if (onclick) { try { eval(onclick); } catch(err) {} }
+    return;
+  }
+  // day cell
+  const cell = e.target.closest('.day-cell');
+  if (cell) {
+    const onclick = cell.getAttribute('onclick');
+    if (onclick) { try { eval(onclick); } catch(err) {} }
+    return;
+  }
+});
+
+// Also add touchend for iOS
+document.addEventListener('touchend', function(e) {
+  const row = e.target.closest('.vendor-status-row');
+  if (row) {
+    e.preventDefault();
+    const onclick = row.getAttribute('onclick');
+    if (onclick) { try { eval(onclick); } catch(err) {} }
+    return;
+  }
+  const cell = e.target.closest('.day-cell');
+  if (cell) {
+    e.preventDefault();
+    const onclick = cell.getAttribute('onclick');
+    if (onclick) { try { eval(onclick); } catch(err) {} }
+    return;
+  }
+}, {passive: false});
+
+renderDayStrip();renderOverview();}
 function resetSchedule(){scheduleDraft={0:['廣弘'],1:['豆漿','麵包','毓品'],2:[],3:['廣弘'],4:['豆漿','毓品','麵包'],5:[],6:[]};renderScheduleEditor();showToast('已重設為預設排程');}
 
 // ── Qty ──
@@ -1402,6 +1446,42 @@ if (window._fbReady) {
 }
 window.addEventListener('online', () => showSyncStatus(true));
 window.addEventListener('offline', () => showSyncStatus(false));
+
+// iOS Safari fix: event delegation for dynamic content
+document.addEventListener('click', function(e) {
+  // vendor status row
+  const row = e.target.closest('.vendor-status-row');
+  if (row) {
+    const onclick = row.getAttribute('onclick');
+    if (onclick) { try { eval(onclick); } catch(err) {} }
+    return;
+  }
+  // day cell
+  const cell = e.target.closest('.day-cell');
+  if (cell) {
+    const onclick = cell.getAttribute('onclick');
+    if (onclick) { try { eval(onclick); } catch(err) {} }
+    return;
+  }
+});
+
+// Also add touchend for iOS
+document.addEventListener('touchend', function(e) {
+  const row = e.target.closest('.vendor-status-row');
+  if (row) {
+    e.preventDefault();
+    const onclick = row.getAttribute('onclick');
+    if (onclick) { try { eval(onclick); } catch(err) {} }
+    return;
+  }
+  const cell = e.target.closest('.day-cell');
+  if (cell) {
+    e.preventDefault();
+    const onclick = cell.getAttribute('onclick');
+    if (onclick) { try { eval(onclick); } catch(err) {} }
+    return;
+  }
+}, {passive: false});
 
 renderDayStrip();renderOverview();
 </script>
