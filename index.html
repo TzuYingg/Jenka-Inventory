@@ -104,7 +104,7 @@ window.dispatchEvent(new Event('fbReady'));
   .vendor-status-row.optional-row{background:var(--opt-bg);}
   .vsr-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
   .vsr-icon.pending{background:#FFF0EB;}
-  .vsr-icon.done{background:#E8F5EE;}
+  .vsr-icon.done{background:#EAF3EE;color:#3A7D5E;}
   .vsr-icon.in-progress{background:#FFF8EE;}
   .vsr-icon.unlocked{background:#FFF8EE;}
   .vsr-left{flex:1;min-width:0;}
@@ -306,7 +306,11 @@ window.dispatchEvent(new Event('fbReady'));
   .btn-export-all{flex:1;background:var(--ink);color:var(--cream);border:none;border-radius:12px;padding:12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
   .btn-export-all:disabled{opacity:.4;cursor:default;}
 
-  /* 三狀態 badge + opt-in 按鈕：統一尺寸 */
+  /* 拖曳排序 */
+  .drag-item{transition:opacity .15s;}
+  .drag-item.dragging{opacity:.4;}
+  .drag-item.drag-over{border-top:2px solid var(--accent)!important;}
+  .drag-handle{cursor:grab;color:var(--ink3);font-size:16px;padding:0 4px;touch-action:none;user-select:none;flex-shrink:0;}
   .badge-pending{background:#FDECEA;color:#C0392B;border:1.5px solid #E8A49A;}
   .badge-need-order{background:#EAF3EE;color:#3A7D5E;border:1.5px solid #3A7D5E;font-weight:700;animation:pulse-green 1.6s infinite;display:inline-block;padding:5px 12px;border-radius:20px;font-size:11px;min-width:64px;text-align:center;letter-spacing:.2px;}
   .badge-ordered-done{background:#EDE9E3;color:#7A6A58;border:1.5px solid #C8BFB0;font-weight:600;padding:5px 12px;border-radius:20px;font-size:11px;min-width:64px;text-align:center;display:inline-block;letter-spacing:.2px;}
@@ -563,14 +567,22 @@ window.dispatchEvent(new Event('fbReady'));
               <input id="newItemStep" placeholder="1" type="number" min="0.1" step="0.1" style="width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);outline:none;">
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
             <div>
               <div style="font-size:11px;color:var(--ink3);margin-bottom:4px;">需備庫存</div>
               <input id="newItemSafe" placeholder="5" type="number" min="0" step="0.1" style="width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);outline:none;">
             </div>
             <div>
+              <div style="font-size:11px;color:var(--ink3);margin-bottom:4px;">最小叫貨量</div>
+              <input id="newItemMinOrder" placeholder="1" type="number" min="0" step="1" style="width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);outline:none;">
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--ink3);margin-bottom:4px;">叫貨倍數</div>
+              <input id="newItemMultiple" placeholder="0" type="number" min="0" step="1" style="width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);outline:none;">
+            </div>
+            <div>
               <div style="font-size:11px;color:var(--ink3);margin-bottom:4px;">廠商</div>
-              <select id="newItemVendor" style="width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'Noto Sans TC',sans-serif;font-size:13px;background:var(--cream);outline:none;" id="newItemVendor"></select>
+              <select id="newItemVendor" style="width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'Noto Sans TC',sans-serif;font-size:13px;background:var(--cream);outline:none;"></select>
             </div>
           </div>
           <button onclick="addItem()" style="width:100%;height:38px;background:var(--admin-accent);color:#fff;border:none;border-radius:10px;font-family:'Noto Sans TC',sans-serif;font-size:14px;font-weight:700;cursor:pointer;touch-action:manipulation;">新增品項</button>
@@ -1047,12 +1059,12 @@ function renderOverview(){
       let icon='–', iconCls='pending', badgeText='尚未點貨', badgeCls='badge-pending', rowCls='';
       let subText = `${vitems.length} 項待點貨`;
       if(state === 'done'){
-        icon='✓'; iconCls='done'; rowCls='submitted';
+        icon='▲'; iconCls='done'; rowCls='submitted';
         const isRe = sub.history && sub.history.length > 1;
         badgeText = isRe ? '已重點' : '已送出'; badgeCls = isRe ? 'badge-recheck' : 'badge-done';
         if(isRe) rowCls = 'rechecked';
         subText = `${sub.checker} · ${sub.time}`;
-        if(ordered[viewDow][v]){ iconCls='ordered'; subText = `${sub.checker} · ${sub.time} ｜ 已點貨 ${ordered[viewDow][v].time}`; }
+        if(ordered[viewDow][v]){ iconCls='ordered'; icon='✓'; subText = `${sub.checker} · ${sub.time} ｜ 已點貨 ${ordered[viewDow][v].time}`; }
       } else if(state === 'unlocked'){
         icon='✎'; iconCls='unlocked'; badgeText='可重點'; badgeCls='badge-recheck'; rowCls='rechecked';
         subText = '管理員已解鎖，等待重點';
@@ -1145,8 +1157,17 @@ function calcOrderAmt(item,dow){
   const max=orderQty[item.id]?.[dow];
   if(max===null||max===undefined)return null;
   const cur=parseFloat(qty[item.id]);
-  if(isNaN(cur)||qty[item.id]==='')return max;
-  return Math.max(0,Math.min(safeQty[item.id]-cur,max));
+  let amt;
+  if(isNaN(cur)||qty[item.id]==='') amt=max;
+  else amt=Math.max(0,Math.min(safeQty[item.id]-cur,max));
+  if(amt<=0) return 0;
+  // 最小叫貨量（minOrder，預設 1）
+  const minOrder=item.minOrder||((item.step||1)<1?1:1);
+  if(amt<minOrder) amt=minOrder;
+  // 叫貨倍數無條件進位（multiple）
+  const multiple=item.multiple||0;
+  if(multiple>1) amt=Math.ceil(amt/multiple)*multiple;
+  return amt;
 }
 function getItemStatus(item){
   const v=parseFloat(qty[item.id]);
@@ -1162,7 +1183,7 @@ function renderVendorDetail(){
   const state=vendorState(activeVendor,viewDow);
   const isSubmitted=state==='done';
   const isUnlocked=state==='unlocked';
-  const vitems=ITEMS_DEF.filter(i=>i.vendor===activeVendor);
+  const vitems=ITEMS_DEF.filter(i=>i.vendor===activeVendor&&i.active!==false).sort((a,b)=>(a.sort||0)-(b.sort||0));
   document.getElementById('vendorViewTitle').textContent=activeVendor;
   const badge=document.getElementById('vendorViewBadge');
   badge.textContent='今日進貨';
@@ -1244,9 +1265,9 @@ var updateQty = function(id,val){
 function adjust(id,delta){
   const item=ITEMS_DEF.find(i=>i.id===id);
   if(vendorState(item?.vendor,viewDow)==='done')return;
-  const step=safeQty[item.id]<1?0.5:1;
+  const step=item.step||1;
   const cur=parseFloat(qty[id])||0;
-  const nv=Math.max(0,+(cur+delta*step).toFixed(1));
+  const nv=Math.max(0,+(cur+delta*step).toFixed(2));
   qty[id]=String(nv);
   const el=document.getElementById(`input-${id}`);
   if(el)el.value=nv;
@@ -1262,7 +1283,7 @@ function submitVendor(){
   if(state==='done')return;
   const checker=document.getElementById('checkerName').value;
   if(!checker){showToast('⚠️ 請先選擇點貨人');return;}
-  const vitems=ITEMS_DEF.filter(i=>i.vendor===activeVendor);
+  const vitems=ITEMS_DEF.filter(i=>i.vendor===activeVendor&&i.active!==false).sort((a,b)=>(a.sort||0)-(b.sort||0));
 
   // ── 防呆：所有品項必須填數字 ──
   const unfilledItems=vitems.filter(i=>{
@@ -1509,37 +1530,150 @@ let itemsAdminVendor = ALL_VENDORS[0];
 let nextItemId = 200; // 新增品項從 200 開始編號避免衝突
 
 function renderItemsAdmin() {
-  // 廠商 tabs
   const tabsEl = document.getElementById('itemsVendorTabs');
   if (tabsEl) {
     tabsEl.innerHTML = ALL_VENDORS.map(v =>
       `<div onclick="switchItemsVendor('${v}')" style="flex-shrink:0;padding:6px 13px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid ${v===itemsAdminVendor?'var(--admin-accent)':'var(--border)'};background:${v===itemsAdminVendor?'var(--admin-accent)':'var(--card)'};color:${v===itemsAdminVendor?'#fff':'var(--ink2)'};touch-action:manipulation;">${v}</div>`
     ).join('');
   }
-  // 品項列表
   const listEl = document.getElementById('itemsAdminList');
   if (!listEl) return;
-  const vitems = ITEMS_DEF.filter(i => i.vendor === itemsAdminVendor);
-  listEl.innerHTML = vitems.length === 0
-    ? `<div style="text-align:center;padding:20px;color:var(--ink3);font-size:13px;">此廠商目前無品項</div>`
-    : vitems.map(item => `
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;margin-bottom:6px;display:flex;align-items:center;gap:10px;">
-        <div style="flex:1;">
-          <div style="font-weight:500;font-size:13.5px;">${item.name}</div>
+
+  // 排序：sort 值，下架品項排後面
+  const vitems = ITEMS_DEF
+    .filter(i => i.vendor === itemsAdminVendor)
+    .sort((a,b) => {
+      const aA = a.active !== false, bA = b.active !== false;
+      if (aA !== bA) return aA ? -1 : 1;
+      return (a.sort||0) - (b.sort||0);
+    });
+
+  if (vitems.length === 0) {
+    listEl.innerHTML = `<div style="text-align:center;padding:20px;color:var(--ink3);font-size:13px;">此廠商目前無品項</div>`;
+  } else {
+    const activeItems = vitems.filter(i => i.active !== false);
+    const inactiveItems = vitems.filter(i => i.active === false);
+
+    const renderItem = (item, idx) => {
+      const isActive = item.active !== false;
+      const tags = [];
+      if ((item.step||1) !== 1) tags.push(`步進 ${item.step}`);
+      if (item.minOrder && item.minOrder !== 1) tags.push(`最小 ${item.minOrder}${item.unit}`);
+      if (item.multiple && item.multiple > 1) tags.push(`倍數 ${item.multiple}`);
+      return `<div class="drag-item" data-id="${item.id}" data-active="${isActive}"
+        draggable="true"
+        style="background:${isActive?'var(--card)':'var(--cream)'};border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;opacity:${isActive?1:0.6};">
+        <div class="drag-handle" title="拖曳排序">⠿</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-weight:500;font-size:13px;${isActive?'':'color:var(--ink3);text-decoration:line-through;'}">${item.name}</div>
           <div style="font-size:11px;color:var(--ink3);margin-top:2px;">
-            單位：${item.unit}　需備：${safeQty[item.id]}${item.unit}　步進：${item.step||1}
+            ${item.unit}　備 ${safeQty[item.id]}${item.unit}
+            ${tags.length ? '　' + tags.join('　') : ''}
           </div>
         </div>
-        <div style="display:flex;gap:6px;flex-shrink:0;">
-          <button onclick="editItemStep(${item.id})" style="padding:4px 10px;height:28px;border:1px solid var(--border);border-radius:8px;font-size:11px;font-family:'Noto Sans TC',sans-serif;background:var(--cream);cursor:pointer;touch-action:manipulation;">編輯</button>
-          <button onclick="removeItem(${item.id})" style="padding:4px 10px;height:28px;border:1.5px solid var(--danger);border-radius:8px;font-size:11px;font-family:'Noto Sans TC',sans-serif;background:#FFF0F0;color:var(--danger);cursor:pointer;touch-action:manipulation;">刪除</button>
+        <div style="display:flex;gap:5px;flex-shrink:0;">
+          <button onclick="toggleItemActive(${item.id})" style="padding:3px 9px;height:28px;border:1px solid ${isActive?'var(--warn)':'var(--ok)'};border-radius:8px;font-size:11px;font-family:'Noto Sans TC',sans-serif;background:${isActive?'#FFFBF2':'#EAF3EE'};color:${isActive?'var(--warn)':'var(--ok)'};cursor:pointer;touch-action:manipulation;">${isActive?'下架':'上架'}</button>
+          <button onclick="editItemStep(${item.id})" style="padding:3px 9px;height:28px;border:1px solid var(--border);border-radius:8px;font-size:11px;font-family:'Noto Sans TC',sans-serif;background:var(--cream);cursor:pointer;touch-action:manipulation;">編輯</button>
+          <button onclick="removeItem(${item.id})" style="padding:3px 9px;height:28px;border:1.5px solid var(--danger);border-radius:8px;font-size:11px;font-family:'Noto Sans TC',sans-serif;background:#FFF0F0;color:var(--danger);cursor:pointer;touch-action:manipulation;">刪</button>
         </div>
-      </div>`
-    ).join('');
+      </div>`;
+    };
 
-  // 更新廠商選單
+    let html = '';
+    activeItems.forEach((item, idx) => { html += renderItem(item, idx); });
+    if (inactiveItems.length > 0) {
+      html += `<div style="font-size:11px;color:var(--ink3);letter-spacing:.5px;margin:10px 0 6px;padding-top:8px;border-top:1px dashed var(--border);">已下架</div>`;
+      inactiveItems.forEach((item, idx) => { html += renderItem(item, idx); });
+    }
+    listEl.innerHTML = html;
+    initDragSort(listEl);
+  }
+
   const vendorSel = document.getElementById('newItemVendor');
   if (vendorSel) vendorSel.innerHTML = ALL_VENDORS.map(v => `<option value="${v}">${v}</option>`).join('');
+}
+
+// ── 拖曳排序 ──
+function initDragSort(container) {
+  let dragEl = null, touchClone = null, touchOffY = 0;
+
+  // 桌機 drag events
+  container.addEventListener('dragstart', e => {
+    const item = e.target.closest('.drag-item');
+    if (!item) return;
+    dragEl = item;
+    setTimeout(() => item.classList.add('dragging'), 0);
+    e.dataTransfer.effectAllowed = 'move';
+  });
+  container.addEventListener('dragend', e => {
+    const item = e.target.closest('.drag-item');
+    if (item) item.classList.remove('dragging');
+    container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    dragEl = null;
+    saveDragOrder(container);
+  });
+  container.addEventListener('dragover', e => {
+    e.preventDefault();
+    const target = e.target.closest('.drag-item');
+    if (!target || target === dragEl) return;
+    container.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+    target.classList.add('drag-over');
+    const rect = target.getBoundingClientRect();
+    const mid = rect.top + rect.height / 2;
+    if (e.clientY < mid) container.insertBefore(dragEl, target);
+    else container.insertBefore(dragEl, target.nextSibling);
+  });
+
+  // 手機 touch events
+  container.addEventListener('touchstart', e => {
+    const handle = e.target.closest('.drag-handle');
+    if (!handle) return;
+    dragEl = handle.closest('.drag-item');
+    if (!dragEl) return;
+    const rect = dragEl.getBoundingClientRect();
+    touchOffY = e.touches[0].clientY - rect.top;
+    touchClone = dragEl.cloneNode(true);
+    touchClone.style.cssText = `position:fixed;left:${rect.left}px;width:${rect.width}px;opacity:.85;z-index:999;pointer-events:none;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.15);`;
+    touchClone.style.top = (e.touches[0].clientY - touchOffY) + 'px';
+    document.body.appendChild(touchClone);
+    dragEl.style.opacity = '.3';
+    e.preventDefault();
+  }, {passive:false});
+
+  container.addEventListener('touchmove', e => {
+    if (!dragEl || !touchClone) return;
+    const y = e.touches[0].clientY;
+    touchClone.style.top = (y - touchOffY) + 'px';
+    const els = [...container.querySelectorAll('.drag-item')].filter(el => el !== dragEl);
+    for (const el of els) {
+      const rect = el.getBoundingClientRect();
+      if (y > rect.top && y < rect.bottom) {
+        const mid = rect.top + rect.height / 2;
+        if (y < mid) container.insertBefore(dragEl, el);
+        else container.insertBefore(dragEl, el.nextSibling);
+        break;
+      }
+    }
+    e.preventDefault();
+  }, {passive:false});
+
+  container.addEventListener('touchend', e => {
+    if (!dragEl) return;
+    if (touchClone) { document.body.removeChild(touchClone); touchClone = null; }
+    dragEl.style.opacity = '';
+    saveDragOrder(container);
+    dragEl = null;
+  });
+}
+
+function saveDragOrder(container) {
+  const items = [...container.querySelectorAll('.drag-item[data-id]')];
+  items.forEach((el, idx) => {
+    const id = parseInt(el.dataset.id);
+    const item = ITEMS_DEF.find(i => i.id === id);
+    if (item) item.sort = idx;
+  });
+  fbSaveItemsDef();
 }
 
 function switchItemsVendor(v) {
@@ -1552,18 +1686,20 @@ window.addItem = function() {
   const unit = document.getElementById('newItemUnit').value.trim() || '個';
   const step = parseFloat(document.getElementById('newItemStep').value) || 1;
   const safe = parseFloat(document.getElementById('newItemSafe').value) || 1;
+  const minOrder = parseFloat(document.getElementById('newItemMinOrder').value) || 1;
+  const multiple = parseFloat(document.getElementById('newItemMultiple').value) || 0;
   const vendor = document.getElementById('newItemVendor').value;
   if (!name) { showToast('⚠️ 請填寫品名'); return; }
 
+  const vendorItems = ITEMS_DEF.filter(i => i.vendor === vendor);
+  const maxSort = vendorItems.length > 0 ? Math.max(...vendorItems.map(i => i.sort||0)) : 0;
   const id = nextItemId++;
-  ITEMS_DEF.push({ id, vendor, name, unit, safe, step });
+  ITEMS_DEF.push({ id, vendor, name, unit, safe, step, minOrder, multiple, active:true, sort:maxSort+1 });
   safeQty[id] = safe;
-  // 初始化叫貨量
   for (let d = 0; d < 7; d++) {
     const fixed = weeklySchedule[d] || [];
-    const isAlways = ALWAYS_VENDORS.includes(vendor);
     if (!orderQty[id]) orderQty[id] = {};
-    orderQty[id][d] = (fixed.includes(vendor) || isAlways) ? safe : null;
+    orderQty[id][d] = fixed.includes(vendor) ? safe : null;
   }
   qty[id] = '';
 
@@ -1571,11 +1707,40 @@ window.addItem = function() {
   document.getElementById('newItemUnit').value = '';
   document.getElementById('newItemStep').value = '';
   document.getElementById('newItemSafe').value = '';
+  document.getElementById('newItemMinOrder').value = '';
+  document.getElementById('newItemMultiple').value = '';
 
   fbSaveItemsDef();
   itemsAdminVendor = vendor;
   renderItemsAdmin();
   showToast(`✓ 已新增：${name}`);
+};
+
+window.toggleItemActive = function(id) {
+  const item = ITEMS_DEF.find(i => i.id === id);
+  if (!item) return;
+  item.active = item.active === false ? true : false;
+  fbSaveItemsDef();
+  renderItemsAdmin();
+  showToast(item.active === false ? `已下架：${item.name}` : `✓ 已上架：${item.name}`);
+};
+
+window.moveItem = function(id, dir) {
+  const vendor = ITEMS_DEF.find(i => i.id === id)?.vendor;
+  const vitems = ITEMS_DEF.filter(i => i.vendor === vendor).sort((a,b)=>(a.sort||0)-(b.sort||0));
+  const idx = vitems.findIndex(i => i.id === id);
+  const swapIdx = dir === 'up' ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= vitems.length) return;
+  const tmp = vitems[idx].sort;
+  vitems[idx].sort = vitems[swapIdx].sort;
+  vitems[swapIdx].sort = tmp;
+  // 若 sort 相同就強制分開
+  if (vitems[idx].sort === vitems[swapIdx].sort) {
+    vitems[idx].sort = idx;
+    vitems[swapIdx].sort = swapIdx;
+  }
+  fbSaveItemsDef();
+  renderItemsAdmin();
 };
 
 window.removeItem = function(id) {
@@ -1595,21 +1760,72 @@ window.removeItem = function(id) {
 window.editItemStep = function(id) {
   const item = ITEMS_DEF.find(i => i.id === id);
   if (!item) return;
-  const newStep = prompt(`「${item.name}」的按鈕步進值（目前：${item.step||1}）：
-例如：0.5、1、5`, item.step || 1);
-  if (newStep === null) return;
-  const s = parseFloat(newStep);
-  if (isNaN(s) || s <= 0) { showToast('⚠️ 請輸入有效數字'); return; }
-  item.step = s;
+  const modal = document.getElementById('modal');
+  const overlay = document.getElementById('overlay');
+  modal.innerHTML = `
+    <h2>編輯品項設定</h2>
+    <div class="modal-sub">${item.name}　${item.unit}</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin:16px 0;">
+      <div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">需備庫存</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input id="editSafeInput" type="number" min="0" step="0.5" value="${safeQty[id]}"
+            style="flex:1;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-size:14px;font-family:'DM Mono',monospace;background:var(--cream);color:var(--ink);outline:none;">
+          <span style="font-size:13px;color:var(--ink2);">${item.unit}</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">按鈕步進值</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input id="editStepInput" type="number" min="0.1" step="0.1" value="${item.step||1}"
+            style="flex:1;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-size:14px;font-family:'DM Mono',monospace;background:var(--cream);color:var(--ink);outline:none;">
+          <span style="font-size:13px;color:var(--ink2);">${item.unit}</span>
+        </div>
+        <div style="font-size:11px;color:var(--ink3);margin-top:4px;">例：0.5、1、5</div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">最小叫貨量</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input id="editMinOrderInput" type="number" min="0" step="1" value="${item.minOrder||1}"
+            style="flex:1;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-size:14px;font-family:'DM Mono',monospace;background:var(--cream);color:var(--ink);outline:none;">
+          <span style="font-size:13px;color:var(--ink2);">${item.unit}</span>
+        </div>
+        <div style="font-size:11px;color:var(--ink3);margin-top:4px;">有叫貨時的最低數量，0 表示不限</div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">叫貨倍數</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input id="editMultipleInput" type="number" min="0" step="1" value="${item.multiple||0}"
+            style="flex:1;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-size:14px;font-family:'DM Mono',monospace;background:var(--cream);color:var(--ink);outline:none;">
+          <span style="font-size:13px;color:var(--ink2);">${item.unit}</span>
+        </div>
+        <div style="font-size:11px;color:var(--ink3);margin-top:4px;">叫貨量自動進位到此倍數，0 或 1 表示不限</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-order" onclick="confirmEditItemStep(${id})">儲存</button>
+    </div>`;
+  overlay.classList.add('open');
+};
 
-  const newSafe = prompt(`「${item.name}」的需備庫存（目前：${safeQty[id]}${item.unit}）：`, safeQty[id]);
-  if (newSafe !== null) {
-    const sv = parseFloat(newSafe);
-    if (!isNaN(sv) && sv >= 0) safeQty[id] = sv;
-  }
-
+window.confirmEditItemStep = function(id) {
+  const item = ITEMS_DEF.find(i => i.id === id);
+  if (!item) return;
+  const stepVal = parseFloat(document.getElementById('editStepInput').value);
+  const safeVal = parseFloat(document.getElementById('editSafeInput').value);
+  const minOrderVal = parseFloat(document.getElementById('editMinOrderInput').value);
+  const multipleVal = parseFloat(document.getElementById('editMultipleInput').value);
+  if (isNaN(stepVal) || stepVal <= 0) { showToast('⚠️ 步進值請輸入有效數字'); return; }
+  if (isNaN(safeVal) || safeVal < 0) { showToast('⚠️ 需備庫存請輸入有效數字'); return; }
+  item.step = stepVal;
+  safeQty[id] = safeVal;
+  item.safe = safeVal;
+  item.minOrder = isNaN(minOrderVal) || minOrderVal < 0 ? 1 : minOrderVal;
+  item.multiple = isNaN(multipleVal) || multipleVal < 0 ? 0 : multipleVal;
   fbSaveItemsDef();
   renderItemsAdmin();
+  closeModal();
   showToast(`✓ 已更新：${item.name}`);
 };
 
@@ -1827,7 +2043,7 @@ var markOrdered = function(vendor){
 function buildExportText(vendor,dow){
   const sub=submitted[dow][vendor];
   if(!sub)return'';
-  const vitems=ITEMS_DEF.filter(i=>i.vendor===vendor);
+  const vitems=ITEMS_DEF.filter(i=>i.vendor===vendor&&i.active!==false).sort((a,b)=>(a.sort||0)-(b.sort||0));
   const needItems=vitems.filter(i=>{const o=calcOrderAmt(i,dow);return o!==null&&o>0;});
   if(needItems.length===0)return`【${vendor}】今日庫存充足，無需叫貨。`;
   const d=new Date(now);d.setDate(now.getDate()-todayDow+dow);
