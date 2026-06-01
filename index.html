@@ -64,7 +64,7 @@ window.dispatchEvent(new Event("fbReady"));
 
   .day-strip{display:flex;gap:4px;padding:0 20px;overflow-x:auto;scrollbar-width:none;}
   .day-strip::-webkit-scrollbar{display:none;}
-  .day-cell{flex-shrink:0;width:44px;padding:6px 0;border-radius:10px;text-align:center;cursor:pointer;border:1px solid var(--border);background:var(--card);transition:all .15s;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;}
+  .day-cell{flex-shrink:0;width:44px;padding:6px 0;border-radius:10px;text-align:center;cursor:pointer;border:1px solid var(--border);background:var(--card);transition:all .15s;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;appearance:none;-webkit-appearance:none;outline:none;}
   .day-cell .day-name{font-size:10px;color:var(--ink3);}
   .day-cell .day-num{font-size:14px;font-weight:700;font-family:'DM Mono',monospace;}
   .day-cell.today{border-color:var(--accent);}
@@ -78,7 +78,7 @@ window.dispatchEvent(new Event("fbReady"));
   .alert-banner.hidden{display:none;}
 
   .vendor-status-bar{margin:12px 20px 0;display:flex;flex-direction:column;gap:6px;}
-  .vendor-status-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;transition:border-color .15s;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;}
+  .vendor-status-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;transition:border-color .15s;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;appearance:none;-webkit-appearance:none;outline:none;}
   .vendor-status-row:hover{border-color:var(--accent);}
   .vendor-status-row.submitted{border-color:var(--ok);background:#F4FAF7;}
   .vendor-status-row.rechecked{border-color:var(--warn);background:#FFFBF2;}
@@ -663,9 +663,9 @@ function renderDayStrip(){
   document.getElementById('dayStrip').innerHTML=[0,1,2,3,4,5,6].map(dow=>{
     const d=new Date(now);d.setDate(now.getDate()-todayDow+dow);
     const hasFixed=(weeklySchedule[dow]||[]).length>0;
-    return`<div class="day-cell${dow===todayDow?' today':''}${dow===viewDow?' active':''}" onclick="switchDay(${dow})">
+    return`<button class="day-cell${dow===todayDow?' today':''}${dow===viewDow?' active':''}" onclick="switchDay(${dow})" style="font-family:'DM Mono',monospace;border:1px solid var(--border);">
       <div class="day-name">週${DAY_NAMES[dow]}</div><div class="day-num">${d.getDate()}</div>
-      <div class="day-dot${hasFixed?'':' hidden'}"></div></div>`;
+      <div class="day-dot${hasFixed?'':' hidden'}"></div></button>`;
   }).join('');
 }
 function switchDay(dow){viewDow=dow;backToOverview();renderDayStrip();}
@@ -711,7 +711,7 @@ function renderOverview(){
         icon='✎';iconCls='in-progress';badgeText=`${filled}/${vitems.length}`;badgeCls='badge-progress';
         subText=`已填 ${filled} 項`;
       }
-      return`<div class="vendor-status-row${rowCls?' '+rowCls:''}${opt?' optional-row':''}${ordered[viewDow][v]?' ordered':''}" onclick="openVendor('${v}')">
+      return`<button class="vendor-status-row${rowCls?' '+rowCls:''}${opt?' optional-row':''}${ordered[viewDow][v]?' ordered':''}" onclick="openVendor('${v}')" style="width:100%;text-align:left;border:1px solid var(--border);font-family:'Noto Sans TC',sans-serif;">
         <div class="vsr-icon ${iconCls}">${icon}</div>
         <div class="vsr-left"><div class="vsr-name">${v}</div><div class="vsr-sub">${subText}</div></div>
         <div class="vsr-right">
@@ -720,7 +720,7 @@ function renderOverview(){
           <span class="vsr-badge ${opt&&state==='pending'?'badge-opt':ordered[viewDow][v]?'badge-ordered':badgeCls}">${opt&&state==='pending'?'不定期':ordered[viewDow][v]?'已叫貨':badgeText}</span>
           <span class="vsr-chevron">›</span>
         </div>
-      </div>`;
+      </button>`;
     }).join('');
   }
 
