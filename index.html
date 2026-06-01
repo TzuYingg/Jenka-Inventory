@@ -9,7 +9,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getDatabase, ref, set, get, onValue, update, remove } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
 const firebaseConfig={
   apiKey:"AIzaSyDoSPSDr6DfQNa7DHV9Z4xl0Dkc36kd69o",
@@ -32,44 +32,52 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-// 登入
-window.googleSignIn = function() {
-  signInWithPopup(auth, provider).catch(err => {
-    alert('登入失敗：' + err.message);
-  });
-};
-
-// 登出
-window.googleSignOut = function() {
-  signOut(auth);
-};
-
-// 監聽登入狀態
-onAuthStateChanged(auth, user => {
+function initApp(user) {
   const loginScreen = document.getElementById('loginScreen');
   const appContent = document.getElementById('appContent');
-  
   if (user && ALLOWED_EMAILS.includes(user.email)) {
-    // 授權成功
     loginScreen.style.display = 'none';
     appContent.style.display = 'block';
-    document.getElementById('userEmail').textContent = user.email;
-    // 初始化 Firebase 功能
     window._fb = {db, ref, set, get, onValue, update, remove};
     window._fbReady = true;
     window.dispatchEvent(new Event('fbReady'));
   } else if (user && !ALLOWED_EMAILS.includes(user.email)) {
-    // 帳號不在白名單
     signOut(auth);
     loginScreen.style.display = 'flex';
     appContent.style.display = 'none';
     document.getElementById('loginError').textContent = '此帳號（' + user.email + '）未獲授權，請聯繫老闆。';
   } else {
-    // 未登入
     loginScreen.style.display = 'flex';
     appContent.style.display = 'none';
   }
+}
+
+// 處理 redirect 登入結果
+getRedirectResult(auth).then(result => {
+  if (result && result.user) {
+    initApp(result.user);
+  }
+}).catch(err => {
+  console.warn('Redirect result error:', err);
+  document.getElementById('loginError').textContent = '登入失敗，請重試。';
 });
+
+// 監聽登入狀態
+onAuthStateChanged(auth, user => {
+  initApp(user);
+});
+
+// 登入 - 使用 redirect（手機/平板相容）
+window.googleSignIn = function() {
+  signInWithRedirect(auth, provider);
+};
+
+// 登出
+window.googleSignOut = function() {
+  signOut(auth).then(() => {
+    window.location.reload();
+  });
+};
 </script>
 <style>
   :root {
