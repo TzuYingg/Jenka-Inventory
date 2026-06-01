@@ -13,7 +13,7 @@ import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onA
 
 const firebaseConfig={
   apiKey:"AIzaSyDoSPSDr6DfQNa7DHV9Z4xl0Dkc36kd69o",
-  authDomain:"jenka-inventory.firebaseapp.com",
+  authDomain:"tzuyingg.github.io",
   databaseURL:"https://jenka-inventory-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId:"jenka-inventory",
   storageBucket:"jenka-inventory.firebasestorage.app",
@@ -52,24 +52,33 @@ function initApp(user) {
   }
 }
 
-// 處理 redirect 登入結果
-getRedirectResult(auth).then(result => {
-  if (result && result.user) {
-    initApp(result.user);
-  }
-}).catch(err => {
-  console.warn('Redirect result error:', err);
-  document.getElementById('loginError').textContent = '登入失敗，請重試。';
-});
-
-// 監聽登入狀態
+// 監聽登入狀態（主要邏輯）
 onAuthStateChanged(auth, user => {
   initApp(user);
 });
 
-// 登入 - 使用 redirect（手機/平板相容）
+// 處理 redirect 登入結果
+getRedirectResult(auth).then(result => {
+  if (result && result.user) {
+    console.log('Redirect login success:', result.user.email);
+    initApp(result.user);
+  } else {
+    console.log('No redirect result, checking auth state...');
+  }
+}).catch(err => {
+  console.warn('Redirect result error:', err.code, err.message);
+  const errEl = document.getElementById('loginError');
+  if (errEl) errEl.textContent = '登入失敗（' + err.code + '），請重試。';
+});
+
+// 登入按鈕
 window.googleSignIn = function() {
-  signInWithRedirect(auth, provider);
+  const errEl = document.getElementById('loginError');
+  if (errEl) errEl.textContent = '正在跳轉至 Google 登入...';
+  signInWithRedirect(auth, provider).catch(err => {
+    console.warn('SignIn error:', err);
+    if (errEl) errEl.textContent = '無法啟動登入，請確認網路連線。';
+  });
 };
 
 // 登出
