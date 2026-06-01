@@ -710,7 +710,8 @@ let adminPin='1234';
 let pinBuffer='',pinAttempts=0,pinLocked=false;
 let isAdminLoggedIn=false;
 
-const ITEMS_DEF=[
+// ── 品項種子資料（僅第一次啟動時使用，之後以 Firebase 為主）──
+const ITEMS_SEED=[
   {id:1,vendor:'豆漿',name:'有糖豆漿',unit:'袋',safe:8},{id:2,vendor:'豆漿',name:'無糖豆漿',unit:'袋',safe:8},
   {id:3,vendor:'南北貨',name:'竹筷子（紅色）',unit:'束',safe:1},{id:4,vendor:'南北貨',name:'4吋鐵炮竹串',unit:'包',safe:1},
   {id:5,vendor:'南北貨',name:'6吋鐵炮串',unit:'包',safe:1},{id:6,vendor:'南北貨',name:'0號夾鏈袋',unit:'包',safe:2},
@@ -755,6 +756,9 @@ const ITEMS_DEF=[
   {id:85,vendor:'麵包',name:'20切去邊全麥',unit:'條',safe:16},{id:86,vendor:'麵包',name:'20切去邊吐司',unit:'條',safe:8},
   {id:87,vendor:'麵包',name:'山形小厚片',unit:'條',safe:4},
 ];
+
+// 執行時的品項清單——Firebase 載入後會取代這裡的內容
+let ITEMS_DEF = ITEMS_SEED.map(i => ({...i}));
 
 function buildDefaultOrders(){
   const o={};
@@ -1435,13 +1439,18 @@ window.editItemStep = function(id) {
 function fbSaveItemsDef() {
   if (!window._fb) return;
   const { db, ref, set } = window._fb;
-  // 儲存自訂品項（id >= 200）
-  const customItems = ITEMS_DEF.filter(i => i.id >= 200);
-  set(ref(db, 'jenka/customItems'), customItems.length > 0 ? customItems : null);
-  // 儲存所有品項的 step 和 safe
-  const itemMeta = {};
-  ITEMS_DEF.forEach(i => { itemMeta[i.id] = { step: i.step || 1, safe: safeQty[i.id] }; });
-  set(ref(db, 'jenka/itemMeta'), itemMeta);
+  // 所有品項（含原始內建＋自訂）統一存到 allItems
+  // 儲存每個品項的完整資料（含 safe、step 的最新值）
+  const allItems = ITEMS_DEF.map(i => ({
+    id: i.id,
+    vendor: i.vendor,
+    name: i.name,
+    unit: i.unit,
+    safe: safeQty[i.id] ?? i.safe,
+    ...(i.step ? { step: i.step } : {}),
+    ...(i.itemGroup ? { itemGroup: i.itemGroup } : {}),
+  }));
+  set(ref(db, 'jenka/allItems'), allItems).catch(e => console.warn('FB allItems write error', e));
 }
 
 // ── Checker ──
@@ -2320,37 +2329,40 @@ function fbSaveGlobal() {
 // 啟動：監聽今天資料 + 全域設定
 function fbInit() {
   if (!window._fb) return;
-  const { db, ref, onValue } = window._fb;
+  const { db, ref, onValue, get, set } = window._fb;
 
-  // 載入自訂品項
-  onValue(ref(db, 'jenka/customItems'), snap => {
-    const d = snap.val();
-    if (d && Array.isArray(d)) {
-      d.forEach(item => {
-        if (!ITEMS_DEF.find(i => i.id === item.id)) {
+  // ── 品項：allItems 為唯一來源 ──
+  // get() 而非 onValue()，避免每次變動都重建整個 ITEMS_DEF
+  get(ref(db, 'jenka/allItems')).then(snap => {
+    if (snap.exists()) {
+      // Firebase 有資料 → 完全取代程式碼預設值
+      const fbItems = snap.val();
+      if (Array.isArray(fbItems) && fbItems.length > 0) {
+        // 清空再填入
+        ITEMS_DEF.length = 0;
+        fbItems.forEach(item => {
           ITEMS_DEF.push(item);
           safeQty[item.id] = item.safe;
-          qty[item.id] = '';
+          qty[item.id] = qty[item.id] ?? '';
           if (item.id >= nextItemId) nextItemId = item.id + 1;
-        }
-      });
-    }
-  });
-
-  // 載入品項 meta（step、safe 覆蓋）
-  onValue(ref(db, 'jenka/itemMeta'), snap => {
-    const d = snap.val();
-    if (!d) return;
-    Object.entries(d).forEach(([id, meta]) => {
-      const item = ITEMS_DEF.find(i => i.id == id);
-      if (item) {
-        if (meta.step) item.step = meta.step;
-        if (meta.safe !== undefined) safeQty[id] = meta.safe;
+        });
       }
-    });
+    } else {
+      // 第一次啟動，Firebase 還沒有資料 → 把種子資料寫入
+      console.log('[JenKa] 首次啟動，寫入品項種子資料到 Firebase');
+      fbSaveItemsDef();
+    }
+    // 品項載入完成後再監聽其他資料
+    fbInitRest();
+  }).catch(e => {
+    console.warn('allItems load error, using seed data', e);
+    fbInitRest();
   });
+}
 
-  // 載入帳號
+function fbInitRest() {
+  if (!window._fb) return;
+  const { db, ref, onValue } = window._fb;
   onValue(ref(db, 'jenka/accounts'), snap => {
     const d = snap.val();
     if (d) accounts = d;
@@ -2367,7 +2379,10 @@ function fbInit() {
     if (d.weeklySchedule) weeklySchedule = d.weeklySchedule;
     if (d.checkerNames) checkerNames = d.checkerNames;
     if (d.adminPin) adminPin = d.adminPin;
-    if (d.safeQty) Object.assign(safeQty, d.safeQty);
+    // safeQty 以 allItems 為主（已在 fbInit 載入），global 的只補沒載到的
+    if (d.safeQty) Object.entries(d.safeQty).forEach(([id, val]) => {
+      if (safeQty[id] === undefined) safeQty[id] = val;
+    });
     if (d.orderQty) Object.assign(orderQty, d.orderQty);
   });
 
