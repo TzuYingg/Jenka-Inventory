@@ -2947,14 +2947,10 @@ function fbInitRest() {
 // 覆寫需要同步的函式
 const GAS_WEBHOOK = 'https://script.google.com/macros/s/AKfycby5d0dSujOrATRPJoDruni89KCwdG1er_3KR9MXF4LeWxdwcUdgttmpU85wI2rdTggfFg/exec';
 
-// 通知 GAS（不等回應，失敗靜默）
+// 通知 GAS
 function notifyGAS(payload) {
-  fetch(GAS_WEBHOOK, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-    mode: 'no-cors'
-  }).catch(() => {});
+  const url = GAS_WEBHOOK + '?data=' + encodeURIComponent(JSON.stringify(payload));
+  fetch(url, { method: 'GET', mode: 'no-cors' }).catch(() => {});
 }
 
 const _origConfirmVendorSubmit = confirmVendorSubmit;
