@@ -306,11 +306,7 @@ window.dispatchEvent(new Event('fbReady'));
   .btn-export-all{flex:1;background:var(--ink);color:var(--cream);border:none;border-radius:12px;padding:12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
   .btn-export-all:disabled{opacity:.4;cursor:default;}
 
-  /* 拖曳排序 */
-  .drag-item{transition:opacity .15s;}
-  .drag-item.dragging{opacity:.4;}
-  .drag-item.drag-over{border-top:2px solid var(--accent)!important;}
-  .drag-handle{cursor:grab;color:var(--ink3);font-size:16px;padding:0 4px;touch-action:none;user-select:none;flex-shrink:0;}
+  /* 拖曳排序（新版，長按觸發）*/
   .badge-pending{background:#FDECEA;color:#C0392B;border:1.5px solid #E8A49A;}
   .badge-need-order{background:#EAF3EE;color:#3A7D5E;border:1.5px solid #3A7D5E;font-weight:700;animation:pulse-green 1.6s infinite;display:inline-block;padding:5px 12px;border-radius:20px;font-size:11px;min-width:64px;text-align:center;letter-spacing:.2px;}
   .badge-ordered-done{background:#EDE9E3;color:#7A6A58;border:1.5px solid #C8BFB0;font-weight:600;padding:5px 12px;border-radius:20px;font-size:11px;min-width:64px;text-align:center;display:inline-block;letter-spacing:.2px;}
@@ -318,6 +314,13 @@ window.dispatchEvent(new Event('fbReady'));
   @keyframes pulse-green{0%,100%{box-shadow:0 0 0 0 rgba(58,125,94,0.35);background:#EAF3EE;}50%{box-shadow:0 0 0 5px rgba(58,125,94,0);background:#D4EBE0;}}
   .btn-opt-in-toggle{font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;border:1.5px solid #3A6BC4;background:#E8EFFF;color:#3A6BC4;cursor:pointer;white-space:nowrap;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;min-width:64px;text-align:center;letter-spacing:.2px;}
   .btn-opt-cancel{font-size:11px;padding:5px 10px;border-radius:20px;border:1.5px solid var(--border);background:var(--cream);color:var(--ink3);cursor:pointer;white-space:nowrap;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;}
+  /* 拖曳排序 */
+  .drag-item{touch-action:none;transition:box-shadow .15s,opacity .15s;}
+  .drag-item.dragging{opacity:0.4;box-shadow:0 6px 20px rgba(0,0,0,.13);transform:scale(1.02);}
+  .drag-item.drag-over{border-color:var(--accent)!important;box-shadow:0 0 0 2px rgba(212,82,42,.2);}
+  .drag-handle{width:28px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3.5px;cursor:grab;flex-shrink:0;opacity:0.3;padding:4px 2px;touch-action:none;}
+  .drag-handle:active{cursor:grabbing;opacity:0.6;}
+  .drag-handle span{display:block;width:14px;height:2px;background:var(--ink);border-radius:2px;}
 
   /* ── 歷史查詢頁面 ── */
   #historyPage{display:none;}
@@ -1624,24 +1627,34 @@ function initDragSort(container) {
     else container.insertBefore(dragEl, target.nextSibling);
   });
 
-  // 手機 touch events
+  // 手機 touch events（長按 300ms 後才開始拖曳）
+  let longPressTimer = null;
   container.addEventListener('touchstart', e => {
     const handle = e.target.closest('.drag-handle');
     if (!handle) return;
-    dragEl = handle.closest('.drag-item');
-    if (!dragEl) return;
-    const rect = dragEl.getBoundingClientRect();
-    touchOffY = e.touches[0].clientY - rect.top;
-    touchClone = dragEl.cloneNode(true);
-    touchClone.style.cssText = `position:fixed;left:${rect.left}px;width:${rect.width}px;opacity:.85;z-index:999;pointer-events:none;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.15);`;
-    touchClone.style.top = (e.touches[0].clientY - touchOffY) + 'px';
-    document.body.appendChild(touchClone);
-    dragEl.style.opacity = '.3';
+    const itemEl = handle.closest('.drag-item');
+    if (!itemEl) return;
+    longPressTimer = setTimeout(() => {
+      dragEl = itemEl;
+      const rect = dragEl.getBoundingClientRect();
+      touchOffY = e.touches[0].clientY - rect.top;
+      touchClone = dragEl.cloneNode(true);
+      touchClone.style.cssText = `position:fixed;left:${rect.left}px;width:${rect.width}px;opacity:.85;z-index:999;pointer-events:none;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.15);`;
+      touchClone.style.top = (e.touches[0].clientY - touchOffY) + 'px';
+      document.body.appendChild(touchClone);
+      dragEl.style.opacity = '.3';
+      // 震動回饋（支援的裝置）
+      if (navigator.vibrate) navigator.vibrate(30);
+    }, 300);
     e.preventDefault();
   }, {passive:false});
 
   container.addEventListener('touchmove', e => {
-    if (!dragEl || !touchClone) return;
+    if (!dragEl || !touchClone) {
+      // 移動時取消長按計時
+      if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+      return;
+    }
     const y = e.touches[0].clientY;
     touchClone.style.top = (y - touchOffY) + 'px';
     const els = [...container.querySelectorAll('.drag-item')].filter(el => el !== dragEl);
@@ -1658,6 +1671,7 @@ function initDragSort(container) {
   }, {passive:false});
 
   container.addEventListener('touchend', e => {
+    if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
     if (!dragEl) return;
     if (touchClone) { document.body.removeChild(touchClone); touchClone = null; }
     dragEl.style.opacity = '';
@@ -2931,22 +2945,46 @@ function fbInitRest() {
 }
 
 // 覆寫需要同步的函式
+const GAS_WEBHOOK = 'https://script.google.com/macros/s/AKfycby5d0dSujOrATRPJoDruni89KCwdG1er_3KR9MXF4LeWxdwcUdgttmpU85wI2rdTggfFg/exec';
+
+// 通知 GAS（不等回應，失敗靜默）
+function notifyGAS(payload) {
+  fetch(GAS_WEBHOOK, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    mode: 'no-cors'
+  }).catch(() => {});
+}
+
 const _origConfirmVendorSubmit = confirmVendorSubmit;
 confirmVendorSubmit = function(vendor, checker, time, isRecheck) {
   _origConfirmVendorSubmit(vendor, checker, time, isRecheck);
   fbSave(viewDow);
+  // 通知 GAS：員工送出點貨單
+  notifyGAS({ type: 'submitted', vendor, checker, time });
 };
 
 const _origToggleOptIn = toggleOptIn;
 toggleOptIn = function(dow, vendor) {
   _origToggleOptIn(dow, vendor);
-  // fbSave already called inside toggleOptIn
 };
 
 const _origMarkOrdered = markOrdered;
 markOrdered = function(vendor) {
   _origMarkOrdered(vendor);
   fbSave(viewDow);
+  // 檢查是否全部叫貨完成
+  const allVisible = [
+    ...(weeklySchedule[viewDow] || []),
+    ...OPT_IN_VENDORS.filter(v => optInToday[viewDow][v])
+  ];
+  const submittedVendors = allVisible.filter(v => submitted[viewDow][v]);
+  const allOrdered = submittedVendors.length > 0 &&
+    submittedVendors.every(v => ordered[viewDow][v]);
+  if (allOrdered) {
+    notifyGAS({ type: 'allDone', vendors: submittedVendors });
+  }
 };
 
 const _origMarkOrderedModal = markOrderedModal;
