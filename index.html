@@ -172,8 +172,8 @@ window.dispatchEvent(new Event('fbReady'));
   .item.submitted-item{opacity:.55;pointer-events:none;}
   .item-name{font-weight:500;font-size:13.5px;}
   .item-meta{font-size:11px;color:var(--ink3);margin-top:3px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-  .safe-tag{background:var(--tag-bg);padding:1px 6px;border-radius:4px;font-family:'DM Mono',monospace;}
-  .order-tag{padding:1px 6px;border-radius:4px;font-family:'DM Mono',monospace;font-size:11px;}
+  .safe-tag{background:none;padding:0;border-radius:0;font-family:'DM Mono',monospace;font-size:9px;color:var(--ink3);}
+  .order-tag{padding:0;border-radius:0;font-family:'DM Mono',monospace;font-size:9px;}
   .order-tag.need{background:#FFF0EB;color:var(--accent);}
   .order-tag.ok{background:#E8F5EE;color:var(--ok);}
   .order-tag.zero{background:var(--tag-bg);color:var(--ink3);}
@@ -1353,22 +1353,22 @@ function renderVendorDetail(){
       const isSel=!isNaN(curVal)&&Math.abs(curVal-v)<0.001;
       return`<button class="qty-preset${isSel?' selected':''}" onclick="setQty(${item.id},${v})" ${locked?'disabled':''}>${v}</button>`;
     }).join('');
-    return`<div class="item status-${st}${locked?' submitted-item':''}" id="item-${item.id}" data-offset="${initOffset}" data-max="${allPresets.length}">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
-        <div class="item-name" style="flex:1;min-width:0;">${item.name}</div>
-        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
-          <span class="safe-tag">備 ${safeQty[item.id]}${item.unit}</span>
-          <span class="${otagCls}" id="otag-${item.id}">${otagText}</span>
-          <span class="status-dot dot-${st}" id="dot-${item.id}"></span>
-          ${!locked?`<button onclick="setQty(${item.id},0)" style="font-size:10px;color:var(--ink3);background:none;border:none;cursor:pointer;padding:0 2px;touch-action:manipulation;" title="清零">✕</button>`:''}
+    return`<div style="margin-bottom:12px;" id="item-wrap-${item.id}">
+      <div class="item status-${st}${locked?' submitted-item':''}" id="item-${item.id}" data-offset="${initOffset}" data-max="${allPresets.length}">
+        <div class="item-name" style="margin-bottom:7px;">${item.name}</div>
+        <div class="item-controls">
+          <button class="qty-btn" onclick="slidePresets(${item.id},-1)" ${locked||!canLeft?'disabled':''} id="btn-left-${item.id}" style="opacity:${canLeft?1:0.25};">‹</button>
+          <div id="presets-${item.id}" style="display:flex;gap:5px;">${presetsHtml}</div>
+          <button class="qty-btn" onclick="slidePresets(${item.id},1)" ${locked||!canRight?'disabled':''} id="btn-right-${item.id}" style="opacity:${canRight?1:0.25};">›</button>
+          <span class="qty-unit">${item.unit}</span>
         </div>
       </div>
-      <div class="item-controls">
-        <button class="qty-btn" onclick="slidePresets(${item.id},-1)" ${locked||!canLeft?'disabled':''} id="btn-left-${item.id}" style="opacity:${canLeft?1:0.25};">‹</button>
-        <div id="presets-${item.id}" style="display:flex;gap:5px;">${presetsHtml}</div>
-        <button class="qty-btn" onclick="slidePresets(${item.id},1)" ${locked||!canRight?'disabled':''} id="btn-right-${item.id}" style="opacity:${canRight?1:0.25};">›</button>
-        <span class="qty-unit">${item.unit}</span>
-      </div></div>`;
+      <div id="info-${item.id}" style="display:flex;align-items:center;gap:5px;padding:3px 4px 0;">
+        <span class="status-dot dot-${st}" id="dot-${item.id}"></span>
+        <span class="safe-tag">備 ${safeQty[item.id]}${item.unit}</span>
+        <span class="${otagCls}" id="otag-${item.id}">${otagText}</span>
+      </div>
+    </div>`;
   }).join('');
 }
 
@@ -2334,14 +2334,18 @@ function fbSaveItemsDef() {
   if (!window._fb) return;
   const { db, ref, set } = window._fb;
   // 所有品項（含原始內建＋自訂）統一存到 allItems
-  // 儲存每個品項的完整資料（含 safe、step 的最新值）
+  // 儲存每個品項的完整資料（含 safe、step、active、sort、minOrder、multiple 的最新值）
   const allItems = ITEMS_DEF.map(i => ({
     id: i.id,
     vendor: i.vendor,
     name: i.name,
     unit: i.unit,
     safe: safeQty[i.id] ?? i.safe,
-    ...(i.step ? { step: i.step } : {}),
+    ...(i.step && i.step !== 1 ? { step: i.step } : {}),
+    ...(i.active === false ? { active: false } : {}),
+    ...(typeof i.sort === 'number' ? { sort: i.sort } : {}),
+    ...(i.minOrder && i.minOrder !== 1 ? { minOrder: i.minOrder } : {}),
+    ...(i.multiple && i.multiple > 1 ? { multiple: i.multiple } : {}),
     ...(i.itemGroup ? { itemGroup: i.itemGroup } : {}),
   }));
   set(ref(db, 'jenka/allItems'), allItems).catch(e => console.warn('FB allItems write error', e));
@@ -2588,6 +2592,7 @@ function buildExportText(vendor,dow){
 function showExportSingle(vendor){
   const txt=buildExportText(vendor,viewDow);
   if(!txt){showToast('此廠商尚未送出點貨單');return;}
+  const isAdmin = currentUser && currentUser.role === 'admin';
   const sub=submitted[viewDow][vendor];
   const isOrdered=!!ordered[viewDow][vendor];
   let html=`<h2>${vendor} 叫貨文字</h2>
@@ -3318,19 +3323,29 @@ async function queryHistory() {
       const s = sub[vendor];
       if (!s) return;
 
-      // 計算每個品項的叫貨量
+      // 計算每個品項的叫貨量（對齊 calcOrderAmt 邏輯）
       const vitems = ITEMS_DEF.filter(i => i.vendor === vendor);
       const itemRows = vitems.map(item => {
         const dow = d.getDay();
-        const maxQty = snapOrderQty?.[item.id]?.[dow];
-        if (maxQty === null || maxQty === undefined) return null;
+        const target = snapOrderQty?.[item.id]?.[dow]; // 每日需備量
+        if (target === null || target === undefined) return null;
         const cur = parseFloat(qtySnap[item.id]);
         let ordAmt;
         if (isNaN(cur) || qtySnap[item.id] === '' || qtySnap[item.id] === undefined) {
-          ordAmt = maxQty;
+          ordAmt = target;
         } else {
-          ordAmt = Math.max(0, Math.min((snapSafe[item.id] || safeQty[item.id] || 0) - cur, maxQty));
+          ordAmt = Math.max(0, target - cur);
         }
+        if (ordAmt <= 0) return { itemName: item.name, unit: item.unit, qty: 0, cur, vendor, itemId: item.id };
+        // 最小叫貨量
+        const minOrder = item.minOrder || 0;
+        if (minOrder > 0 && ordAmt < minOrder) ordAmt = minOrder;
+        // 叫貨倍數
+        const multiple = item.multiple || 0;
+        if (multiple > 1) ordAmt = Math.ceil(ordAmt / multiple) * multiple;
+        // 上限（safeQty）
+        const maxLimit = snapSafe[item.id] || safeQty[item.id] || 0;
+        if (maxLimit && ordAmt > maxLimit) ordAmt = maxLimit;
         return { itemName: item.name, unit: item.unit, qty: ordAmt, cur, vendor, itemId: item.id };
       }).filter(Boolean);
 
@@ -3457,15 +3472,23 @@ async function queryTrend() {
 
       targetItems.forEach(item => {
         if (!dayData.submitted[item.vendor]) return; // 這天沒送出
-        const maxQ = snapOQ?.[item.id]?.[dow];
-        if (maxQ === null || maxQ === undefined) return;
+        const dow2 = cur.getDay();
+        const target = snapOQ?.[item.id]?.[dow2];
+        if (target === null || target === undefined) return;
         const curQ = parseFloat(qtySnap[item.id]);
         let ordAmt;
         if (isNaN(curQ) || qtySnap[item.id] === '' || qtySnap[item.id] === undefined) {
-          ordAmt = maxQ;
+          ordAmt = target;
         } else {
-          ordAmt = Math.max(0, Math.min((snapSafe[item.id] || safeQty[item.id] || 0) - curQ, maxQ));
+          ordAmt = Math.max(0, target - curQ);
         }
+        if (ordAmt <= 0) { hasData = true; return; }
+        const minOrder = item.minOrder || 0;
+        if (minOrder > 0 && ordAmt < minOrder) ordAmt = minOrder;
+        const multiple = item.multiple || 0;
+        if (multiple > 1) ordAmt = Math.ceil(ordAmt / multiple) * multiple;
+        const maxLimit = snapSafe[item.id] || safeQty[item.id] || 0;
+        if (maxLimit && ordAmt > maxLimit) ordAmt = maxLimit;
         total += ordAmt;
         hasData = true;
       });
@@ -3713,12 +3736,14 @@ function fbInitRest() {
     const d = snap.val();
     if (d) {
       accounts = d;
-      // 帳號載入完成後嘗試自動登入（員工帳號）
-      if (!currentUser) tryAutoLogin();
     } else {
       // 第一次使用，存預設帳號
       fbSaveAccounts();
     }
+    // 標記帳號資料已載入，登入按鈕可用
+    window._fbAccountsLoaded = true;
+    // 帳號載入完成後嘗試自動登入（員工帳號）
+    if (!currentUser) tryAutoLogin();
   });
 
   // 全域設定
