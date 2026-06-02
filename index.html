@@ -1022,7 +1022,8 @@ function renderOverview(){
   // 員工只看到排程廠商 + 已開啟的 opt-in 廠商
   // 管理員看到排程廠商 + 全部 opt-in 廠商（含開關）
   const activeOptIn = OPT_IN_VENDORS.filter(v => optInToday[viewDow][v]);
-  const visibleScheduled = schedVendors;
+  // 週排程中移除 OPT_IN_VENDORS（避免重複），OPT_IN_VENDORS 走獨立邏輯
+  const visibleScheduled = schedVendors.filter(v => !OPT_IN_VENDORS.includes(v));
   const vendors = isAdmin
     ? [...visibleScheduled, ...OPT_IN_VENDORS]
     : [...visibleScheduled, ...activeOptIn];
@@ -1276,6 +1277,33 @@ function adjust(id,delta){
   if(el)el.value=nv;
   updateQty(id,nv);
 }
+function showCheckerModal() {
+  const modal = document.getElementById('modal');
+  const overlay = document.getElementById('overlay');
+  modal.innerHTML = `
+    <h2>今天誰來點貨？</h2>
+    <div class="modal-sub">請選擇點貨人後繼續送出</div>
+    <div style="display:flex;flex-direction:column;gap:8px;margin:16px 0;">
+      ${checkerNames.map(name => `
+        <button onclick="selectCheckerAndSubmit('${name}')"
+          style="width:100%;padding:14px;border:1.5px solid var(--border);border-radius:12px;background:var(--cream);font-family:'Noto Sans TC',sans-serif;font-size:15px;font-weight:500;cursor:pointer;text-align:left;touch-action:manipulation;transition:all .15s;"
+          onmouseenter="this.style.borderColor='var(--accent)';this.style.background='#FFF8F5'"
+          onmouseleave="this.style.borderColor='var(--border)';this.style.background='var(--cream)'">
+          ${name}
+        </button>`).join('')}
+    </div>
+    <button class="btn-cancel" onclick="closeModal()" style="width:100%;">取消</button>
+  `;
+  overlay.classList.add('open');
+}
+
+window.selectCheckerAndSubmit = function(name) {
+  const sel = document.getElementById('checkerName');
+  if (sel) { sel.value = name; onCheckerChange(); }
+  closeModal();
+  submitVendor();
+};
+
 function clearVendor(){
   if(vendorState(activeVendor,viewDow)==='done')return;
   ITEMS_DEF.filter(i=>i.vendor===activeVendor).forEach(i=>qty[i.id]='');
@@ -1285,7 +1313,11 @@ function submitVendor(){
   const state=vendorState(activeVendor,viewDow);
   if(state==='done')return;
   const checker=document.getElementById('checkerName').value;
-  if(!checker){showToast('⚠️ 請先選擇點貨人');return;}
+  if(!checker){
+    // 彈出點貨人選取視窗
+    showCheckerModal();
+    return;
+  }
   const vitems=ITEMS_DEF.filter(i=>i.vendor===activeVendor&&i.active!==false).sort((a,b)=>(a.sort||0)-(b.sort||0));
 
   // ── 防呆：所有品項必須填數字 ──
@@ -2211,6 +2243,30 @@ const DEFAULT_ACCOUNTS = {
 let accounts = JSON.parse(JSON.stringify(DEFAULT_ACCOUNTS));
 let currentUser = null; // { username, name, role }
 
+// ── 自動登入（員工帳號）──
+function tryAutoLogin() {
+  try {
+    const saved = localStorage.getItem('jenka_autologin');
+    if (!saved) return false;
+    const { username, password } = JSON.parse(saved);
+    const acc = accounts[username];
+    if (!acc || !acc.active || acc.password !== password || acc.role === 'admin') {
+      localStorage.removeItem('jenka_autologin');
+      return false;
+    }
+    currentUser = { username, name: acc.name, role: acc.role };
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appContent').style.display = 'block';
+    const adminBtn = document.querySelector('.page-switcher button');
+    if (adminBtn) adminBtn.style.display = 'none';
+    const histBtn = document.getElementById('historyPageBtn');
+    if (histBtn) histBtn.style.display = 'none';
+    if (!checkerNames.includes(acc.name)) checkerNames.push(acc.name);
+    if (window._fbReady) window.dispatchEvent(new Event('fbReady'));
+    return true;
+  } catch(e) { return false; }
+}
+
 // 登入
 window.doLogin = function() {
   const username = document.getElementById('loginUsername').value.trim().toLowerCase();
@@ -2234,24 +2290,25 @@ window.doLogin = function() {
   document.getElementById('loginPassword').value = '';
   errEl.textContent = '';
 
-  // 若是管理員，顯示後台按鈕；若是員工則隱藏
+  // 員工帳號記住登入狀態，管理員不記住
+  if (acc.role !== 'admin') {
+    localStorage.setItem('jenka_autologin', JSON.stringify({ username, password }));
+  } else {
+    localStorage.removeItem('jenka_autologin');
+  }
+
   const adminBtn = document.querySelector('.page-switcher button');
   if (adminBtn) adminBtn.style.display = acc.role === 'admin' ? '' : 'none';
-  // 歷史查詢僅管理員可用
   const histBtn = document.getElementById('historyPageBtn');
   if (histBtn) histBtn.style.display = acc.role === 'admin' ? '' : 'none';
 
-  // 更新 checkerNames 以當前登入者為主
   if (!checkerNames.includes(acc.name)) checkerNames.push(acc.name);
-
-  // 觸發 Firebase 初始化
-  if (window._fbReady) {
-    window.dispatchEvent(new Event('fbReady'));
-  }
+  if (window._fbReady) window.dispatchEvent(new Event('fbReady'));
 };
 
 // 登出
 window.doLogout = function() {
+  localStorage.removeItem('jenka_autologin');
   currentUser = null;
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('appContent').style.display = 'none';
@@ -2890,8 +2947,11 @@ function fbInitRest() {
   const { db, ref, onValue } = window._fb;
   onValue(ref(db, 'jenka/accounts'), snap => {
     const d = snap.val();
-    if (d) accounts = d;
-    else {
+    if (d) {
+      accounts = d;
+      // 帳號載入完成後嘗試自動登入（員工帳號）
+      if (!currentUser) tryAutoLogin();
+    } else {
       // 第一次使用，存預設帳號
       fbSaveAccounts();
     }
@@ -2972,7 +3032,7 @@ markOrdered = function(vendor) {
   fbSave(viewDow);
   // 檢查是否全部叫貨完成
   const allVisible = [
-    ...(weeklySchedule[viewDow] || []),
+    ...(weeklySchedule[viewDow] || []).filter(v => !OPT_IN_VENDORS.includes(v)),
     ...OPT_IN_VENDORS.filter(v => optInToday[viewDow][v])
   ];
   const submittedVendors = allVisible.filter(v => submitted[viewDow][v]);
