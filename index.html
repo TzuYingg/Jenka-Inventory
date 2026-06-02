@@ -488,8 +488,8 @@ window.dispatchEvent(new Event('fbReady'));
 
   <div class="submit-bar">
     <div id="overviewBar" style="display:flex;gap:10px;width:100%;">
-      <button class="btn-clear" onclick="showAllOrders()">總覽</button>
-      <button class="btn-export-all" id="exportAllBtn" onclick="showExportAll()">匯出全部叫貨文字</button>
+      <button class="btn-clear" onclick="showDailyNote()">今日備註</button>
+      <button class="btn-export-all" id="exportAllBtn" onclick="showDailySummary()">今日點貨摘要</button>
     </div>
     <div id="vendorBar" style="display:none;gap:10px;width:100%;">
       <button class="btn-clear" onclick="clearVendor()">清除</button>
@@ -514,7 +514,7 @@ window.dispatchEvent(new Event('fbReady'));
       </div>
     </div>
     <div class="admin-nav">
-      <button class="admin-nav-btn active" id="navRecheck" onclick="switchAdminNav('recheck')">重點</button>
+      <button class="admin-nav-btn active" id="navRecheck" onclick="switchAdminNav('recheck')">取消點貨</button>
       <button class="admin-nav-btn" id="navSchedule" onclick="switchAdminNav('schedule')">排程</button>
       <button class="admin-nav-btn" id="navQty" onclick="switchAdminNav('qty')">叫貨量</button>
       <button class="admin-nav-btn" id="navItems" onclick="switchAdminNav('items')">品項</button>
@@ -524,7 +524,7 @@ window.dispatchEvent(new Event('fbReady'));
     </div>
 
     <div id="recheckAdminView">
-      <p class="admin-desc" style="margin-top:10px;">解鎖已送出的廠商點貨單，讓員工重新填寫。原始紀錄保留並標記「已重點」。</p>
+      <p class="admin-desc" style="margin-top:10px;">將已送出的點貨單恢復為未點貨狀態，員工可以重新填寫。原始紀錄會保留。</p>
       <div class="recheck-admin"><div class="recheck-admin-title">本週點貨紀錄</div><div id="recheckDayList"></div></div>
     </div>
     <div id="scheduleAdminView" style="display:none;">
@@ -542,8 +542,8 @@ window.dispatchEvent(new Event('fbReady'));
       <div style="margin:10px 20px 0;">
         <div style="background:#F0F4FF;border:1px solid #B8CEFF;border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
           <div style="font-size:12px;color:#3A6BC4;line-height:1.6;">
-            <strong>同步種子品項</strong><br>
-            <span style="font-size:11px;color:var(--ink3);">只新增程式碼中有但 Firebase 沒有的品項，你自行修改的資料不受影響</span>
+            <strong>同步系統品項</strong><br>
+            <span style="font-size:11px;color:var(--ink3);">將開發者新增的品項同步進來，你自己在後台新增或修改過的品項不受影響</span>
           </div>
           <button onclick="confirmResetAllItems()" style="flex-shrink:0;padding:6px 14px;border-radius:20px;border:1.5px solid #3A6BC4;background:#E8EFFF;color:#3A6BC4;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;white-space:nowrap;">同步品項</button>
         </div>
@@ -678,12 +678,20 @@ window.dispatchEvent(new Event('fbReady'));
           <textarea id="sysOptInVendors" style="width:100%;height:72px;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'Noto Sans TC',sans-serif;font-size:13px;background:var(--cream);color:var(--ink);outline:none;resize:vertical;line-height:1.8;"></textarea>
         </div>
 
+        <!-- 廠商 LINE 連結 -->
+        <div class="admin-item">
+          <div class="admin-item-name">廠商 LINE 連結 <span class="unit-tag">管理員專用</span></div>
+          <div style="font-size:11px;color:var(--ink3);margin-bottom:8px;">每行一個，格式：廠商名稱｜LINE連結</div>
+          <textarea id="sysVendorContacts" style="width:100%;height:120px;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:12px;background:var(--cream);color:var(--ink);outline:none;resize:vertical;line-height:1.8;"></textarea>
+          <div style="font-size:11px;color:var(--ink3);margin-top:4px;">例：廣弘｜https://line.me/ti/g/xxxxx</div>
+        </div>
+
       </div>
     </div>
   </div>
 
   <div class="submit-bar">
-    <div id="recheckBar" style="width:100%;"><div style="font-size:12px;color:var(--ink3);text-align:center;padding:13px 0;">點擊「解鎖重點」後員工即可重新填寫</div></div>
+    <div id="recheckBar" style="width:100%;"><div style="font-size:12px;color:var(--ink3);text-align:center;padding:13px 0;">點擊「回復狀態」後員工即可重新填寫</div></div>
     <div id="scheduleBar" style="display:none;gap:10px;width:100%;">
       <button class="btn-clear" onclick="resetSchedule()">重設預設</button>
       <button class="btn-admin-save" onclick="saveSchedule()">儲存排程</button>
@@ -1065,13 +1073,13 @@ function renderOverview(){
       if(state === 'done'){
         icon='▲'; iconCls='done'; rowCls='submitted';
         const isRe = sub.history && sub.history.length > 1;
-        badgeText = isRe ? '已重點' : '已送出'; badgeCls = isRe ? 'badge-recheck' : 'badge-done';
+        badgeText = isRe ? '已重新點貨' : '已送出'; badgeCls = isRe ? 'badge-recheck' : 'badge-done';
         if(isRe) rowCls = 'rechecked';
         subText = `${sub.checker} · ${sub.time}`;
         if(ordered[viewDow][v]){ iconCls='ordered'; icon='✓'; subText = `${sub.checker} · ${sub.time} ｜ 已點貨 ${ordered[viewDow][v].time}`; }
       } else if(state === 'unlocked'){
-        icon='✎'; iconCls='unlocked'; badgeText='可重點'; badgeCls='badge-recheck'; rowCls='rechecked';
-        subText = '管理員已解鎖，等待重點';
+        icon='–'; iconCls='pending'; badgeText='尚未點貨'; badgeCls='badge-pending'; rowCls='';
+        subText = '管理員已回復狀態，等待重新點貨';
       } else if(state === 'progress'){
         icon='✎'; iconCls='in-progress'; badgeText=`${filled}/${vitems.length}`; badgeCls='badge-progress';
         subText = `已填 ${filled} 項`;
@@ -1197,7 +1205,7 @@ function renderVendorDetail(){
   if(isUnlocked){
     const sub=submitted[viewDow][activeVendor];
     notice.classList.remove('hidden');
-    notice.innerHTML=`⚠️ 管理員已解鎖重點。<br><strong>原始紀錄：</strong>${sub.checker} · ${sub.time}（已標記為已重點）`;
+    notice.innerHTML=`⚠️ 管理員已回復狀態，請重新點貨。<br><strong>原始紀錄：</strong>${sub.checker} · ${sub.time}（原始紀錄已保留）`;
   } else notice.classList.add('hidden');
 
   const btn=document.getElementById('vendorSubmitBtn');
@@ -1346,7 +1354,7 @@ function submitVendor(){
 
   let html=`<h2>${activeVendor} 叫貨單</h2>
     <div class="modal-sub">週${DAY_NAMES[viewDow]}${isRecheck?' · 重新點貨':''}</div>
-    <div class="modal-meta"><span>${checker}</span><span>${timeStr}</span>${isRecheck?'<span style="color:var(--warn)">⚠️ 重點</span>':''}</div>`;
+    <div class="modal-meta"><span>${checker}</span><span>${timeStr}</span>${isRecheck?'<span style="color:var(--warn)">⚠️ 重新點貨</span>':''}</div>`;
   if(needItems.length>0){
     html+=`<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);text-transform:uppercase;padding:4px 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px;">需叫貨 ${needItems.length} 項</div>`;
     html+=needItems.map(item=>{
@@ -1390,7 +1398,138 @@ var confirmVendorSubmit = function(vendor,checker,time,isRecheck){
   setTimeout(()=>backToOverview(),600);
 }
 
-function showAllOrders(){showExportAll();}
+// ── 今日備註 ──
+function showDailyNote() {
+  const modal = document.getElementById('modal');
+  const overlay = document.getElementById('overlay');
+  const existingNote = window._dailyNote || '';
+  modal.innerHTML = `
+    <h2>今日備註</h2>
+    <div class="modal-sub">${new Date().getMonth()+1}/${new Date().getDate()} 當日狀況記錄</div>
+    <div style="margin:14px 0;">
+      <textarea id="dailyNoteInput" placeholder="例如：廣弘說明天延遲、南北貨改叫兩箱..." 
+        style="width:100%;height:120px;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;resize:none;line-height:1.6;">${existingNote}</textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-order" onclick="saveDailyNote()">儲存備註</button>
+    </div>`;
+  overlay.classList.add('open');
+  setTimeout(() => document.getElementById('dailyNoteInput')?.focus(), 100);
+}
+
+function saveDailyNote() {
+  const note = document.getElementById('dailyNoteInput').value.trim();
+  window._dailyNote = note;
+  // 存進 Firebase 今天的節點
+  if (window._fb) {
+    const { db, ref, set } = window._fb;
+    const now = new Date();
+    const dateKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    set(ref(db, `jenka/${dateKey}/dailyNote`), note);
+  }
+  closeModal();
+  showToast('✓ 備註已儲存');
+}
+
+// ── 今日點貨摘要 ──
+function showDailySummary() {
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  const modal = document.getElementById('modal');
+  const overlay = document.getElementById('overlay');
+
+  const schedVendors = (weeklySchedule[viewDow] || []).filter(v => !OPT_IN_VENDORS.includes(v));
+  const activeOptIn = OPT_IN_VENDORS.filter(v => optInToday[viewDow][v]);
+  const allVendors = [...schedVendors, ...activeOptIn];
+
+  const d = new Date(now); d.setDate(now.getDate() - todayDow + viewDow);
+  const dateLabel = `${d.getMonth()+1}/${d.getDate()} 週${DAY_NAMES[d.getDay()]}`;
+
+  let html = `<h2>今日點貨摘要</h2>
+    <div class="modal-sub">${dateLabel}</div>
+    <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px;">`;
+
+  if (allVendors.length === 0) {
+    html += `<div style="text-align:center;padding:20px;color:var(--ink3);font-size:13px;">今日無排程廠商</div>`;
+  } else {
+    allVendors.forEach(vendor => {
+      const sub = submitted[viewDow][vendor];
+      const ord = ordered[viewDow][vendor];
+      const state = vendorState(vendor, viewDow);
+
+      // 廠商標頭
+      const statusColor = ord ? '#7A6A58' : sub ? '#3A7D5E' : '#C0392B';
+      const statusText = ord ? '已叫貨' : sub ? '已點貨' : '未點貨';
+      const statusBg = ord ? '#EDE9E3' : sub ? '#EAF3EE' : '#FDECEA';
+
+      html += `<div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--tag-bg);cursor:pointer;"
+          onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+          <div style="font-weight:600;font-size:14px;">${vendor}</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:${statusBg};color:${statusColor};">${statusText}</span>
+            <span style="color:var(--ink3);font-size:14px;">▾</span>
+          </div>
+        </div>
+        <div style="display:none;padding:10px 14px;">`;
+
+      if (sub) {
+        html += `<div style="font-size:12px;color:var(--ink3);margin-bottom:8px;">👤 ${sub.checker} · ${sub.time}${ord ? ` ｜ 已叫貨 ${ord.time}` : ''}</div>`;
+        if (sub.note) {
+          html += `<div style="font-size:12px;background:#F5F0FF;border-radius:8px;padding:6px 10px;color:var(--ink2);margin-bottom:8px;">備註：${sub.note}</div>`;
+        }
+        // 叫貨品項
+        const vitems = ITEMS_DEF.filter(i => i.vendor === vendor && i.active !== false).sort((a,b)=>(a.sort||0)-(b.sort||0));
+        const needItems = vitems.filter(i => { const o = calcOrderAmt(i, viewDow); return o !== null && o > 0; });
+        if (needItems.length > 0) {
+          html += needItems.map(item => {
+            const o = calcOrderAmt(item, viewDow);
+            return `<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid var(--border);">
+              <span style="color:var(--ink2);">${item.name}</span>
+              <span style="font-family:'DM Mono',monospace;color:var(--accent);">${o} ${item.unit}</span>
+            </div>`;
+          }).join('');
+        } else {
+          html += `<div style="font-size:12px;color:var(--ink3);">今日庫存充足，無需叫貨</div>`;
+        }
+        // 管理員才顯示 LINE 連結
+        if (isAdmin && vendorContacts[vendor]) {
+          html += `<a href="${vendorContacts[vendor]}" target="_blank" 
+            style="display:block;margin-top:10px;padding:8px;background:#06C755;color:#fff;border-radius:8px;text-align:center;font-size:13px;font-weight:600;text-decoration:none;">
+            開啟 LINE 叫貨
+          </a>`;
+        }
+      } else {
+        html += `<div style="font-size:12px;color:var(--ink3);padding:4px 0;">今日尚未點貨</div>`;
+      }
+
+      html += `</div></div>`;
+    });
+  }
+
+  // 今日備註
+  if (window._dailyNote) {
+    html += `<div style="background:#F5F0FF;border:1px solid #D0B8FF;border-radius:10px;padding:10px 14px;font-size:13px;color:var(--ink2);">
+      <div style="font-size:11px;font-weight:700;color:#7B5EA7;margin-bottom:4px;">今日備註</div>
+      ${window._dailyNote}
+    </div>`;
+  }
+
+  html += `</div>
+    <div class="modal-actions" style="margin-top:14px;">
+      <button class="btn-order" onclick="closeModal()" style="width:100%;">關閉</button>
+    </div>`;
+
+  modal.innerHTML = html;
+  overlay.classList.add('open');
+}
+
+// ── 廠商聯絡資訊 ──
+let vendorContacts = {
+  '廣弘': 'https://line.me/ti/g/DjTQMWBLqQ',
+};
+
+function showAllOrders(){ showDailySummary(); }
 
 // ── Opt-in 廠商開關（蔬菜、南北貨）──
 var toggleOptIn = function(dow, vendor) {
@@ -1426,7 +1565,7 @@ function renderRecheckAdmin(){
             <div class="rv-sub">最後：${sub.checker} · ${sub.time}</div>
           </div>
           <button class="btn-unlock${isUnlocked?' is-unlocked':''}" onclick="${isUnlocked?'':('unlockRecheck('+dow+',\''+v+'\')')}">
-            ${isUnlocked?'✓ 已解鎖':'解鎖重點'}
+            ${isUnlocked?'✓ 已回復':'回復狀態'}
           </button>
         </div>
         ${sub.history&&sub.history.length>1?`<div class="history-log"><div class="history-log-title">點貨紀錄</div>${histHtml}</div>`:''}
@@ -1898,6 +2037,9 @@ function renderSystemAdmin() {
   document.getElementById('sysOrderGreeting').value = orderGreeting;
   document.getElementById('sysAllVendors').value = ALL_VENDORS.join('\n');
   document.getElementById('sysOptInVendors').value = OPT_IN_VENDORS.join('\n');
+  // 廠商聯絡資訊
+  document.getElementById('sysVendorContacts').value = Object.entries(vendorContacts)
+    .map(([k,v]) => `${k}｜${v}`).join('\n');
 }
 
 function saveSystemSettings() {
@@ -1923,6 +2065,16 @@ function saveSystemSettings() {
   orderGreeting = newGreeting;
   ALL_VENDORS = newAllVendors;
   OPT_IN_VENDORS = newOptInVendors;
+
+  // 廠商聯絡資訊
+  const contactsRaw = document.getElementById('sysVendorContacts').value;
+  vendorContacts = {};
+  contactsRaw.split('\n').forEach(line => {
+    const parts = line.trim().split('｜');
+    if (parts.length === 2 && parts[0].trim() && parts[1].trim()) {
+      vendorContacts[parts[0].trim()] = parts[1].trim();
+    }
+  });
 
   // 更新登入頁顯示
   const loginSubtitle = document.getElementById('loginSubtitle');
@@ -2905,6 +3057,7 @@ function fbSaveGlobal() {
     optInVendors: OPT_IN_VENDORS,
     shopName,
     orderGreeting,
+    vendorContacts,
   }).catch(e => console.warn('FB global write error', e));
 }
 
@@ -2975,6 +3128,7 @@ function fbInitRest() {
     // 店名與叫貨問候語
     if (d.shopName) shopName = d.shopName;
     if (d.orderGreeting) orderGreeting = d.orderGreeting;
+    if (d.vendorContacts) vendorContacts = d.vendorContacts;
     // 更新登入頁店名顯示
     const loginSubtitle = document.getElementById('loginSubtitle');
     if (loginSubtitle) loginSubtitle.textContent = shopName + '點貨系統';
@@ -2992,6 +3146,7 @@ function fbInitRest() {
         if (data.ordered) ordered[d] = data.ordered;
         if (data.unlockedRecheck) unlockedRecheck[d] = data.unlockedRecheck;
         if (data.optInToday) optInToday[d] = data.optInToday;
+        if (d === todayDow && data.dailyNote) window._dailyNote = data.dailyNote;
         // qty 只同步今天
         if (d === viewDow && data.qty) Object.assign(qty, data.qty);
         // 重新渲染
