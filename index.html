@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getDatabase, ref, set, get, onValue, update, remove } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
+import { getDatabase, ref, set, get, onValue, update, remove, push } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
 
 const firebaseConfig={
   apiKey:"AIzaSyDoSPSDr6DfQNa7DHV9Z4xl0Dkc36kd69o",
@@ -25,7 +25,7 @@ const firebaseConfig={
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-window._fb = {db, ref, set, get, onValue, update, remove};
+window._fb = {db, ref, set, get, onValue, update, remove, push};
 window._fbReady = true;
 window.dispatchEvent(new Event('fbReady'));
 </script>
@@ -179,11 +179,12 @@ window.dispatchEvent(new Event('fbReady'));
   .order-tag.zero{background:var(--tag-bg);color:var(--ink3);}
   .status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
   .dot-ok{background:var(--ok);}.dot-warn{background:var(--warn);}.dot-danger{background:var(--danger);}.dot-empty{background:#D9D5CE;}
-  .item-controls{display:flex;align-items:center;gap:5px;}
-  .qty-btn{width:26px;height:26px;border-radius:7px;border:1px solid var(--border);background:var(--cream);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--ink2);user-select:none;}
+  .item-controls{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+  .qty-btn{width:30px;height:30px;border-radius:8px;border:0.5px solid var(--border);background:var(--cream);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--ink2);user-select:none;flex-shrink:0;}
   .qty-btn:active{background:var(--border);}
-  .qty-input{width:46px;height:30px;border:1.5px solid var(--border);border-radius:7px;text-align:center;font-family:'DM Mono',monospace;font-size:14px;font-weight:500;background:var(--cream);color:var(--ink);outline:none;}
-  .qty-input:focus{border-color:#E8A455;}
+  .qty-preset{min-width:36px;height:30px;padding:0 8px;border-radius:8px;border:0.5px solid var(--border);background:var(--cream);cursor:pointer;font-size:12px;font-family:'DM Mono',monospace;color:var(--ink2);user-select:none;}
+  .qty-preset.selected{border:1.5px solid #3A7D5E;background:#EAF3EE;color:#3A7D5E;font-weight:600;}
+  .qty-preset:active{opacity:.7;}
   .qty-unit{font-size:11px;color:var(--ink3);min-width:16px;}
 
   .submit-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:680px;padding:10px 20px;background:var(--cream);border-top:1px solid var(--border);display:flex;gap:10px;}
@@ -322,6 +323,23 @@ window.dispatchEvent(new Event('fbReady'));
   .drag-handle:active{cursor:grabbing;opacity:0.6;}
   .drag-handle span{display:block;width:14px;height:2px;background:var(--ink);border-radius:2px;}
 
+  /* ── 庫存回報頁面 ── */
+  #stockPage{display:none;}
+  .stock-header{padding:20px 20px 0;display:flex;align-items:center;justify-content:space-between;}
+  .stock-item-card{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;}
+  .stock-item-header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+  .stock-item-name{font-weight:600;font-size:14px;}
+  .stock-item-meta{font-size:11px;color:var(--ink3);margin-top:2px;}
+  .stock-status-badge{font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;white-space:nowrap;}
+  .stock-status-ok{background:#EDE9E3;color:#7A6A58;}
+  .stock-status-low{background:#FDECEA;color:#C0392B;animation:pulse-red 2s infinite;}
+  .stock-status-ordered{background:#EAF3EE;color:#3A7D5E;}
+  @keyframes pulse-red{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,0.3);}50%{box-shadow:0 0 0 4px rgba(192,57,43,0);}}
+  .stock-history{padding:0 16px 12px;border-top:1px solid var(--border);}
+  .stock-history-item{padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;}
+  .stock-history-item:last-child{border-bottom:none;}
+  .stock-report-form{padding:12px 16px;background:var(--cream);border-top:1px solid var(--border);}
+
   /* ── 歷史查詢頁面 ── */
   #historyPage{display:none;}
   .hist-header{padding:20px 20px 0;display:flex;align-items:center;justify-content:space-between;}
@@ -437,12 +455,18 @@ window.dispatchEvent(new Event('fbReady'));
       <div class="page-switcher">
         <button class="page-btn" onclick="requestAdmin()" style="background:var(--tag-bg);color:var(--admin-accent);font-weight:700;">後台管理</button>
         <button class="page-btn" id="historyPageBtn" onclick="showHistoryPage()" style="color:var(--ink2);">歷史查詢</button>
+        <button class="page-btn" id="announcementBtn" onclick="showAnnouncementEditor()" style="color:var(--ink2);display:none;">今日公告</button>
+        <button class="page-btn" onclick="showPage('stock')" style="color:var(--ink2);">庫存回報</button>
       </div>
     </div>
 
     <!-- OVERVIEW -->
     <div id="overviewView">
       <div class="day-strip" id="dayStrip"></div>
+      <div id="announcementBanner" style="display:none;margin:10px 20px 0;background:#FFF8EE;border:1px solid #F0D49A;border-radius:12px;padding:10px 14px;font-size:13px;color:#8B5A00;line-height:1.6;position:relative;">
+        <span id="announcementText"></span>
+        <button onclick="closeAnnouncement()" style="position:absolute;top:8px;right:10px;background:none;border:none;font-size:14px;color:var(--ink3);cursor:pointer;">✕</button>
+      </div>
       <div class="alert-banner hidden" id="alertBanner">⚠️ <span id="alertText"></span></div>
       <div class="completion-banner hidden" id="completionBanner"></div>
       <div class="vendor-status-bar" id="vendorStatusBar"></div>
@@ -462,9 +486,18 @@ window.dispatchEvent(new Event('fbReady'));
             <div class="vsh-title" id="vendorViewTitle"></div>
             <span class="section-badge" id="vendorViewBadge"></span>
           </div>
-          <button class="back-btn" onclick="backToOverview()">← 返回</button>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="vendorLineBtn" style="display:none;">
+              <a id="vendorLineLinkEl" href="#" target="_blank"
+                style="display:flex;align-items:center;gap:4px;padding:5px 10px;background:#06C755;color:#fff;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;">
+                LINE
+              </a>
+            </span>
+            <button class="back-btn" onclick="backToOverview()">← 返回</button>
+          </div>
         </div>
         <div id="recheckNotice" class="recheck-notice hidden"></div>
+        <div id="vendorNoteBar" style="display:none;margin:0 0 10px;background:#FFF8EE;border:1px solid #F0D49A;border-radius:10px;padding:8px 14px;font-size:12px;color:#8B5A00;"></div>
         <div class="checker-card">
           <div class="checker-card-title">點貨資訊</div>
           <div class="checker-fields">
@@ -491,9 +524,12 @@ window.dispatchEvent(new Event('fbReady'));
       <button class="btn-clear" onclick="showDailyNote()">今日備註</button>
       <button class="btn-export-all" id="exportAllBtn" onclick="showDailySummary()">今日點貨摘要</button>
     </div>
-    <div id="vendorBar" style="display:none;gap:10px;width:100%;">
-      <button class="btn-clear" onclick="clearVendor()">清除</button>
-      <button class="btn-submit" id="vendorSubmitBtn" onclick="submitVendor()">送出點貨單</button>
+    <div id="vendorBar" style="display:none;gap:10px;width:100%;flex-direction:column;">
+      <div id="vendorProgress" style="display:none;font-size:12px;color:var(--ink3);text-align:center;padding:4px 0;"></div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-clear" onclick="clearVendor()">清除</button>
+        <button class="btn-submit" id="vendorSubmitBtn" onclick="submitVendor()">送出點貨單</button>
+      </div>
     </div>
   </div>
 </div>
@@ -532,13 +568,13 @@ window.dispatchEvent(new Event('fbReady'));
       <div class="schedule-editor" id="scheduleEditor"></div>
     </div>
     <div id="qtyAdminView" style="display:none;">
-      <p class="admin-desc" style="margin-top:10px;">實際叫貨量 ＝ 需備庫存 − 現有數量。此欄為最大叫貨上限。</p>
+      <p class="admin-desc" style="margin-top:10px;">設定當天需要備多少庫存。員工點貨填入現有數量後，系統會自動算出叫貨量（需備庫存 − 現有數量）。</p>
       <div class="admin-tabs" id="adminTabBar"></div>
       <div id="adminItemContainer"></div>
     </div>
     <!-- 品項管理 -->
     <div id="itemsAdminView" style="display:none;">
-      <p class="admin-desc" style="margin-top:10px;">新增或刪除各廠商的點貨品項，並設定按鈕步進值（例如 0.5、1、5）。</p>
+      <p class="admin-desc" style="margin-top:10px;">新增或刪除各廠商的點貨品項，並設定按鈕每次增減量（例如 0.5、1、5）。</p>
       <div style="margin:10px 20px 0;">
         <div style="background:#F0F4FF;border:1px solid #B8CEFF;border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
           <div style="font-size:12px;color:#3A6BC4;line-height:1.6;">
@@ -566,7 +602,7 @@ window.dispatchEvent(new Event('fbReady'));
               <input id="newItemUnit" placeholder="包" style="width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'Noto Sans TC',sans-serif;font-size:13px;background:var(--cream);outline:none;">
             </div>
             <div>
-              <div style="font-size:11px;color:var(--ink3);margin-bottom:4px;">步進值</div>
+              <div style="font-size:11px;color:var(--ink3);margin-bottom:4px;">每次增減量</div>
               <input id="newItemStep" placeholder="1" type="number" min="0.1" step="0.1" style="width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);outline:none;">
             </div>
           </div>
@@ -686,6 +722,13 @@ window.dispatchEvent(new Event('fbReady'));
           <div style="font-size:11px;color:var(--ink3);margin-top:4px;">例：廣弘｜https://line.me/ti/g/xxxxx</div>
         </div>
 
+        <!-- 廠商備注 -->
+        <div class="admin-item">
+          <div class="admin-item-name">廠商備注</div>
+          <div style="font-size:11px;color:var(--ink3);margin-bottom:8px;">每行一個，格式：廠商名稱｜備注內容（例如：週三休息、最低叫貨 500 元）</div>
+          <textarea id="sysVendorNotes" style="width:100%;height:100px;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:12px;background:var(--cream);color:var(--ink);outline:none;resize:vertical;line-height:1.8;"></textarea>
+        </div>
+
       </div>
     </div>
   </div>
@@ -787,6 +830,30 @@ window.dispatchEvent(new Event('fbReady'));
       <div id="histTrendResult"></div>
     </div>
     <div style="height:30px;"></div>
+  </div>
+</div>
+
+<!-- STOCK ALERT PAGE -->
+<div id="stockPage" style="display:none;">
+  <div class="app">
+    <div class="stock-header">
+      <div>
+        <h1>庫存回報</h1>
+        <div style="font-size:12px;color:var(--ink3);margin-top:2px;font-family:'DM Mono',monospace;">零散品項庫存狀況</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="stockAddBtn" onclick="showAddStockItem()" style="display:none;font-size:12px;background:var(--ink);color:#fff;border:none;border-radius:20px;padding:6px 14px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">+ 新增品項</button>
+        <button onclick="showPage('inventory')" style="font-size:12px;color:var(--ink3);background:none;border:1px solid var(--border);border-radius:20px;padding:6px 12px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">← 返回</button>
+      </div>
+    </div>
+    <div style="padding:14px 20px 0;">
+      <div id="stockItemList"></div>
+      <div id="stockEmpty" style="display:none;text-align:center;padding:40px 20px;color:var(--ink3);font-size:13px;">
+        目前沒有需要追蹤的品項<br>
+        <span style="font-size:12px;">管理員可新增需要追蹤的零散品項</span>
+      </div>
+    </div>
+    <div style="height:40px;"></div>
   </div>
 </div>
 
@@ -954,6 +1021,7 @@ function showPage(page){
   document.getElementById('inventoryPage').style.display=page==='inventory'?'block':'none';
   document.getElementById('adminPage').style.display=page==='admin'?'block':'none';
   document.getElementById('historyPage').style.display=page==='history'?'block':'none';
+  document.getElementById('stockPage').style.display=page==='stock'?'block':'none';
   if(page==='admin'){
     scheduleDraft=JSON.parse(JSON.stringify(weeklySchedule));
     adminDraft=JSON.parse(JSON.stringify(orderQty));
@@ -961,6 +1029,7 @@ function showPage(page){
   }
   if(page==='inventory')backToOverview();
   if(page==='history')initHistoryPage();
+  if(page==='stock')initStockPage();
 }
 
 function switchAdminNav(nav){
@@ -1076,7 +1145,7 @@ function renderOverview(){
         badgeText = isRe ? '已重新點貨' : '已送出'; badgeCls = isRe ? 'badge-recheck' : 'badge-done';
         if(isRe) rowCls = 'rechecked';
         subText = `${sub.checker} · ${sub.time}`;
-        if(ordered[viewDow][v]){ iconCls='ordered'; icon='✓'; subText = `${sub.checker} · ${sub.time} ｜ 已點貨 ${ordered[viewDow][v].time}`; }
+        if(ordered[viewDow][v]){ iconCls='ordered'; icon='✓'; subText = `${sub.checker} · ${sub.time} ｜ 已叫貨 ${ordered[viewDow][v].time}`; }
       } else if(state === 'unlocked'){
         icon='–'; iconCls='pending'; badgeText='尚未點貨'; badgeCls='badge-pending'; rowCls='';
         subText = '管理員已回復狀態，等待重新點貨';
@@ -1166,26 +1235,30 @@ function renderOverview(){
 
 // ── Vendor detail ──
 function calcOrderAmt(item,dow){
-  const max=orderQty[item.id]?.[dow];
-  if(max===null||max===undefined)return null;
+  const target=orderQty[item.id]?.[dow]; // 每日需備量（計算基準）
+  if(target===null||target===undefined)return null;
   const cur=parseFloat(qty[item.id]);
   let amt;
-  if(isNaN(cur)||qty[item.id]==='') amt=max;
-  else amt=Math.max(0,Math.min(safeQty[item.id]-cur,max));
+  if(isNaN(cur)||qty[item.id]==='') amt=target;
+  else amt=Math.max(0,target-cur);
   if(amt<=0) return 0;
-  // 最小叫貨量（minOrder，預設 1）
-  const minOrder=item.minOrder||((item.step||1)<1?1:1);
-  if(amt<minOrder) amt=minOrder;
-  // 叫貨倍數無條件進位（multiple）
+  // 最小叫貨量
+  const minOrder=item.minOrder||0;
+  if(minOrder>0 && amt<minOrder) amt=minOrder;
+  // 叫貨倍數無條件進位
   const multiple=item.multiple||0;
   if(multiple>1) amt=Math.ceil(amt/multiple)*multiple;
+  // 最高叫貨上限（safeQty 現在是上限）
+  const maxLimit=safeQty[item.id];
+  if(maxLimit && amt>maxLimit) amt=maxLimit;
   return amt;
 }
 function getItemStatus(item){
   const v=parseFloat(qty[item.id]);
+  const target=orderQty[item.id]?.[viewDow]||safeQty[item.id]||0;
   if(qty[item.id]===''||isNaN(v))return'empty';
-  if(v>=safeQty[item.id])return'ok';
-  if(v>=safeQty[item.id]*0.5)return'warn';
+  if(v>=target)return'ok';
+  if(v>=target*0.5)return'warn';
   return'danger';
 }
 function formatTime(d){return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
@@ -1200,6 +1273,29 @@ function renderVendorDetail(){
   const badge=document.getElementById('vendorViewBadge');
   badge.textContent='今日進貨';
   badge.className='section-badge badge-fixed';
+  // LINE 連結按鈕（管理員才顯示）
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  const lineBtn = document.getElementById('vendorLineBtn');
+  const lineLinkEl = document.getElementById('vendorLineLinkEl');
+  if (lineBtn && lineLinkEl) {
+    if (isAdmin && vendorContacts[activeVendor]) {
+      lineBtn.style.display = 'inline';
+      lineLinkEl.href = vendorContacts[activeVendor];
+    } else {
+      lineBtn.style.display = 'none';
+    }
+  }
+  // 廠商備注
+  const noteEl = document.getElementById('vendorNoteBar');
+  if (noteEl) {
+    const note = vendorNotes[activeVendor];
+    if (note) {
+      noteEl.style.display = 'block';
+      noteEl.textContent = '📌 ' + note;
+    } else {
+      noteEl.style.display = 'none';
+    }
+  }
 
   const notice=document.getElementById('recheckNotice');
   if(isUnlocked){
@@ -1228,24 +1324,50 @@ function renderVendorDetail(){
   document.getElementById('vendorItemList').innerHTML=vitems.map(item=>{
     const st=getItemStatus(item);
     const oAmt=calcOrderAmt(item,viewDow);
-    let otag='';
-    if(oAmt===null)otag=`<span class="order-tag zero">今日不叫</span>`;
-    else if(oAmt===0)otag=`<span class="order-tag ok">庫存充足</span>`;
-    else if(qty[item.id]==='')otag=`<span class="order-tag need">未填，上限叫 ${oAmt}${item.unit}</span>`;
-    else otag=`<span class="order-tag need">叫 ${oAmt}${item.unit}</span>`;
+    let otagText='';
+    let otagCls='order-tag';
+    if(oAmt===null){otagText=`今日不叫`;otagCls='order-tag zero';}
+    else if(oAmt===0){otagText=`庫存充足`;otagCls='order-tag ok';}
+    else if(qty[item.id]===''){otagText=`未填 上限${oAmt}${item.unit}`;otagCls='order-tag need';}
+    else{otagText=`叫 ${oAmt}${item.unit}`;otagCls='order-tag need';}
     const locked=isSubmitted&&!isUnlocked;
-    return`<div class="item status-${st}${locked?' submitted-item':''}" id="item-${item.id}">
-      <div><div class="item-name">${item.name}</div>
-        <div class="item-meta"><span class="safe-tag">備 ${safeQty[item.id]}${item.unit}</span>
-          <span id="otag-${item.id}">${otag}</span>
-          <span class="status-dot dot-${st}" id="dot-${item.id}"></span></div></div>
+    const step=item.step||1;
+    const maxLimit=safeQty[item.id]||0;
+    // 產生所有可能的數值
+    const allPresets=[];
+    for(let v=0;v<=maxLimit+0.001;v=Math.round((v+step)*100)/100){
+      allPresets.push(Math.round(v*100)/100);
+    }
+    const curVal=parseFloat(qty[item.id]);
+    // 固定顯示 5 個，offset 決定從哪裡開始
+    const SHOW=5;
+    // 找出目前選中的 index
+    const selIdx=allPresets.findIndex(v=>!isNaN(curVal)&&Math.abs(curVal-v)<0.001);
+    // 預設 offset：讓選中的按鈕盡量在中間
+    let initOffset=0;
+    if(selIdx>=0) initOffset=Math.max(0,Math.min(selIdx-Math.floor(SHOW/2),allPresets.length-SHOW));
+    const visible=allPresets.slice(initOffset,initOffset+SHOW);
+    const canLeft=initOffset>0;
+    const canRight=initOffset+SHOW<allPresets.length;
+    const presetsHtml=visible.map(v=>{
+      const isSel=!isNaN(curVal)&&Math.abs(curVal-v)<0.001;
+      return`<button class="qty-preset${isSel?' selected':''}" onclick="setQty(${item.id},${v})" ${locked?'disabled':''}>${v}</button>`;
+    }).join('');
+    return`<div class="item status-${st}${locked?' submitted-item':''}" id="item-${item.id}" data-offset="${initOffset}" data-max="${allPresets.length}">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
+        <div class="item-name" style="flex:1;min-width:0;">${item.name}</div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <span class="safe-tag">備 ${safeQty[item.id]}${item.unit}</span>
+          <span class="${otagCls}" id="otag-${item.id}">${otagText}</span>
+          <span class="status-dot dot-${st}" id="dot-${item.id}"></span>
+          ${!locked?`<button onclick="setQty(${item.id},0)" style="font-size:10px;color:var(--ink3);background:none;border:none;cursor:pointer;padding:0 2px;touch-action:manipulation;" title="清零">✕</button>`:''}
+        </div>
+      </div>
       <div class="item-controls">
-        <button class="qty-btn" onclick="adjust(${item.id},-1)">−</button>
-        <input class="qty-input" type="number" min="0" step="0.5" id="input-${item.id}"
-          value="${qty[item.id]}" placeholder="?" ${locked?'disabled':''}
-          oninput="updateQty(${item.id},this.value)" onfocus="this.select()">
+        <button class="qty-btn" onclick="slidePresets(${item.id},-1)" ${locked||!canLeft?'disabled':''} id="btn-left-${item.id}" style="opacity:${canLeft?1:0.25};">‹</button>
+        <div id="presets-${item.id}" style="display:flex;gap:5px;">${presetsHtml}</div>
+        <button class="qty-btn" onclick="slidePresets(${item.id},1)" ${locked||!canRight?'disabled':''} id="btn-right-${item.id}" style="opacity:${canRight?1:0.25};">›</button>
         <span class="qty-unit">${item.unit}</span>
-        <button class="qty-btn" onclick="adjust(${item.id},1)">+</button>
       </div></div>`;
   }).join('');
 }
@@ -1255,7 +1377,7 @@ function onCheckerChange(){
   document.getElementById('checkerName').className='checker-input'+(v?' filled':'');
 }
 var updateQty = function(id,val){
-  qty[id]=val;
+  qty[id]=String(val);
   const item=ITEMS_DEF.find(i=>i.id===id);
   const st=getItemStatus(item);
   const state=vendorState(item.vendor,viewDow);
@@ -1273,17 +1395,99 @@ var updateQty = function(id,val){
     else t=`<span class="order-tag need">叫 ${oAmt}${item.unit}</span>`;
     oEl.innerHTML=t;
   }
+  // 更新進度提示
+  if(activeVendor){
+    const vitems=ITEMS_DEF.filter(i=>i.vendor===activeVendor&&i.active!==false);
+    const unfilled=vitems.filter(i=>{
+      const o=calcOrderAmt(i,viewDow);
+      return o!==null&&(qty[i.id]===''||qty[i.id]===undefined||isNaN(parseFloat(qty[i.id])));
+    });
+    const progEl=document.getElementById('vendorProgress');
+    if(progEl){
+      if(unfilled.length>0){
+        progEl.style.display='block';
+        progEl.textContent=`還有 ${unfilled.length} 項未填`;
+        progEl.style.color='var(--warn)';
+      } else {
+        progEl.style.display='block';
+        progEl.textContent='✓ 所有品項已填寫';
+        progEl.style.color='var(--ok)';
+      }
+    }
+  }
 }
+function slidePresets(id, dir) {
+  const itemEl = document.getElementById(`item-${id}`);
+  if (!itemEl) return;
+  const item = ITEMS_DEF.find(i => i.id === id);
+  if (!item) return;
+  const step = item.step || 1;
+  const maxLimit = safeQty[id] || 0;
+  const allPresets = [];
+  for (let v = 0; v <= maxLimit + 0.001; v = Math.round((v + step) * 100) / 100) {
+    allPresets.push(Math.round(v * 100) / 100);
+  }
+  const SHOW = 5;
+  let offset = parseInt(itemEl.dataset.offset) || 0;
+  offset = Math.max(0, Math.min(offset + dir, allPresets.length - SHOW));
+  itemEl.dataset.offset = offset;
+  const curVal = parseFloat(qty[id]);
+  const visible = allPresets.slice(offset, offset + SHOW);
+  const canLeft = offset > 0;
+  const canRight = offset + SHOW < allPresets.length;
+  const presetsEl = document.getElementById(`presets-${id}`);
+  if (presetsEl) {
+    presetsEl.innerHTML = visible.map(v => {
+      const isSel = !isNaN(curVal) && Math.abs(curVal - v) < 0.001;
+      return `<button class="qty-preset${isSel?' selected':''}" onclick="setQty(${id},${v})">${v}</button>`;
+    }).join('');
+  }
+  const btnLeft = document.getElementById(`btn-left-${id}`);
+  const btnRight = document.getElementById(`btn-right-${id}`);
+  if (btnLeft) { btnLeft.disabled = !canLeft; btnLeft.style.opacity = canLeft ? 1 : 0.25; }
+  if (btnRight) { btnRight.disabled = !canRight; btnRight.style.opacity = canRight ? 1 : 0.25; }
+}
+
+function setQty(id, val) {
+  qty[id] = String(val);
+  updateQty(id, val);
+  refreshPresets(id, val);
+}
+
+function refreshPresets(id, val) {
+  const itemEl = document.getElementById(`item-${id}`);
+  if (!itemEl) return;
+  const item = ITEMS_DEF.find(i => i.id === id);
+  if (!item) return;
+  const step = item.step || 1;
+  const maxLimit = safeQty[id] || 0;
+  const allPresets = [];
+  for (let v = 0; v <= maxLimit + 0.001; v = Math.round((v + step) * 100) / 100) {
+    allPresets.push(Math.round(v * 100) / 100);
+  }
+  const SHOW = 5;
+  const curVal = parseFloat(val);
+  const offset = parseInt(itemEl.dataset.offset) || 0;
+  const visible = allPresets.slice(offset, offset + SHOW);
+  const presetsEl = document.getElementById(`presets-${id}`);
+  if (presetsEl) {
+    presetsEl.innerHTML = visible.map(v => {
+      const isSel = !isNaN(curVal) && Math.abs(curVal - v) < 0.001;
+      return `<button class="qty-preset${isSel?' selected':''}" onclick="setQty(${id},${v})">${v}</button>`;
+    }).join('');
+  }
+}
+
 function adjust(id,delta){
   const item=ITEMS_DEF.find(i=>i.id===id);
   if(vendorState(item?.vendor,viewDow)==='done')return;
   const step=item.step||1;
   const cur=parseFloat(qty[id])||0;
-  const nv=Math.max(0,+(cur+delta*step).toFixed(2));
+  const maxLimit = safeQty[id] || 999;
+  const nv=Math.min(maxLimit, Math.max(0,+(cur+delta*step).toFixed(2)));
   qty[id]=String(nv);
-  const el=document.getElementById(`input-${id}`);
-  if(el)el.value=nv;
   updateQty(id,nv);
+  refreshPresets(id,nv);
 }
 function showCheckerModal() {
   const modal = document.getElementById('modal');
@@ -1331,17 +1535,17 @@ function submitVendor(){
   // ── 防呆：所有品項必須填數字 ──
   const unfilledItems=vitems.filter(i=>{
     const o=calcOrderAmt(i,viewDow);
-    if(o===null)return false; // 今日不叫，不需填
+    if(o===null)return false;
     return qty[i.id]===''||qty[i.id]===undefined||qty[i.id]===null||isNaN(parseFloat(qty[i.id]));
   });
   if(unfilledItems.length>0){
     showToast(`⚠️ 尚有 ${unfilledItems.length} 項未填數量`);
     // 標示未填的品項
     unfilledItems.forEach(i=>{
-      const el=document.getElementById(`input-${i.id}`);
-      if(el){el.style.borderColor='var(--danger)';el.style.background='#FFF0F0';}
+      const el=document.getElementById(`item-${i.id}`);
+      if(el) el.style.outline='2px solid var(--danger)';
+      setTimeout(()=>{ if(el) el.style.outline=''; }, 2000);
     });
-    // 捲到第一個未填的品項
     const firstEl=document.getElementById(`item-${unfilledItems[0].id}`);
     if(firstEl)firstEl.scrollIntoView({behavior:'smooth',block:'center'});
     return;
@@ -1398,39 +1602,153 @@ var confirmVendorSubmit = function(vendor,checker,time,isRecheck){
   setTimeout(()=>backToOverview(),600);
 }
 
-// ── 今日備註 ──
-function showDailyNote() {
+// ── 今日備註（聊天室樣式）──
+let dailyMessages = []; // [{ id, name, role, text, time, timestamp }]
+
+function loadDailyMessages() {
+  if (!window._fb) return;
+  const { db, ref, onValue } = window._fb;
+  const now = new Date();
+  const dateKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  onValue(ref(db, `jenka/${dateKey}/chatMessages`), snap => {
+    const d = snap.val();
+    dailyMessages = d ? Object.entries(d).map(([id, msg]) => ({...msg, id}))
+      .sort((a,b) => a.timestamp - b.timestamp) : [];
+    // 若備註視窗開著就重新渲染
+    const chatEl = document.getElementById('chatMsgList');
+    if (chatEl) renderChatMessages(chatEl);
+  });
+}
+
+function renderChatMessages(container) {
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  if (dailyMessages.length === 0) {
+    container.innerHTML = `<div style="text-align:center;padding:20px;color:var(--ink3);font-size:13px;">今天還沒有任何備註</div>`;
+    return;
+  }
+  container.innerHTML = dailyMessages.map(msg => `
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+        <span style="font-size:12px;font-weight:600;color:${msg.role==='admin'?'var(--accent)':'var(--ink2)'};">${msg.name}</span>
+        <span style="font-size:10px;color:var(--ink3);font-family:'DM Mono',monospace;">${msg.time}</span>
+        ${isAdmin ? `<button onclick="deleteChatMessage('${msg.id}')" 
+          style="margin-left:auto;font-size:10px;color:var(--ink3);background:none;border:none;cursor:pointer;padding:0 4px;">✕</button>` : ''}
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;line-height:1.6;">${msg.text}</div>
+    </div>`).join('');
+  container.scrollTop = container.scrollHeight;
+}
+
+// ── 今日臨時公告 ──
+let announcement = '';
+
+function loadAnnouncement() {
+  if (!window._fb) return;
+  const { db, ref, onValue } = window._fb;
+  const now2 = new Date();
+  const dateKey = `${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}-${String(now2.getDate()).padStart(2,'0')}`;
+  onValue(ref(db, `jenka/${dateKey}/announcement`), snap => {
+    announcement = snap.val() || '';
+    const banner = document.getElementById('announcementBanner');
+    const textEl = document.getElementById('announcementText');
+    if (banner && textEl) {
+      if (announcement) {
+        textEl.textContent = announcement;
+        banner.style.display = 'block';
+      } else {
+        banner.style.display = 'none';
+      }
+    }
+  });
+}
+
+function closeAnnouncement() {
+  const banner = document.getElementById('announcementBanner');
+  if (banner) banner.style.display = 'none';
+}
+
+function showAnnouncementEditor() {
+  if (!currentUser || currentUser.role !== 'admin') return;
   const modal = document.getElementById('modal');
   const overlay = document.getElementById('overlay');
-  const existingNote = window._dailyNote || '';
   modal.innerHTML = `
-    <h2>今日備註</h2>
-    <div class="modal-sub">${new Date().getMonth()+1}/${new Date().getDate()} 當日狀況記錄</div>
+    <h2>今日臨時公告</h2>
+    <div class="modal-sub">顯示給所有人看的當日提醒</div>
     <div style="margin:14px 0;">
-      <textarea id="dailyNoteInput" placeholder="例如：廣弘說明天延遲、南北貨改叫兩箱..." 
-        style="width:100%;height:120px;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;resize:none;line-height:1.6;">${existingNote}</textarea>
+      <textarea id="announcementInput" placeholder="例如：今天麵包廠商休息、南北貨改明天叫..."
+        style="width:100%;height:100px;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;resize:none;line-height:1.6;">${announcement}</textarea>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">取消</button>
-      <button class="btn-order" onclick="saveDailyNote()">儲存備註</button>
+      <button class="btn-order" onclick="saveAnnouncement()">發布公告</button>
     </div>`;
   overlay.classList.add('open');
-  setTimeout(() => document.getElementById('dailyNoteInput')?.focus(), 100);
+  setTimeout(() => document.getElementById('announcementInput')?.focus(), 100);
 }
 
-function saveDailyNote() {
-  const note = document.getElementById('dailyNoteInput').value.trim();
-  window._dailyNote = note;
-  // 存進 Firebase 今天的節點
-  if (window._fb) {
-    const { db, ref, set } = window._fb;
-    const now = new Date();
-    const dateKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-    set(ref(db, `jenka/${dateKey}/dailyNote`), note);
-  }
+function saveAnnouncement() {
+  const text = document.getElementById('announcementInput').value.trim();
+  if (!window._fb) return;
+  const { db, ref, set } = window._fb;
+  const now2 = new Date();
+  const dateKey = `${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}-${String(now2.getDate()).padStart(2,'0')}`;
+  set(ref(db, `jenka/${dateKey}/announcement`), text || null);
   closeModal();
-  showToast('✓ 備註已儲存');
+  showToast(text ? '✓ 公告已發布' : '✓ 公告已清除');
 }
+
+function showDailyNote() {
+  const modal = document.getElementById('modal');
+  const overlay = document.getElementById('overlay');
+  modal.innerHTML = `
+    <h2>今日備註</h2>
+    <div class="modal-sub">${new Date().getMonth()+1}/${new Date().getDate()} 當日留言</div>
+    <div id="chatMsgList" style="max-height:280px;overflow-y:auto;margin:12px 0;padding-right:4px;"></div>
+    <div style="display:flex;gap:8px;margin-top:8px;">
+      <input id="chatInput" type="text" placeholder="輸入備註..."
+        style="flex:1;height:40px;border:1.5px solid var(--border);border-radius:10px;padding:0 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;"
+        onkeydown="if(event.key==='Enter')sendChatMessage()">
+      <button onclick="sendChatMessage()"
+        style="height:40px;padding:0 16px;background:#3D2B1F;color:#fff;border:none;border-radius:10px;font-family:'Noto Sans TC',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">送出</button>
+    </div>
+    <div class="modal-actions" style="margin-top:10px;">
+      <button class="btn-cancel" onclick="closeModal()" style="width:100%;">關閉</button>
+    </div>`;
+  overlay.classList.add('open');
+  const chatEl = document.getElementById('chatMsgList');
+  renderChatMessages(chatEl);
+  setTimeout(() => document.getElementById('chatInput')?.focus(), 100);
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input?.value.trim();
+  if (!text || !currentUser) return;
+  if (!window._fb) return;
+
+  const { db, ref, push, set } = window._fb;
+  const now2 = new Date();
+  const dateKey = `${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}-${String(now2.getDate()).padStart(2,'0')}`;
+  const timeStr = `${String(now2.getHours()).padStart(2,'0')}:${String(now2.getMinutes()).padStart(2,'0')}`;
+
+  const msgRef = push(ref(db, `jenka/${dateKey}/chatMessages`));
+  set(msgRef, {
+    name: currentUser.name,
+    role: currentUser.role,
+    text,
+    time: timeStr,
+    timestamp: now2.getTime()
+  });
+  if (input) input.value = '';
+}
+
+window.deleteChatMessage = function(msgId) {
+  if (!window._fb) return;
+  const { db, ref, remove } = window._fb;
+  const now2 = new Date();
+  const dateKey = `${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}-${String(now2.getDate()).padStart(2,'0')}`;
+  remove(ref(db, `jenka/${dateKey}/chatMessages/${msgId}`));
+};
 
 // ── 今日點貨摘要 ──
 function showDailySummary() {
@@ -1459,7 +1777,7 @@ function showDailySummary() {
 
       // 廠商標頭
       const statusColor = ord ? '#7A6A58' : sub ? '#3A7D5E' : '#C0392B';
-      const statusText = ord ? '已叫貨' : sub ? '已點貨' : '未點貨';
+      const statusText = ord ? '已叫貨' : sub ? '已叫貨' : '未點貨';
       const statusBg = ord ? '#EDE9E3' : sub ? '#EAF3EE' : '#FDECEA';
 
       html += `<div style="border:1px solid var(--border);border-radius:12px;overflow:hidden;">
@@ -1507,14 +1825,6 @@ function showDailySummary() {
     });
   }
 
-  // 今日備註
-  if (window._dailyNote) {
-    html += `<div style="background:#F5F0FF;border:1px solid #D0B8FF;border-radius:10px;padding:10px 14px;font-size:13px;color:var(--ink2);">
-      <div style="font-size:11px;font-weight:700;color:#7B5EA7;margin-bottom:4px;">今日備註</div>
-      ${window._dailyNote}
-    </div>`;
-  }
-
   html += `</div>
     <div class="modal-actions" style="margin-top:14px;">
       <button class="btn-order" onclick="closeModal()" style="width:100%;">關閉</button>
@@ -1528,6 +1838,7 @@ function showDailySummary() {
 let vendorContacts = {
   '廣弘': 'https://line.me/ti/g/DjTQMWBLqQ',
 };
+let vendorNotes = {}; // { '廠商名': '備注文字' }
 
 function showAllOrders(){ showDailySummary(); }
 
@@ -1580,10 +1891,15 @@ function renderRecheckAdmin(){
     `<div style="text-align:center;padding:30px;color:var(--ink3);font-size:13px">本週尚無已送出的點貨紀錄</div>`;
 }
 var unlockRecheck = function(dow,vendor){
-  unlockedRecheck[dow][vendor]=true;
+  // 清除送出紀錄（完全回到尚未點貨）
+  if(submitted[dow]) delete submitted[dow][vendor];
+  if(ordered[dow]) delete ordered[dow][vendor];
+  if(unlockedRecheck[dow]) delete unlockedRecheck[dow][vendor];
+  // 清除品項數量
   ITEMS_DEF.filter(i=>i.vendor===vendor).forEach(i=>qty[i.id]='');
   renderRecheckAdmin();
-  showToast(`✓ ${vendor}（週${DAY_NAMES[dow]}）已解鎖，員工可重新點貨`);
+  renderOverview();
+  showToast(`✓ ${vendor}（週${DAY_NAMES[dow]}）已回復為尚未點貨`);
 }
 
 // ── Schedule ──
@@ -1621,7 +1937,7 @@ function switchAdminTab(v){adminActiveVendor=v;renderAdminTabs();renderAdminItem
 function renderAdminItems(){
   const vitems=ITEMS_DEF.filter(i=>i.vendor===adminActiveVendor);
   document.getElementById('adminItemContainer').innerHTML=`<div class="admin-section">
-    <div class="admin-section-title">${adminActiveVendor} — 各天最大叫貨量</div>
+    <div class="admin-section-title">${adminActiveVendor} — 各天需備庫存量</div>
     ${vitems.map(item=>{
       const cols=[1,2,3,4,5,6,0].map(dow=>{
         const isFixed=(weeklySchedule[dow]||[]).includes(adminActiveVendor)||ALWAYS_VENDORS.includes(adminActiveVendor);
@@ -1629,7 +1945,7 @@ function renderAdminItems(){
         const display=(val!==null&&val!==undefined)?val:'';
         return`<div class="admin-day-col">
           <div class="admin-day-label${isFixed?' has-fixed':''}">週${DAY_NAMES[dow]}</div>
-          <input class="admin-day-input${display!==''?' has-value':''}" type="number" min="0" step="0.5"
+          <input class="admin-day-input${display!==''?' has-value':''}" type="number" min="0" step="${item.step||1}"
             value="${display}" placeholder="—" oninput="updateDraft(${item.id},${dow},this.value,this)">
         </div>`;
       }).join('');
@@ -1637,10 +1953,10 @@ function renderAdminItems(){
         <div class="admin-item-name">${item.name}<span class="unit-tag">${item.unit}</span></div>
         <div class="admin-grid">${cols}</div>
         <div class="admin-safe-row">
-          <span class="admin-safe-label">需備庫存：</span>
-          <input class="admin-safe-input" type="number" min="0" step="0.5" value="${safeQty[item.id]}" oninput="updateSafe(${item.id},this.value)">
+          <span class="admin-safe-label">最高叫貨上限：</span>
+          <input class="admin-safe-input" type="number" min="0" step="1" value="${safeQty[item.id]}" oninput="updateSafe(${item.id},this.value)">
           <span style="font-size:11px;color:var(--ink3)">${item.unit}</span>
-          <span class="admin-tip">影響警示與叫貨計算</span>
+          <span class="admin-tip">超過此上限時自動截止，防止叫太多</span>
         </div>
       </div>`;
     }).join('')}
@@ -1659,7 +1975,7 @@ function confirmResetAllItems() {
     <div class="modal-sub">新增缺少的品項，不覆蓋現有資料</div>
     <div style="background:#F0F4FF;border:1px solid #B8CEFF;border-radius:10px;padding:12px 14px;margin:14px 0;font-size:13px;color:var(--ink2);line-height:1.8;">
       程式碼種子資料中有、但 Firebase 目前沒有的品項，會被<strong>新增進去</strong>。<br>
-      你自行修改過的品項（安全庫存、步進值、名稱）以及自行新增的品項，<strong>完全不受影響</strong>。
+      你自行修改過的品項（安全庫存、每次增減量、名稱）以及自行新增的品項，<strong>完全不受影響</strong>。
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">取消</button>
@@ -1731,7 +2047,7 @@ function renderItemsAdmin() {
     const renderItem = (item, idx) => {
       const isActive = item.active !== false;
       const tags = [];
-      if ((item.step||1) !== 1) tags.push(`步進 ${item.step}`);
+      if ((item.step||1) !== 1) tags.push(`每次增減量 ${item.step}`);
       if (item.minOrder && item.minOrder !== 1) tags.push(`最小 ${item.minOrder}${item.unit}`);
       if (item.multiple && item.multiple > 1) tags.push(`倍數 ${item.multiple}`);
       return `<div class="drag-item" data-id="${item.id}" data-active="${isActive}"
@@ -1960,7 +2276,7 @@ window.editItemStep = function(id) {
         </div>
       </div>
       <div>
-        <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">按鈕步進值</div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">按鈕每次增減量</div>
         <div style="display:flex;align-items:center;gap:8px;">
           <input id="editStepInput" type="number" min="0.1" step="0.1" value="${item.step||1}"
             style="flex:1;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-size:14px;font-family:'DM Mono',monospace;background:var(--cream);color:var(--ink);outline:none;">
@@ -2001,7 +2317,7 @@ window.confirmEditItemStep = function(id) {
   const safeVal = parseFloat(document.getElementById('editSafeInput').value);
   const minOrderVal = parseFloat(document.getElementById('editMinOrderInput').value);
   const multipleVal = parseFloat(document.getElementById('editMultipleInput').value);
-  if (isNaN(stepVal) || stepVal <= 0) { showToast('⚠️ 步進值請輸入有效數字'); return; }
+  if (isNaN(stepVal) || stepVal <= 0) { showToast('⚠️ 每次增減量請輸入有效數字'); return; }
   if (isNaN(safeVal) || safeVal < 0) { showToast('⚠️ 需備庫存請輸入有效數字'); return; }
   item.step = stepVal;
   safeQty[id] = safeVal;
@@ -2040,6 +2356,8 @@ function renderSystemAdmin() {
   // 廠商聯絡資訊
   document.getElementById('sysVendorContacts').value = Object.entries(vendorContacts)
     .map(([k,v]) => `${k}｜${v}`).join('\n');
+  document.getElementById('sysVendorNotes').value = Object.entries(vendorNotes)
+    .map(([k,v]) => `${k}｜${v}`).join('\n');
 }
 
 function saveSystemSettings() {
@@ -2073,6 +2391,16 @@ function saveSystemSettings() {
     const parts = line.trim().split('｜');
     if (parts.length === 2 && parts[0].trim() && parts[1].trim()) {
       vendorContacts[parts[0].trim()] = parts[1].trim();
+    }
+  });
+
+  // 廠商備注
+  const notesRaw = document.getElementById('sysVendorNotes').value;
+  vendorNotes = {};
+  notesRaw.split('\n').forEach(line => {
+    const parts = line.trim().split('｜');
+    if (parts.length >= 2 && parts[0].trim()) {
+      vendorNotes[parts[0].trim()] = parts.slice(1).join('｜').trim();
     }
   });
 
@@ -2112,7 +2440,7 @@ function showOrderView(vendor){
   // 叫貨狀態卡片
   if(isOrdered){
     html+=`<div style="background:#E8F5EE;border:1px solid var(--ok);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--ok);font-weight:500;">
-      ✓ 已點貨　${ordered[viewDow][vendor].time}
+      ✓ 已叫貨　${ordered[viewDow][vendor].time}
     </div>`;
   } else {
     html+=`<div style="background:#FFF8EE;border:1px solid #F0D49A;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--warn);">
@@ -2268,6 +2596,11 @@ function showExportSingle(vendor){
     <div class="export-actions">
       <button class="btn-copy" id="copyBtn-${vendor}" onclick="copyText('exportBox-${vendor}','copyBtn-${vendor}')">複製文字</button>
     </div>
+    ${isAdmin && vendorContacts[vendor] ? `
+    <a href="${vendorContacts[vendor]}" target="_blank"
+      style="display:block;margin-top:10px;padding:11px;background:#06C755;color:#fff;border-radius:10px;text-align:center;font-size:14px;font-weight:600;text-decoration:none;">
+      開啟 LINE 傳給廠商
+    </a>` : ''}
     <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
       <div style="font-size:12px;color:var(--ink3);margin-bottom:8px;">叫貨狀態</div>
       <button class="btn-mark-ordered${isOrdered?' done':''}" style="font-size:13px;padding:8px 20px;border-radius:10px;"
@@ -2453,6 +2786,8 @@ window.doLogin = function() {
   if (adminBtn) adminBtn.style.display = acc.role === 'admin' ? '' : 'none';
   const histBtn = document.getElementById('historyPageBtn');
   if (histBtn) histBtn.style.display = acc.role === 'admin' ? '' : 'none';
+  const annBtn = document.getElementById('announcementBtn');
+  if (annBtn) annBtn.style.display = acc.role === 'admin' ? '' : 'none';
 
   if (!checkerNames.includes(acc.name)) checkerNames.push(acc.name);
   if (window._fbReady) window.dispatchEvent(new Event('fbReady'));
@@ -2485,6 +2820,34 @@ window.addAccount = function() {
   document.getElementById('newAccPassword').value = '';
   renderAccountList();
   showToast(`✓ 已新增帳號：${name}`);
+};
+
+window.deleteAccount = function(username) {
+  if (username === currentUser?.username) { showToast('⚠️ 不能刪除自己的帳號'); return; }
+  const acc = accounts[username];
+  if (!acc) return;
+  const modal = document.getElementById('modal');
+  const overlay = document.getElementById('overlay');
+  modal.innerHTML = `
+    <h2>刪除帳號</h2>
+    <div class="modal-sub">此操作無法復原</div>
+    <div style="background:#FFF0F0;border:1px solid var(--danger);border-radius:10px;padding:12px 14px;margin:14px 0;font-size:13px;color:var(--ink2);line-height:1.8;">
+      確定要刪除帳號 <strong>${acc.name}（@${username}）</strong> 嗎？
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button style="flex:1;background:var(--danger);color:#fff;border:none;border-radius:12px;padding:13px;font-family:'Noto Sans TC',sans-serif;font-size:15px;font-weight:600;cursor:pointer;" 
+        onclick="confirmDeleteAccount('${username}')">確認刪除</button>
+    </div>`;
+  overlay.classList.add('open');
+};
+
+window.confirmDeleteAccount = function(username) {
+  delete accounts[username];
+  fbSaveAccounts();
+  renderAccountList();
+  closeModal();
+  showToast(`✓ 已刪除帳號：${username}`);
 };
 
 window.toggleAccountActive = function(username) {
@@ -2533,13 +2896,256 @@ function renderAccountList() {
           <option value="admin" ${acc.role==='admin'?'selected':''}>管理員</option>
         </select>
         <button onclick="changeAccountPassword('${username}')" style="padding:0 10px;height:30px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'Noto Sans TC',sans-serif;background:var(--cream);cursor:pointer;">改密碼</button>
-        <button onclick="toggleAccountActive('${username}')" style="padding:0 10px;height:30px;border:1.5px solid ${acc.active?'var(--danger)':'var(--ok)'};border-radius:8px;font-size:12px;font-family:'Noto Sans TC',sans-serif;background:${acc.active?'#FFF0EB':'#E8F5EE'};color:${acc.active?'var(--danger)':'var(--ok)'};cursor:pointer;">
+        <button onclick="toggleAccountActive('${username}')" style="padding:0 10px;height:30px;border:1.5px solid ${acc.active?'var(--warn)':'var(--ok)'};border-radius:8px;font-size:12px;font-family:'Noto Sans TC',sans-serif;background:${acc.active?'#FFFBF2':'#E8F5EE'};color:${acc.active?'var(--warn)':'var(--ok)'};cursor:pointer;">
           ${acc.active?'停用':'啟用'}
         </button>
+        <button onclick="deleteAccount('${username}')" style="padding:0 10px;height:30px;border:1.5px solid var(--danger);border-radius:8px;font-size:12px;font-family:'Noto Sans TC',sans-serif;background:#FFF0F0;color:var(--danger);cursor:pointer;">刪除</button>
       </div>
     </div>
   `).join('');
 }
+
+// ══════════════════════════════════════════
+// 庫存回報系統
+// ══════════════════════════════════════════
+
+let stockItems = {}; // { itemId: { name, unit, note, createdAt } }
+let stockReports = {}; // { itemId: [ { date, qty, status, reporter, timestamp, ordered, orderedAt } ] }
+
+function initStockPage() {
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  const addBtn = document.getElementById('stockAddBtn');
+  if (addBtn) addBtn.style.display = isAdmin ? '' : 'none';
+  loadStockData();
+}
+
+function loadStockData() {
+  if (!window._fb) return;
+  const { db, ref, onValue } = window._fb;
+  onValue(ref(db, 'jenka/stockAlerts/items'), snap => {
+    stockItems = snap.val() || {};
+    loadStockReports();
+  });
+}
+
+function loadStockReports() {
+  if (!window._fb) return;
+  const { db, ref, onValue } = window._fb;
+  // 讀取最近 7 天的回報
+  const now2 = new Date();
+  stockReports = {};
+  let loaded = 0;
+  const days = 7;
+  for (let i = 0; i < days; i++) {
+    const d = new Date(now2);
+    d.setDate(now2.getDate() - i);
+    const dk = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    onValue(ref(db, `jenka/stockAlerts/reports/${dk}`), snap => {
+      const data = snap.val();
+      if (data) {
+        Object.entries(data).forEach(([itemId, report]) => {
+          if (!stockReports[itemId]) stockReports[itemId] = [];
+          stockReports[itemId].push({ ...report, date: dk });
+        });
+      }
+      loaded++;
+      if (loaded === days) renderStockPage();
+    });
+  }
+  if (Object.keys(stockItems).length === 0) renderStockPage();
+}
+
+function renderStockPage() {
+  const listEl = document.getElementById('stockItemList');
+  const emptyEl = document.getElementById('stockEmpty');
+  if (!listEl) return;
+
+  const items = Object.entries(stockItems);
+  if (items.length === 0) {
+    listEl.innerHTML = '';
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+
+  listEl.innerHTML = items.map(([itemId, item]) => {
+    const reports = (stockReports[itemId] || []).sort((a,b) => b.date.localeCompare(a.date));
+    const latest = reports[0];
+    const todayReport = reports.find(r => r.date === todayKey);
+
+    // 狀態判斷
+    let statusText = '尚未回報', statusCls = 'stock-status-ok';
+    if (todayReport) {
+      if (todayReport.ordered) {
+        statusText = '✓ 已叫貨'; statusCls = 'stock-status-ordered';
+      } else {
+        statusText = `剩 ${todayReport.qty} ${item.unit}`; statusCls = 'stock-status-low';
+      }
+    } else if (latest) {
+      statusText = `${latest.date.slice(5)} 剩 ${latest.qty} ${item.unit}`;
+    }
+
+    // 歷史記錄（最近5筆）
+    const historyHtml = reports.slice(0, 5).map(r => `
+      <div class="stock-history-item" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <span style="color:var(--ink3);">${r.date.slice(5)}</span>
+          <span style="margin-left:8px;">${r.reporter}</span>
+          <span style="margin-left:8px;color:${r.ordered?'var(--ok)':'var(--accent)'};">${r.ordered?'✓ 已叫貨':`剩 ${r.qty} ${item.unit}`}</span>
+        </div>
+        ${isAdmin && !r.ordered && r.date === todayKey ?
+          `<button onclick="markStockOrdered('${itemId}')"
+            style="font-size:11px;padding:3px 10px;border:1px solid var(--ok);border-radius:20px;background:#EAF3EE;color:var(--ok);cursor:pointer;font-family:'Noto Sans TC',sans-serif;">
+            已叫貨
+          </button>` : ''}
+      </div>`).join('');
+
+    return `<div class="stock-item-card">
+      <div class="stock-item-header" onclick="toggleStockHistory('${itemId}')">
+        <div>
+          <div class="stock-item-name">${item.name}</div>
+          <div class="stock-item-meta">${item.unit}${item.note ? '　' + item.note : ''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="stock-status-badge ${statusCls}">${statusText}</span>
+          ${isAdmin ? `<button onclick="event.stopPropagation();deleteStockItem('${itemId}')"
+            style="font-size:11px;padding:2px 8px;border:1px solid var(--danger);border-radius:20px;background:#FFF0F0;color:var(--danger);cursor:pointer;font-family:'Noto Sans TC',sans-serif;">刪</button>` : ''}
+        </div>
+      </div>
+      <div class="stock-report-form">
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span style="font-size:13px;color:var(--ink2);">今日庫存剩</span>
+          <input type="number" min="0" step="1" placeholder="數量"
+            id="stock-qty-${itemId}"
+            style="width:70px;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);color:var(--ink);outline:none;text-align:center;">
+          <span style="font-size:13px;color:var(--ink2);">${item.unit}</span>
+          <button onclick="submitStockReport('${itemId}')"
+            style="flex:1;height:34px;background:#C0392B;color:#fff;border:none;border-radius:8px;font-family:'Noto Sans TC',sans-serif;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation;">
+            回報
+          </button>
+        </div>
+      </div>
+      <div id="stock-history-${itemId}" style="display:none;">
+        <div class="stock-history">
+          ${historyHtml || '<div style="font-size:12px;color:var(--ink3);padding:8px 0;">尚無回報紀錄</div>'}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleStockHistory(itemId) {
+  const el = document.getElementById(`stock-history-${itemId}`);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function submitStockReport(itemId) {
+  const input = document.getElementById(`stock-qty-${itemId}`);
+  const qty = parseFloat(input?.value);
+  if (isNaN(qty) || qty < 0) { showToast('⚠️ 請輸入有效數量'); return; }
+  if (!currentUser) return;
+  if (!window._fb) return;
+
+  const { db, ref, set } = window._fb;
+  const now2 = new Date();
+  const dateKey = `${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}-${String(now2.getDate()).padStart(2,'0')}`;
+  const timeStr = `${String(now2.getHours()).padStart(2,'0')}:${String(now2.getMinutes()).padStart(2,'0')}`;
+  const item = stockItems[itemId];
+
+  set(ref(db, `jenka/stockAlerts/reports/${dateKey}/${itemId}`), {
+    qty, reporter: currentUser.name, time: timeStr, timestamp: now2.getTime(), ordered: false
+  });
+
+  if (input) input.value = '';
+  showToast(`✓ 已回報 ${item?.name} 剩 ${qty} ${item?.unit}`);
+
+  // 通知老闆（GAS）
+  notifyGAS({ type: 'stockAlert', itemName: item?.name, qty, unit: item?.unit, reporter: currentUser.name, time: timeStr });
+}
+
+function markStockOrdered(itemId) {
+  if (!window._fb) return;
+  const { db, ref, update } = window._fb;
+  const now2 = new Date();
+  const dateKey = `${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}-${String(now2.getDate()).padStart(2,'0')}`;
+  const timeStr = `${String(now2.getHours()).padStart(2,'0')}:${String(now2.getMinutes()).padStart(2,'0')}`;
+  update(ref(db, `jenka/stockAlerts/reports/${dateKey}/${itemId}`), { ordered: true, orderedAt: timeStr });
+  showToast('✓ 已標記叫貨完成');
+}
+
+function showAddStockItem() {
+  if (!currentUser || currentUser.role !== 'admin') return;
+  const modal = document.getElementById('modal');
+  const overlay = document.getElementById('overlay');
+  modal.innerHTML = `
+    <h2>新增追蹤品項</h2>
+    <div style="display:flex;flex-direction:column;gap:12px;margin:16px 0;">
+      <div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">品項名稱</div>
+        <input id="stockNewName" type="text" placeholder="例：蛋餅皮"
+          style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">單位</div>
+          <input id="stockNewUnit" type="text" placeholder="包、盒、個..."
+            style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
+        </div>
+        <div>
+          <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">備注（選填）</div>
+          <input id="stockNewNote" type="text" placeholder="例：快沒提醒老闆"
+            style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-order" onclick="confirmAddStockItem()">新增</button>
+    </div>`;
+  overlay.classList.add('open');
+  setTimeout(() => document.getElementById('stockNewName')?.focus(), 100);
+}
+
+window.confirmAddStockItem = function() {
+  const name = document.getElementById('stockNewName').value.trim();
+  const unit = document.getElementById('stockNewUnit').value.trim() || '個';
+  const note = document.getElementById('stockNewNote').value.trim();
+  if (!name) { showToast('⚠️ 請填寫品項名稱'); return; }
+  if (!window._fb) return;
+  const { db, ref, push, set } = window._fb;
+  const newRef = push(ref(db, 'jenka/stockAlerts/items'));
+  set(newRef, { name, unit, note, createdAt: Date.now() });
+  closeModal();
+  showToast(`✓ 已新增：${name}`);
+};
+
+window.deleteStockItem = function(itemId) {
+  const item = stockItems[itemId];
+  if (!item) return;
+  const modal = document.getElementById('modal');
+  const overlay = document.getElementById('overlay');
+  modal.innerHTML = `
+    <h2>刪除品項</h2>
+    <div style="padding:12px 0;font-size:13px;color:var(--ink2);">確定要刪除「<strong>${item.name}</strong>」嗎？歷史回報紀錄不會刪除。</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button style="flex:1;background:var(--danger);color:#fff;border:none;border-radius:12px;padding:13px;font-family:'Noto Sans TC',sans-serif;font-size:15px;font-weight:600;cursor:pointer;"
+        onclick="confirmDeleteStockItem('${itemId}')">確認刪除</button>
+    </div>`;
+  overlay.classList.add('open');
+};
+
+window.confirmDeleteStockItem = function(itemId) {
+  if (!window._fb) return;
+  const { db, ref, remove } = window._fb;
+  remove(ref(db, `jenka/stockAlerts/items/${itemId}`));
+  closeModal();
+  showToast('✓ 已刪除品項');
+};
 
 // ══════════════════════════════════════════
 // 歷史查詢功能
@@ -2780,7 +3386,7 @@ async function queryHistory() {
 // ── 匯出 CSV ──
 function exportHistoryCSV() {
   if (!histCachedResults.length) return;
-  const header = ['日期', '星期', '廠商', '點貨人', '點貨時間', '品項', '叫貨量', '單位', '已點貨'];
+  const header = ['日期', '星期', '廠商', '點貨人', '點貨時間', '品項', '叫貨量', '單位', '已叫貨'];
   const rows = histCachedResults.map(r => {
     const d = new Date(r.date + 'T00:00:00');
     return [
@@ -3003,6 +3609,10 @@ function renderTrendChart(days, groupName, unit, safeVal, filterVendor, isMultiV
           <div style="font-size:18px;font-weight:700;font-family:'DM Mono',monospace;margin-top:2px;">${vals.length}<span style="font-size:11px;font-weight:400;color:var(--ink3);"> 天</span></div>
         </div>
       </div>
+      <div style="margin-top:10px;padding:10px 12px;background:#F0F4FF;border:1px solid #B8CEFF;border-radius:10px;font-size:13px;color:#3A6BC4;line-height:1.6;">
+        <strong>建議需備庫存：${(parseFloat(avg) * 1.2).toFixed(1)} ${unit}</strong>
+        <div style="font-size:11px;color:var(--ink3);margin-top:2px;">根據平均叫貨量 × 1.2 計算，目前設定 ${safeVal} ${unit}</div>
+      </div>
     </div>`;
 }
 
@@ -3058,6 +3668,7 @@ function fbSaveGlobal() {
     shopName,
     orderGreeting,
     vendorContacts,
+    vendorNotes,
   }).catch(e => console.warn('FB global write error', e));
 }
 
@@ -3128,7 +3739,8 @@ function fbInitRest() {
     // 店名與叫貨問候語
     if (d.shopName) shopName = d.shopName;
     if (d.orderGreeting) orderGreeting = d.orderGreeting;
-    if (d.vendorContacts) vendorContacts = d.vendorContacts;
+    if (d.vendorContacts && Object.keys(d.vendorContacts).length > 0) vendorContacts = d.vendorContacts;
+    if (d.vendorNotes) vendorNotes = d.vendorNotes;
     // 更新登入頁店名顯示
     const loginSubtitle = document.getElementById('loginSubtitle');
     if (loginSubtitle) loginSubtitle.textContent = shopName + '點貨系統';
@@ -3146,7 +3758,7 @@ function fbInitRest() {
         if (data.ordered) ordered[d] = data.ordered;
         if (data.unlockedRecheck) unlockedRecheck[d] = data.unlockedRecheck;
         if (data.optInToday) optInToday[d] = data.optInToday;
-        if (d === todayDow && data.dailyNote) window._dailyNote = data.dailyNote;
+        
         // qty 只同步今天
         if (d === viewDow && data.qty) Object.assign(qty, data.qty);
         // 重新渲染
@@ -3172,8 +3784,9 @@ const _origConfirmVendorSubmit = confirmVendorSubmit;
 confirmVendorSubmit = function(vendor, checker, time, isRecheck) {
   _origConfirmVendorSubmit(vendor, checker, time, isRecheck);
   fbSave(viewDow);
-  // 通知 GAS：員工送出點貨單
   notifyGAS({ type: 'submitted', vendor, checker, time });
+  // 儲存成功提示
+  setTimeout(() => showToast('✓ 已自動儲存'), 700);
 };
 
 const _origToggleOptIn = toggleOptIn;
@@ -3312,7 +3925,7 @@ document.addEventListener('touchend', function(e) {
   }
 }, {passive: false});
 
-renderDayStrip();renderOverview();
+renderDayStrip();renderOverview();loadDailyMessages();loadAnnouncement();
 </script>
 </div><!-- /appContent -->
 </body>
