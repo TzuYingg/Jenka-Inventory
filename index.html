@@ -50,6 +50,8 @@ window.dispatchEvent(new Event('fbReady'));
   .app{max-width:680px;margin:0 auto;padding:72px 0 96px;}
   /* 叫貨頁底部還有送出列，需要更多空間 */
   #inventoryPage .app{padding-bottom:148px;}
+  /* 廠商點貨頁的送出列含進度條會更高，最後品項需額外留白避免被蓋住 */
+  #vendorView{padding-bottom:52px;}
 
   /* ── PIN SCREEN ── */
   #pinScreen{position:fixed;inset:0;background:var(--admin-accent);z-index:200;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;}
@@ -539,16 +541,17 @@ window.dispatchEvent(new Event('fbReady'));
   <div class="app">
     <!-- OVERVIEW -->
     <div id="overviewView">
-      <div id="announcementBanner" class="announce-card" style="display:none;">
+      <div id="announcementBanner" class="announce-card" style="display:none;" onclick="editAnnouncement(event)">
         <div class="announce-inner">
           <div class="announce-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l14-5v12L3 14z"/><path d="M11.5 16.5a2.5 2.5 0 0 1-4.9-.6"/><path d="M19 9.5a3 3 0 0 1 0 5"/></svg></div>
           <div class="announce-body">
-            <div class="announce-label">今日公告</div>
+            <div class="announce-label">今日公告<span id="announceEditHint" style="display:none;font-weight:500;letter-spacing:0;color:var(--accent);margin-left:8px;">· 點此編輯</span></div>
             <span id="announcementText"></span>
           </div>
-          <button class="announce-close" onclick="closeAnnouncement()" aria-label="關閉">✕</button>
+          <button class="announce-close" onclick="event.stopPropagation();closeAnnouncement()" aria-label="關閉">✕</button>
         </div>
       </div>
+      <button id="announceSetBtn" onclick="showAnnouncementEditor()" style="display:none;margin:0 20px 14px;width:calc(100% - 40px);padding:10px;background:none;border:1px dashed var(--border);border-radius:12px;color:var(--ink3);font-size:13px;font-family:'Noto Sans TC',sans-serif;cursor:pointer;text-align:center;">＋ 設定今日公告</button>
       <div class="day-strip" id="dayStrip"></div>
       <div class="alert-banner hidden" id="alertBanner">⚠️ <span id="alertText"></span></div>
       <div class="completion-banner hidden" id="completionBanner"></div>
@@ -636,8 +639,8 @@ window.dispatchEvent(new Event('fbReady'));
     <!-- A 群組：叫貨營運 子分頁 -->
     <div class="admin-nav" id="adminNavOps">
       <button class="admin-nav-btn active" id="navQty" onclick="switchAdminNav('qty')">叫貨量</button>
-      <button class="admin-nav-btn" id="navVendors" onclick="switchAdminNav('vendors')">廠商</button>
       <button class="admin-nav-btn" id="navSchedule" onclick="switchAdminNav('schedule')">排程</button>
+      <button class="admin-nav-btn" id="navVendors" onclick="switchAdminNav('vendors')">廠商</button>
       <button class="admin-nav-btn" id="navItems" onclick="switchAdminNav('items')">品項</button>
       <button class="admin-nav-btn" id="navRecheck" onclick="switchAdminNav('recheck')">取消</button>
     </div>
@@ -1133,7 +1136,7 @@ function showPage(page){
   if(page==='stock')initStockPage();
 }
 
-const ADMIN_GROUPS={ops:['qty','vendors','schedule','items','recheck'],sys:['shopinfo','checker','pin']};
+const ADMIN_GROUPS={ops:['qty','schedule','vendors','items','recheck'],sys:['shopinfo','checker','pin']};
 const ADMIN_ALL_NAVS=['qty','vendors','schedule','items','recheck','shopinfo','checker','pin'];
 function _navCap(n){return n.charAt(0).toUpperCase()+n.slice(1);}
 function _syncAdminGroupUI(group){
@@ -1352,6 +1355,8 @@ function renderOverview(){
     banner.className = 'completion-banner hidden';
     banner.textContent = '';
   }
+  // 同步公告橫幅/編輯入口（依登入身分）
+  if (typeof syncAnnounceUI === 'function') syncAnnounceUI();
 }
 
 // ── Vendor detail ──
@@ -1763,6 +1768,27 @@ function renderChatMessages(container) {
 // ── 今日臨時公告 ──
 let announcement = '';
 
+// 依目前公告內容與登入身分，同步公告橫幅/編輯入口的顯示
+function syncAnnounceUI() {
+  const banner = document.getElementById('announcementBanner');
+  const textEl = document.getElementById('announcementText');
+  const setBtn = document.getElementById('announceSetBtn');
+  const editHint = document.getElementById('announceEditHint');
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  if (!banner || !textEl) return;
+  if (announcement) {
+    textEl.textContent = announcement;
+    banner.style.display = 'block';
+    banner.style.cursor = isAdmin ? 'pointer' : 'default';
+    if (editHint) editHint.style.display = isAdmin ? 'inline' : 'none';
+    if (setBtn) setBtn.style.display = 'none';
+  } else {
+    banner.style.display = 'none';
+    // 沒有公告時，只有管理員看到「設定今日公告」入口
+    if (setBtn) setBtn.style.display = isAdmin ? 'block' : 'none';
+  }
+}
+
 function loadAnnouncement() {
   if (!window._fb) return;
   const { db, ref, onValue } = window._fb;
@@ -1770,22 +1796,19 @@ function loadAnnouncement() {
   const dateKey = `${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}-${String(now2.getDate()).padStart(2,'0')}`;
   onValue(ref(db, `jenka/${dateKey}/announcement`), snap => {
     announcement = snap.val() || '';
-    const banner = document.getElementById('announcementBanner');
-    const textEl = document.getElementById('announcementText');
-    if (banner && textEl) {
-      if (announcement) {
-        textEl.textContent = announcement;
-        banner.style.display = 'block';
-      } else {
-        banner.style.display = 'none';
-      }
-    }
+    syncAnnounceUI();
   });
 }
 
 function closeAnnouncement() {
   const banner = document.getElementById('announcementBanner');
   if (banner) banner.style.display = 'none';
+}
+
+// 管理員點公告橫幅 → 開編輯器；員工點則無作用（唯讀）
+function editAnnouncement(e) {
+  if (!(currentUser && currentUser.role === 'admin')) return;
+  showAnnouncementEditor();
 }
 
 function showAnnouncementEditor() {
@@ -2560,6 +2583,7 @@ var deleteChecker = function(idx){const name=checkerNames[idx];checkerNames.spli
 
 // ── 叫貨查看頁（點貨已完成時點入）──
 function showOrderView(vendor){
+  const isAdmin = currentUser && currentUser.role === 'admin';
   const sub=submitted[viewDow][vendor];
   const isOrdered=!!ordered[viewDow][vendor];
   const vitems=ITEMS_DEF.filter(i=>i.vendor===vendor);
@@ -2644,6 +2668,11 @@ function showOrderView(vendor){
     <div class="export-actions">
       <button class="btn-copy" id="copyBtnView" onclick="copyText('exportBoxView','copyBtnView')">複製文字</button>
     </div>
+    ${isAdmin && vendorContacts[vendor] ? `
+    <a href="${vendorContacts[vendor]}" target="_blank"
+      style="display:block;margin-top:10px;padding:11px;background:#06C755;color:#fff;border-radius:10px;text-align:center;font-size:14px;font-weight:600;text-decoration:none;">
+      開啟 LINE 傳給廠商
+    </a>` : ''}
   </div>`;
 
   html+=`<div class="modal-actions" style="margin-top:14px;">
@@ -4093,6 +4122,9 @@ else { window.addEventListener('fbReady', () => { loadDailyMessages(); loadAnnou
 
 // ── BOTTOM TAB BAR 切換 ──
 function switchTab(page) {
+  // 切換任何分頁前，先關掉開啟中的點貨內容/彈窗，避免它浮在新頁面上
+  if(typeof closeModal==='function') closeModal();
+
   // note / announce 開 modal，不切頁面，不改 tab active
   if (page === 'note') { if(typeof showDailyNote==='function') showDailyNote(); return; }
   if (page === 'announce') { if(typeof showAnnouncementEditor==='function') showAnnouncementEditor(); return; }
@@ -4121,7 +4153,7 @@ function setTabBarVisible(visible) {
 }
 // 設定底欄目前選取的分頁高亮
 function setBottomActive(page){
-  const allTabs = ['inventory','stock','note','announce','history','admin'];
+  const allTabs = ['inventory','stock','history','admin'];
   allTabs.forEach(t => {
     const btn = document.getElementById('btab-' + t);
     if (!btn) return;
@@ -4139,8 +4171,6 @@ function setBottomActive(page){
 <div class="bottom-tabbar" id="bottomTabBar">
     <button class="btab-item active" id="btab-inventory" onclick="switchTab('inventory')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--tab-active)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span class="btab-label">點貨</span></button>
     <button class="btab-item" id="btab-stock" onclick="switchTab('stock')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8C4BB" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5" rx="1"/><line x1="10" y1="12" x2="14" y2="12"/></svg><span class="btab-label">庫存</span></button>
-    <button class="btab-item" id="btab-note" onclick="switchTab('note')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8C4BB" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="btab-label">備註</span></button>
-    <button class="btab-item" id="btab-announce" onclick="switchTab('announce')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8C4BB" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg><span class="btab-label">公告</span></button>
     <button class="btab-item" id="btab-history" onclick="switchTab('history')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8C4BB" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg><span class="btab-label">歷史</span></button>
     <button class="btab-item" id="btab-admin" onclick="switchTab('admin')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8C4BB" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="btab-label">後台</span></button>
 </div>
