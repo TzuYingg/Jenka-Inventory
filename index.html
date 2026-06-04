@@ -80,7 +80,7 @@ window.dispatchEvent(new Event('fbReady'));
   .header{padding:10px 20px;display:flex;align-items:center;justify-content:space-between;position:relative;min-height:100px;}
   /* ── 全域固定頂欄 ── */
   #appHeader{position:fixed;top:0;left:0;right:0;z-index:90;background:var(--cream);border-bottom:1px solid var(--border);}
-  .appheader-inner{max-width:680px;margin:0 auto;padding:8px 20px;min-height:64px;display:flex;align-items:center;justify-content:space-between;position:relative;}
+  .appheader-inner{max-width:680px;margin:0 auto;padding:10px 24px;min-height:64px;display:flex;align-items:center;justify-content:space-between;position:relative;}
   .header-logo{height:50px;width:50px;object-fit:contain;border-radius:50%;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);}
   .header-left h1{font-size:22px;font-weight:700;letter-spacing:-.5px;}
   .header-left .subtitle{font-size:12px;color:var(--ink3);margin-top:2px;font-family:'DM Mono',monospace;}
@@ -158,11 +158,11 @@ window.dispatchEvent(new Event('fbReady'));
   /* 歸零時整張卡變淡 */
   .stat.dimmed{opacity:0.28;}
   .stat.dimmed .value{color:var(--ink3)!important;}
-  .progress-bar{height:4px;background:var(--border);border-radius:2px;margin:10px 20px 0;}
+  .progress-bar{height:4px;background:var(--border);border-radius:2px;margin:10px 24px 0;}
   .progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s;}
 
-  .vendor-section{margin:0 20px;}
-  .vendor-section-header{display:flex;align-items:center;justify-content:space-between;padding:14px 0 10px;}
+  .vendor-section{margin:0 24px;}
+  .vendor-section-header{display:flex;align-items:center;justify-content:space-between;padding:22px 0 16px;}
   .vsh-left{display:flex;align-items:center;gap:8px;}
   .vsh-title{font-size:16px;font-weight:700;}
   .back-btn{font-size:12px;color:var(--ink3);cursor:pointer;padding:4px 10px;border:1px solid var(--border);border-radius:20px;background:var(--card);}
@@ -174,7 +174,7 @@ window.dispatchEvent(new Event('fbReady'));
   .recheck-notice.hidden{display:none;}
   .recheck-notice strong{color:var(--ink2);}
 
-  .checker-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+  .checker-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 18px;margin-bottom:18px;}
   .checker-card-title{font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);text-transform:uppercase;margin-bottom:10px;}
   .checker-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
   .checker-field label{font-size:11px;color:var(--ink3);display:block;margin-bottom:4px;}
@@ -185,7 +185,7 @@ window.dispatchEvent(new Event('fbReady'));
   .checker-submitted{font-size:12px;color:var(--ok);display:flex;align-items:center;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);}
   .checker-submitted.hidden{display:none;}
 
-  .item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:5px;display:flex;flex-direction:column;align-items:stretch;}
+  .item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:10px;display:flex;flex-direction:column;align-items:stretch;}
   .item.status-ok{border-left:3px solid var(--ok);}
   .item.status-warn{border-left:3px solid var(--warn);}
   .item.status-danger{border-left:3px solid var(--danger);}
@@ -211,15 +211,15 @@ window.dispatchEvent(new Event('fbReady'));
   .a3-bar{height:3px;background:var(--border);border-radius:2px;margin-top:7px;overflow:hidden;}
   .a3-fill{height:100%;width:0;background:var(--warn);border-radius:2px;transition:width .25s ease,background .25s ease;}
   .a3-fill.ok{background:var(--ok);}
-  .item-controls{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:wrap;}
-  .qty-btn{width:30px;height:30px;border-radius:8px;border:0.5px solid var(--border);background:var(--cream);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--ink2);user-select:none;flex-shrink:0;}
+  .item-controls{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap;}
+  .qty-btn{width:32px;height:32px;border-radius:8px;border:0.5px solid var(--border);background:var(--cream);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--ink2);user-select:none;flex-shrink:0;}
   .qty-btn:active{background:var(--border);}
-  .qty-preset{min-width:36px;height:30px;padding:0 8px;border-radius:8px;border:0.5px solid var(--border);background:var(--cream);cursor:pointer;font-size:12px;font-family:'DM Mono',monospace;color:var(--ink2);user-select:none;}
+  .qty-preset{min-width:38px;height:32px;padding:0 8px;border-radius:8px;border:0.5px solid var(--border);background:var(--cream);cursor:pointer;font-size:12px;font-family:'DM Mono',monospace;color:var(--ink2);user-select:none;}
   .qty-preset.selected{border:1.5px solid #5F8268;background:#E9EFE9;color:#5F8268;font-weight:600;}
   .qty-preset:active{opacity:.7;}
   .qty-unit{font-size:11px;color:var(--ink3);min-width:16px;}
 
-  .submit-bar{position:fixed;bottom:calc(58px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:100%;max-width:680px;padding:10px 20px;background:var(--cream);border-top:1px solid var(--border);display:flex;gap:10px;z-index:99;}
+  .submit-bar{position:fixed;bottom:calc(58px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:100%;max-width:680px;padding:12px 24px;background:var(--cream);border-top:1px solid var(--border);display:flex;gap:10px;z-index:99;}
   .btn-submit{flex:1;background:var(--active);color:#fff;border:none;border-radius:12px;padding:14px;font-family:'Noto Sans TC',sans-serif;font-size:15px;font-weight:600;cursor:pointer;letter-spacing:.3px;}
   .btn-submit:disabled{background:var(--ok);opacity:.85;cursor:default;}
   .btn-clear{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 14px;font-family:'Noto Sans TC',sans-serif;font-size:13px;color:var(--ink2);cursor:pointer;white-space:nowrap;}
@@ -318,7 +318,7 @@ window.dispatchEvent(new Event('fbReady'));
   .admin-tabs::-webkit-scrollbar{display:none;}
   .admin-tab{flex-shrink:0;padding:6px 13px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--ink2);transition:all .15s;}
   .admin-tab.active{background:var(--admin-accent);color:#fff;border-color:var(--admin-accent);}
-  .admin-section{margin:14px 20px 0;}
+  .admin-section{margin:14px 24px 0;}
   .admin-section-title{font-size:11px;font-weight:700;letter-spacing:1.5px;color:var(--ink3);text-transform:uppercase;margin-bottom:10px;}
   .admin-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;}
   .admin-item-name{font-weight:500;font-size:14px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
@@ -1110,8 +1110,8 @@ const ITEMS_SEED=[
   {id:310,vendor:'廣弘',name:'紅龍全熟卡啦（辣味）',unit:'包',safe:5},
   {id:311,vendor:'廣弘',name:'紅龍雞塊',unit:'包',safe:4},
   {id:312,vendor:'廣弘',name:'富統小熱狗',unit:'包',safe:3},
-  {id:60,vendor:'蔬菜',name:'高麗菜',unit:'顆',safe:2},{id:61,vendor:'蔬菜',name:'馬鈴薯',unit:'顆',safe:20},
-  {id:62,vendor:'蔬菜',name:'美生菜',unit:'顆',safe:6},{id:63,vendor:'蔬菜',name:'牛番茄',unit:'顆',safe:20},
+  {id:60,vendor:'蔬菜',name:'高麗菜',unit:'顆',safe:2},{id:61,vendor:'蔬菜',name:'馬鈴薯',unit:'顆',safe:28,step:4,oUnit:'斤',factor:0.33,oStep:0.5},
+  {id:62,vendor:'蔬菜',name:'美生菜',unit:'顆',safe:12,oUnit:'斤',factor:0.75,oStep:0.5},{id:63,vendor:'蔬菜',name:'牛番茄',unit:'顆',safe:20,step:4,oUnit:'斤',factor:0.25,oStep:0.5},
   {id:64,vendor:'蔬菜',name:'紫洋蔥',unit:'顆',safe:2},{id:65,vendor:'蔬菜',name:'蘿蔓',unit:'包',safe:1},
   {id:66,vendor:'蔬菜',name:'紫高麗菜',unit:'顆',safe:1},{id:67,vendor:'蔬菜',name:'小番茄',unit:'盒',safe:1},
   {id:68,vendor:'蔬菜',name:'紅地瓜',unit:'斤',safe:3},{id:69,vendor:'蔬菜',name:'香菇',unit:'包',safe:3},
@@ -1560,13 +1560,16 @@ function renderOverview(){
 }
 
 // ── Vendor detail ──
+// 叫貨單位：有設 oUnit（換算品項，如蔬菜以斤叫貨）就用 oUnit，否則沿用點貨單位
+function oUnitOf(item){return item.oUnit||item.unit;}
 function calcOrderAmt(item,dow){
-  const target=orderQty[item.id]?.[dow]; // 每日需備量（計算基準）
+  const target=orderQty[item.id]?.[dow]; // 每日需備量（換算品項以叫貨單位計，例：番茄 4 斤）
   if(target===null||target===undefined)return null;
+  const f=item.factor||1;               // 點貨單位→叫貨單位 換算係數；未設定=1，行為與原本完全相同
   const cur=parseFloat(qty[item.id]);
   let amt;
   if(isNaN(cur)||qty[item.id]==='') amt=target;
-  else amt=Math.max(0,target-cur);
+  else amt=Math.max(0,target-cur*f);    // 員工數的現有量（點貨單位）換算成叫貨單位後再相減
   if(amt<=0) return 0;
   // 最小叫貨量
   const minOrder=item.minOrder||0;
@@ -1574,15 +1577,19 @@ function calcOrderAmt(item,dow){
   // 叫貨倍數無條件進位
   const multiple=item.multiple||0;
   if(multiple>1) amt=Math.ceil(amt/multiple)*multiple;
-  // 最高叫貨上限（safeQty 現在是上限）
-  const maxLimit=safeQty[item.id];
-  if(maxLimit && amt>maxLimit) amt=maxLimit;
+  // 換算品項：進位到 0.5 叫貨單位，避免出現零碎小數（可用 item.oRound 調整）
+  if(f!==1){ const r=item.oRound||0.5; amt=Math.ceil(amt/r)*r; }
+  // 最高叫貨上限：僅未換算品項套用（換算品項的叫貨量已被需備量自然封頂，safe 僅作點貨上限）
+  if(f===1){ const maxLimit=safeQty[item.id]; if(maxLimit && amt>maxLimit) amt=maxLimit; }
+  amt=Math.round(amt*100)/100;          // 清除浮點誤差
   return amt;
 }
 function getItemStatus(item){
-  const v=parseFloat(qty[item.id]);
-  const target=orderQty[item.id]?.[viewDow]||safeQty[item.id]||0;
-  if(qty[item.id]===''||isNaN(v))return'empty';
+  const f=item.factor||1;
+  const raw=parseFloat(qty[item.id]);
+  const target=orderQty[item.id]?.[viewDow]||(safeQty[item.id]||0)*f||0;
+  if(qty[item.id]===''||isNaN(raw))return'empty';
+  const v=raw*f; // 現有量換算成叫貨單位再與需備量比較
   if(v>=target)return'ok';
   if(v>=target*0.5)return'warn';
   return'danger';
@@ -1659,8 +1666,8 @@ function renderVendorDetail(){
     let otagCls='order-tag';
     if(oAmt===null){otagText=`今日不叫`;otagCls='order-tag zero';}
     else if(oAmt===0){otagText=`庫存充足`;otagCls='order-tag ok';}
-    else if(qty[item.id]===''){otagText=`未填 上限${oAmt}${item.unit}`;otagCls='order-tag need';}
-    else{otagText=`叫 ${oAmt}${item.unit}`;otagCls='order-tag need';}
+    else if(qty[item.id]===''){otagText=`未填 上限${oAmt}${oUnitOf(item)}`;otagCls='order-tag need';}
+    else{otagText=`叫 ${oAmt}${oUnitOf(item)}`;otagCls='order-tag need';}
     const locked=isSubmitted&&!isUnlocked;
     const step=item.step||1;
     const maxLimit=safeQty[item.id]||0;
@@ -1684,7 +1691,7 @@ function renderVendorDetail(){
       const isSel=!isNaN(curVal)&&Math.abs(curVal-v)<0.001;
       return`<button class="qty-preset${isSel?' selected':''}" onclick="setQty(${item.id},${v})" ${locked?'disabled':''}>${v}</button>`;
     }).join('');
-    return`<div style="margin-bottom:12px;" id="item-wrap-${item.id}">
+    return`<div style="margin-bottom:18px;" id="item-wrap-${item.id}">
       <div class="item status-${st}${locked?' submitted-item':''}" id="item-${item.id}" data-offset="${initOffset}" data-max="${allPresets.length}">
         <div class="item-name" style="margin-bottom:7px;">${item.name}</div>
         <div class="item-controls">
@@ -1727,7 +1734,7 @@ var updateQty = function(id,val){
     let t='';
     if(oAmt===null)t=`<span class="order-tag zero">今日不叫</span>`;
     else if(oAmt===0)t=`<span class="order-tag ok">庫存充足</span>`;
-    else t=`<span class="order-tag need">叫 ${oAmt}${item.unit}</span>`;
+    else t=`<span class="order-tag need">叫 ${oAmt}${oUnitOf(item)}</span>`;
     oEl.innerHTML=t;
   }
   // 更新進度提示（微進度）
@@ -1896,7 +1903,7 @@ function submitVendor(){
       const cur=qty[item.id]!==''?`現有 ${qty[item.id]}${item.unit}`:'未盤點';
       return`<div class="order-item"><div><span style="font-weight:500">${item.name}</span><br>
         <span style="color:var(--ink3);font-size:11px">${cur} · 上限 ${safeQty[item.id]}${item.unit}</span></div>
-        <div class="need">叫 ${o}${item.unit}</div></div>`;
+        <div class="need">叫 ${o}${oUnitOf(item)}</div></div>`;
     }).join('');
   }
   if(okItems.length>0){
@@ -2163,7 +2170,7 @@ function showDailySummary() {
             const o = calcOrderAmt(item, viewDow);
             return `<div style="display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid var(--border);">
               <span style="color:var(--ink2);">${item.name}</span>
-              <span style="font-family:'DM Mono',monospace;color:var(--accent);">${o} ${item.unit}</span>
+              <span style="font-family:'DM Mono',monospace;color:var(--accent);">${o} ${oUnitOf(item)}</span>
             </div>`;
           }).join('');
         } else {
@@ -2364,7 +2371,7 @@ function renderAdminItems(){
         const display=(val!==null&&val!==undefined)?val:'';
         return`<div class="admin-day-col">
           <div class="admin-day-label${isFixed?' has-fixed':''}">週${DAY_NAMES[dow]}</div>
-          <input class="admin-day-input${display!==''?' has-value':''}" type="number" min="0" step="${item.step||1}"
+          <input class="admin-day-input${display!==''?' has-value':''}" type="number" min="0" step="${item.factor?(item.oStep||0.5):(item.step||1)}"
             value="${display}" placeholder="—" oninput="updateDraft(${item.id},${dow},this.value,this)">
         </div>`;
       }).join('');
@@ -2374,13 +2381,13 @@ function renderAdminItems(){
       const mainVal=allSame?dvals[0]:'';
       const noSchedule=fixedDows.length===0;
       return`<div class="admin-item">
-        <div class="admin-item-name">${item.name}<span class="unit-tag">${item.unit}</span></div>
+        <div class="admin-item-name">${item.name}<span class="unit-tag">${oUnitOf(item)}</span>${item.factor?`<span style="font-size:11px;color:var(--ink3);font-weight:400;margin-left:6px;">需備量以 ${oUnitOf(item)} 計（員工數 ${item.unit}，系統自動換算）</span>`:''}</div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
           <span style="font-size:12px;color:var(--ink2);white-space:nowrap;">需備量</span>
-          <input id="main-qty-${item.id}" class="iae-input" type="number" min="0" step="${item.step||1}" placeholder="${noSchedule?'此廠商今日無排程':'填一個數'}" value="${mainVal}" ${noSchedule?'disabled':''}
+          <input id="main-qty-${item.id}" class="iae-input" type="number" min="0" step="${item.factor?(item.oStep||0.5):(item.step||1)}" placeholder="${noSchedule?'此廠商今日無排程':'填一個數'}" value="${mainVal}" ${noSchedule?'disabled':''}
             onkeydown="if(event.key==='Enter')applyMainQty(${item.id})"
             style="width:70px;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 8px;text-align:center;font-family:'DM Mono',monospace;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
-          <span style="font-size:12px;color:var(--ink3);">${item.unit}</span>
+          <span style="font-size:12px;color:var(--ink3);">${oUnitOf(item)}</span>
           <button onclick="applyMainQty(${item.id})" ${noSchedule?'disabled':''}
             style="height:34px;padding:0 12px;border:none;border-radius:8px;background:${noSchedule?'var(--tint)':'var(--accent-soft)'};color:${noSchedule?'var(--ink3)':'var(--accent)'};font-size:12px;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:${noSchedule?'default':'pointer'};touch-action:manipulation;white-space:nowrap;">套用到叫貨日</button>
         </div>
@@ -2416,7 +2423,7 @@ function applyMainQty(id){
   const item=ITEMS_DEF.find(i=>i.id===id);
   const modal=document.getElementById('modal'); const overlay=document.getElementById('overlay');
   modal.innerHTML=`<h2>套用需備量</h2>
-    <div style="padding:12px 0 4px;font-size:14px;color:var(--ink2);line-height:1.7;">將需備庫存量套用至所有叫貨日中${item?`<br><span style="font-size:12px;color:var(--ink3);">${item.name}　${n} ${item.unit}</span>`:''}</div>
+    <div style="padding:12px 0 4px;font-size:14px;color:var(--ink2);line-height:1.7;">將需備庫存量套用至所有叫貨日中${item?`<br><span style="font-size:12px;color:var(--ink3);">${item.name}　${n} ${oUnitOf(item)}</span>`:''}</div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">返回</button>
       <button class="btn-order" onclick="confirmApplyMainQty(${id})">確定</button>
@@ -3015,6 +3022,21 @@ window.editItemStep = function(id) {
         </div>
         <div style="font-size:11px;color:var(--ink3);margin-top:4px;">叫貨量自動進位到此倍數，0 或 1 表示不限</div>
       </div>
+      <div style="border-top:1px dashed var(--border);padding-top:12px;">
+        <div style="font-size:12px;color:var(--ink2);font-weight:500;margin-bottom:8px;">叫貨單位換算（員工數一種單位、叫貨用另一種）</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <span style="font-size:12px;color:var(--ink3);white-space:nowrap;">叫貨單位</span>
+          <input id="editOUnitInput" type="text" value="${item.oUnit||''}" placeholder="留空＝同點貨單位"
+            style="flex:1;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-size:14px;font-family:'Noto Sans TC',sans-serif;background:var(--cream);color:var(--ink);outline:none;">
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:12px;color:var(--ink3);white-space:nowrap;">1 ${item.unit} =</span>
+          <input id="editFactorInput" type="number" min="0" step="0.01" value="${item.factor||''}" placeholder="例：0.25"
+            style="flex:1;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-size:14px;font-family:'DM Mono',monospace;background:var(--cream);color:var(--ink);outline:none;">
+          <span id="editFactorUnit" style="font-size:13px;color:var(--ink2);">${item.oUnit||'叫貨單位'}</span>
+        </div>
+        <div style="font-size:11px;color:var(--ink3);margin-top:4px;">設定後：需備量、叫貨量都以「叫貨單位」顯示，員工仍只數「${item.unit}」。留空＝不換算。</div>
+      </div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">取消</button>
@@ -3030,6 +3052,8 @@ window.confirmEditItemStep = function(id) {
   const safeVal = parseFloat(document.getElementById('editSafeInput').value);
   const minOrderVal = parseFloat(document.getElementById('editMinOrderInput').value);
   const multipleVal = parseFloat(document.getElementById('editMultipleInput').value);
+  const oUnitVal = (document.getElementById('editOUnitInput').value || '').trim();
+  const factorVal = parseFloat(document.getElementById('editFactorInput').value);
   if (isNaN(stepVal) || stepVal <= 0) { showToast('⚠️ 每次增減量請輸入有效數字'); return; }
   if (isNaN(safeVal) || safeVal < 0) { showToast('⚠️ 最高上限請輸入有效數字'); return; }
   item.step = stepVal;
@@ -3037,6 +3061,14 @@ window.confirmEditItemStep = function(id) {
   item.safe = safeVal;
   item.minOrder = isNaN(minOrderVal) || minOrderVal < 0 ? 1 : minOrderVal;
   item.multiple = isNaN(multipleVal) || multipleVal < 0 ? 0 : multipleVal;
+  // 換算設定：叫貨單位與係數同時有效才啟用，否則清除（回到不換算）
+  if (oUnitVal && !isNaN(factorVal) && factorVal > 0) {
+    item.oUnit = oUnitVal;
+    item.factor = factorVal;
+    if (!item.oStep) item.oStep = 0.5;
+  } else {
+    delete item.oUnit; delete item.factor; delete item.oStep; delete item.oRound;
+  }
   fbSaveItemsDef();
   renderItemsAdmin();
   closeModal();
@@ -3059,6 +3091,10 @@ function fbSaveItemsDef() {
     ...(typeof i.sort === 'number' ? { sort: i.sort } : {}),
     ...(i.minOrder && i.minOrder !== 1 ? { minOrder: i.minOrder } : {}),
     ...(i.multiple && i.multiple > 1 ? { multiple: i.multiple } : {}),
+    ...(i.oUnit ? { oUnit: i.oUnit } : {}),
+    ...(i.factor && i.factor !== 1 ? { factor: i.factor } : {}),
+    ...(i.oStep ? { oStep: i.oStep } : {}),
+    ...(i.oRound ? { oRound: i.oRound } : {}),
     ...(i.itemGroup ? { itemGroup: i.itemGroup } : {}),
   }));
   set(ref(db, 'jenka/allItems'), allItems).catch(e => console.warn('FB allItems write error', e));
@@ -3211,12 +3247,12 @@ function showOrderView(vendor){
         <div style="font-weight:500;font-size:13px;">${item.name}</div>
         <div style="text-align:center;min-width:56px;font-size:13px;color:var(--ink2);">${cur} <span style="font-size:11px;color:var(--ink3);">${item.unit}</span></div>
         <div style="text-align:center;min-width:56px;font-size:13px;color:var(--ink2);">${safeQty[item.id]} <span style="font-size:11px;color:var(--ink3);">${item.unit}</span></div>
-        <div style="text-align:center;min-width:72px;font-size:13px;color:var(--ink3);">${o} <span style="font-size:11px;">${item.unit}</span></div>
+        <div style="text-align:center;min-width:72px;font-size:13px;color:var(--ink3);">${o} <span style="font-size:11px;">${oUnitOf(item)}</span></div>
         <div style="display:flex;align-items:center;gap:4px;min-width:96px;justify-content:center;">
-          <button onclick="adjOrderQty('${adjKey}',${item.id},-${item.step||1},'${item.unit}','${vendor}')" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--cream);cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;font-family:monospace;flex-shrink:0;">−</button>
+          <button onclick="adjOrderQty('${adjKey}',${item.id},-${item.factor?(item.oStep||0.5):(item.step||1)},'${oUnitOf(item)}','${vendor}')" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--cream);cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;font-family:monospace;flex-shrink:0;">−</button>
           <span id="adj-${adjKey}-${item.id}" style="font-size:13px;font-weight:600;min-width:28px;text-align:center;color:var(--accent);">${adjVal}</span>
-          <span style="font-size:11px;color:var(--ink3);">${item.unit}</span>
-          <button onclick="adjOrderQty('${adjKey}',${item.id},${item.step||1},'${item.unit}','${vendor}')" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--cream);cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;font-family:monospace;flex-shrink:0;">+</button>
+          <span style="font-size:11px;color:var(--ink3);">${oUnitOf(item)}</span>
+          <button onclick="adjOrderQty('${adjKey}',${item.id},${item.factor?(item.oStep||0.5):(item.step||1)},'${oUnitOf(item)}','${vendor}')" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--cream);cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;font-family:monospace;flex-shrink:0;">+</button>
         </div>
       </div>`;
     }).join('');
@@ -3289,7 +3325,7 @@ function updateExportBoxView(vendor) {
   let txt = orderGreeting.replace('{shop}', shopName).replace('{date}', dateStr) + '\n\n';
   needItems.forEach(item => {
     const o = window._orderAdj?.[adjKey]?.[item.id] ?? calcOrderAmt(item, viewDow);
-    txt += `・${item.name}　${o} ${item.unit}\n`;
+    txt += `・${item.name}　${o} ${oUnitOf(item)}\n`;
   });
   if(sub.note) txt += `\n備註：${sub.note}`;
   box.textContent = txt.trimEnd();
@@ -3317,7 +3353,7 @@ function buildExportText(vendor,dow){
     .replace('{date}', dateStr) + '\n\n';
   needItems.forEach(item=>{
     const o=calcOrderAmt(item,dow);
-    txt+=`・${item.name}　${o} ${item.unit}\n`;
+    txt+=`・${item.name}　${o} ${oUnitOf(item)}\n`;
   });
   if(sub.note) txt+=`\n備註：${sub.note}`;
   return txt.trimEnd();
@@ -3369,7 +3405,7 @@ function showExportAll(){
     anyNeed=true;
     combined+=`【${v}】\n`;
     needItems.forEach(item=>{
-      combined+=`  ・${item.name}　${calcOrderAmt(item,viewDow)} ${item.unit}\n`;
+      combined+=`  ・${item.name}　${calcOrderAmt(item,viewDow)} ${oUnitOf(item)}\n`;
     });
     combined+=`\n`;
   });
@@ -4439,26 +4475,29 @@ async function queryHistory() {
       const vitems = ITEMS_DEF.filter(i => i.vendor === vendor);
       const itemRows = vitems.map(item => {
         const dow = d.getDay();
-        const target = snapOrderQty?.[item.id]?.[dow]; // 每日需備量
+        const target = snapOrderQty?.[item.id]?.[dow]; // 每日需備量（換算品項以叫貨單位計）
         if (target === null || target === undefined) return null;
+        const f = item.factor || 1; // 點貨單位→叫貨單位 換算係數
         const cur = parseFloat(qtySnap[item.id]);
         let ordAmt;
         if (isNaN(cur) || qtySnap[item.id] === '' || qtySnap[item.id] === undefined) {
           ordAmt = target;
         } else {
-          ordAmt = Math.max(0, target - cur);
+          ordAmt = Math.max(0, target - cur * f);
         }
-        if (ordAmt <= 0) return { itemName: item.name, unit: item.unit, qty: 0, cur, vendor, itemId: item.id };
+        if (ordAmt <= 0) return { itemName: item.name, unit: oUnitOf(item), qty: 0, cur, vendor, itemId: item.id };
         // 最小叫貨量
         const minOrder = item.minOrder || 0;
         if (minOrder > 0 && ordAmt < minOrder) ordAmt = minOrder;
         // 叫貨倍數
         const multiple = item.multiple || 0;
         if (multiple > 1) ordAmt = Math.ceil(ordAmt / multiple) * multiple;
-        // 上限（safeQty）
-        const maxLimit = snapSafe[item.id] || safeQty[item.id] || 0;
-        if (maxLimit && ordAmt > maxLimit) ordAmt = maxLimit;
-        return { itemName: item.name, unit: item.unit, qty: ordAmt, cur, vendor, itemId: item.id };
+        // 換算品項：進位到 0.5 叫貨單位
+        if (f !== 1) { const r = item.oRound || 0.5; ordAmt = Math.ceil(ordAmt / r) * r; }
+        // 最高叫貨上限：僅未換算品項套用（換算品項已被需備量自然封頂）
+        if (f === 1) { const maxLimit = snapSafe[item.id] || safeQty[item.id] || 0; if (maxLimit && ordAmt > maxLimit) ordAmt = maxLimit; }
+        ordAmt = Math.round(ordAmt * 100) / 100;
+        return { itemName: item.name, unit: oUnitOf(item), qty: ordAmt, cur, vendor, itemId: item.id };
       }).filter(Boolean);
 
       const needItems = itemRows.filter(r => r.qty > 0);
