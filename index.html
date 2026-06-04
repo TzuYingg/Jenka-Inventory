@@ -50,6 +50,8 @@ window.dispatchEvent(new Event('fbReady'));
   .app{max-width:680px;margin:0 auto;padding:72px 0 96px;}
   /* 叫貨頁底部還有送出列，需要更多空間 */
   #inventoryPage .app{padding-bottom:148px;}
+  /* 後台頁每個子分頁底部都有固定的儲存列，內容需額外留白避免最後欄位被蓋住 */
+  #adminPage .app{padding-bottom:calc(140px + env(safe-area-inset-bottom));}
   /* 廠商點貨頁的送出列含進度條會更高，最後品項需額外留白避免被蓋住 */
   #vendorView{padding-bottom:52px;}
 
@@ -125,6 +127,11 @@ window.dispatchEvent(new Event('fbReady'));
   .vsr-left{flex:1;min-width:0;}
   .vsr-name{font-weight:600;font-size:14px;letter-spacing:.1px;}
   .vsr-sub{font-size:11.5px;color:var(--ink3);margin-top:3px;letter-spacing:.1px;}
+  .deadline-chip{display:inline-block;margin-top:6px;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;font-family:'DM Mono',monospace;letter-spacing:.2px;line-height:1.5;}
+  .deadline-chip.dl-norm{background:var(--tint);color:var(--ink2);}
+  .deadline-chip.dl-warn{background:var(--warn-soft);color:var(--warn);}
+  .deadline-chip.dl-danger{background:var(--danger-soft);color:var(--danger);font-weight:700;}
+  .deadline-chip.dl-soft{background:transparent;color:var(--ink3);padding-left:0;font-weight:500;}
   .vsr-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
   .vsr-badge{font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;white-space:nowrap;display:inline-block;text-align:center;min-width:64px;letter-spacing:.2px;}
   /* 尚未點貨 → 磚紅 */
@@ -221,9 +228,9 @@ window.dispatchEvent(new Event('fbReady'));
   .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--ink);color:var(--cream);padding:10px 20px;border-radius:24px;font-size:13px;font-weight:500;transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap;}
   .toast.show{transform:translateX(-50%) translateY(0);}
 
-  .overlay{position:fixed;inset:0;background:rgba(28,26,20,.55);z-index:100;display:none;align-items:flex-end;}
+  .overlay{position:fixed;inset:0;background:rgba(28,26,20,.55);z-index:160;display:none;align-items:flex-end;}
   .overlay.open{display:flex;}
-  .modal{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:680px;margin:0 auto;padding:24px 20px 40px;max-height:85vh;overflow-y:auto;}
+  .modal{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:680px;margin:0 auto;padding:24px 20px calc(28px + env(safe-area-inset-bottom));max-height:88vh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
   .modal h2{font-size:18px;font-weight:700;margin-bottom:4px;}
   .modal-sub{font-size:12px;color:var(--ink3);font-family:'DM Mono',monospace;margin-bottom:14px;}
   .modal-meta{background:var(--tag-bg);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--ink2);display:flex;gap:16px;flex-wrap:wrap;}
@@ -232,6 +239,27 @@ window.dispatchEvent(new Event('fbReady'));
   .need{font-family:'DM Mono',monospace;font-weight:500;color:var(--accent);}
   .need.ok{color:var(--ok);}
   .modal-actions{display:flex;gap:10px;margin-top:20px;}
+
+  /* 品項排序模式（全螢幕） */
+  #sortMode{position:fixed;inset:0;z-index:190;background:var(--cream);display:none;flex-direction:column;max-width:680px;margin:0 auto;}
+  #sortMode.open{display:flex;}
+  .sm-topbar{display:flex;align-items:center;justify-content:space-between;padding:max(12px,env(safe-area-inset-top)) 16px 12px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+  .sm-title{font-size:15px;font-weight:700;color:var(--ink);}
+  .sm-cancel{background:none;border:none;font-family:'Noto Sans TC',sans-serif;font-size:14px;color:var(--ink2);cursor:pointer;padding:6px 4px;touch-action:manipulation;}
+  .sm-done{background:var(--ink);color:#fff;border:none;border-radius:20px;font-family:'Noto Sans TC',sans-serif;font-size:14px;font-weight:700;padding:7px 18px;cursor:pointer;touch-action:manipulation;}
+  .sm-vendors{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:12px 16px 4px;flex-shrink:0;}
+  .sm-vendors::-webkit-scrollbar{display:none;}
+  .sm-vchip{flex-shrink:0;padding:6px 13px;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--ink2);touch-action:manipulation;}
+  .sm-vchip.active{background:var(--admin-accent);color:#fff;border-color:var(--admin-accent);}
+  .sm-hint{font-size:11px;color:var(--ink3);padding:6px 16px 8px;line-height:1.6;flex-shrink:0;}
+  .sm-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px calc(24px + env(safe-area-inset-bottom));overscroll-behavior:contain;}
+  .sm-row{display:flex;align-items:center;gap:10px;height:46px;padding:0 6px 0 4px;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:7px;user-select:none;-webkit-user-select:none;}
+  .sm-row.sm-dragging{opacity:.35;}
+  .sm-row .sm-handle{font-size:20px;color:var(--ink3);cursor:grab;padding:0 6px;touch-action:none;line-height:1;}
+  .sm-row .sm-idx{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);width:22px;text-align:right;flex-shrink:0;}
+  .sm-row .sm-name{flex:1;min-width:0;font-size:14px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .sm-row .sm-unit{font-size:11px;color:var(--ink3);flex-shrink:0;}
+  .sm-ghost{position:fixed;z-index:999;pointer-events:none;opacity:.92;box-shadow:0 6px 20px rgba(0,0,0,.18);border-radius:10px;}
   .btn-order{flex:1;background:#2B2824;color:#fff;border:none;border-radius:12px;padding:14px;font-family:'Noto Sans TC',sans-serif;font-size:15px;font-weight:600;cursor:pointer;letter-spacing:.3px;}
   .btn-cancel{background:var(--tag-bg);border:none;border-radius:12px;padding:13px 18px;font-family:'Noto Sans TC',sans-serif;font-size:14px;color:var(--ink2);cursor:pointer;}
   .no-need{text-align:center;padding:20px;color:var(--ink3);font-size:13px;}
@@ -358,9 +386,10 @@ window.dispatchEvent(new Event('fbReady'));
   .iae-input{transition:border-color .35s ease, background-color .35s ease;}
   .iae-input.saved-flash{border-color:var(--ok)!important;background:var(--ok-soft)!important;}
 
-  /* ── 庫存回報頁面 ── */
+  /* ── 庫存追蹤頁面 ── */
   #stockPage{display:none;}
   .stock-header{padding:20px 20px 0;display:flex;align-items:center;justify-content:space-between;}
+  .stock-header h1{font-size:22px;font-weight:700;}
   .stock-item-card{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;}
   .stock-item-header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
   .stock-item-name{font-weight:600;font-size:14px;}
@@ -824,6 +853,17 @@ window.dispatchEvent(new Event('fbReady'));
           <div style="font-size:11px;color:var(--ink3);margin-bottom:8px;">每行一個，格式：廠商名稱｜備註內容（例如：週三休息、最低叫貨 500 元）</div>
           <textarea id="sysVendorNotes" style="width:100%;height:100px;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:12px;background:var(--cream);color:var(--ink);outline:none;resize:vertical;line-height:1.8;"></textarea>
         </div>
+
+        <!-- 廠商叫貨截止時間 -->
+        <div class="admin-item">
+          <div class="admin-item-name">叫貨截止時間 <span class="unit-tag">截止提醒</span></div>
+          <div style="font-size:11px;color:var(--ink3);margin-bottom:8px;line-height:1.7;">
+            每行一個，格式：<code style="background:var(--tag-bg);padding:1px 5px;border-radius:4px;">廠商名稱｜時間｜hard 或 soft</code><br>
+            <strong style="color:var(--danger);">hard</strong>＝有截止限定（會跑倒數、逾時轉紅、緊急排序置頂，例如廣弘）；
+            <strong style="color:var(--ink2);">soft</strong>＝不顯示提醒（僅保留設定，畫面不顯示、不轉紅）。省略第三欄預設 soft。
+          </div>
+          <textarea id="sysVendorDeadlines" placeholder="廣弘｜14:00｜hard&#10;豆漿｜17:00｜soft" style="width:100%;height:120px;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:12px;background:var(--cream);color:var(--ink);outline:none;resize:vertical;line-height:1.8;"></textarea>
+        </div>
       </div>
     </div>
 
@@ -965,16 +1005,19 @@ window.dispatchEvent(new Event('fbReady'));
   <div class="app">
     <div class="stock-header">
       <div>
-        <h1>庫存回報</h1>
-        <div style="font-size:12px;color:var(--ink3);margin-top:2px;font-family:'DM Mono',monospace;">零散品項庫存狀況</div>
+        <h1>庫存追蹤</h1>
+        <div style="font-size:12px;color:var(--ink3);margin-top:2px;font-family:'DM Mono',monospace;">追蹤品項庫存狀況</div>
       </div>
-      <button id="stockAddBtn" onclick="showAddStockItem()" style="display:none;font-size:12px;background:var(--active);color:#fff;border:none;border-radius:20px;padding:6px 14px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">+ 新增品項</button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="stockPresetBtn" onclick="manageStockPresets()" style="display:none;font-size:12px;background:var(--cream);color:var(--ink2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">品項範本</button>
+        <button id="stockAddBtn" onclick="showAddStockItem()" style="display:none;font-size:12px;background:var(--active);color:#fff;border:none;border-radius:20px;padding:6px 14px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">+ 新增品項</button>
+      </div>
     </div>
     <div style="padding:14px 20px 0;">
       <div id="stockItemList"></div>
       <div id="stockEmpty" style="display:none;text-align:center;padding:40px 20px;color:var(--ink3);font-size:13px;">
         目前沒有需要追蹤的品項<br>
-        <span style="font-size:12px;">管理員可新增需要追蹤的零散品項</span>
+        <span style="font-size:12px;">管理員可新增追蹤品項</span>
       </div>
     </div>
     <div style="height:40px;"></div>
@@ -984,7 +1027,31 @@ window.dispatchEvent(new Event('fbReady'));
 <div class="toast" id="toast"></div>
 <div class="overlay" id="overlay" onclick="closeOverlay(event)"><div class="modal" id="modal"></div></div>
 
+<!-- 品項排序模式（全螢幕） -->
+<div id="sortMode">
+  <div class="sm-topbar">
+    <button class="sm-cancel" onclick="cancelSort()">取消</button>
+    <div class="sm-title">調整品項順序</div>
+    <button class="sm-done" onclick="commitSort()">完成</button>
+  </div>
+  <div class="sm-vendors" id="sortModeVendors"></div>
+  <div class="sm-hint">按住握把 ⠿ 上下拖曳即可調整順序，順序＝員工點貨時看到的順序。</div>
+  <div class="sm-list" id="sortModeList"></div>
+</div>
+
 <script>
+/* =====================================================================
+   庄腳點貨系統 — 主程式區塊索引（單檔，搜尋關鍵字可快速跳到該區）
+   ---------------------------------------------------------------------
+   [種子預設]     ALL_VENDORS / OPT_IN_VENDORS / weeklySchedule / ITEMS_SEED
+   [廠商設定]     vendorContacts / vendorNotes / vendorDeadlines（收單死線）
+   [截止提醒]     getDeadlineInfo / fmtLeft / tickDeadlines（倒數＋緊急排序）
+   [點貨總覽]     renderOverview / vendorState / renderVendorDetail
+   [後台 - 品項]  renderItemsAdmin / saveItemField / doResetAllItems（同步品項）
+   [品項排序]     openSortMode / renderSortList / initSortDrag / commitSort
+   [後台 - 系統]  renderSystemAdmin / saveSystemSettings
+   [Firebase]     fbInit / fbSaveGlobal / fbSaveItemsDef（jenka/allItems・global）
+   ===================================================================== */
 // ── 系統設定種子預設值（Firebase 有資料時會被覆蓋）──
 let ALL_VENDORS=['豆漿','南北貨','毓品','廣弘','蔬菜','麵包'];
 let OPT_IN_VENDORS=['蔬菜','南北貨']; // 需管理員每日開啟才對員工顯示
@@ -1268,7 +1335,7 @@ function switchDay(dow){viewDow=dow;backToOverview();renderDayStrip();if(typeof 
 function switchWeek(delta){weekOffset+=delta;activeVendor=null;document.getElementById('vendorView').style.display='none';document.getElementById('overviewView').style.display='block';document.getElementById('overviewBar').style.display='flex';document.getElementById('vendorBar').style.display='none';renderDayStrip();renderOverview();if(typeof loadAnnouncement==='function')loadAnnouncement();}
 function goToday(){weekOffset=0;viewDow=todayDow;backToOverview();renderDayStrip();if(typeof loadAnnouncement==='function')loadAnnouncement();}
 
-// 非本週的預覽模式：唯讀排定廠商＋該日公告＋該日預定叫貨
+// 非本週的預覽模式：唯讀排定廠商＋該日公告＋該日排定叫貨
 function renderPreviewOverview(isAdmin){
   setLiveWidgets(false);
   const ab=document.getElementById('alertBanner'); if(ab) ab.classList.add('hidden');
@@ -1290,12 +1357,12 @@ function renderPreviewOverview(isAdmin){
     html+=fixed.map(v=>`<div class="vendor-status-row" style="width:100%;text-align:left;border:1px solid var(--border);cursor:default;">
       <div class="vsr-icon" style="background:var(--ink3);">–</div>
       <div class="vsr-left"><div class="vsr-name">${v}</div><div class="vsr-sub">固定排程</div></div>
-      <div class="vsr-right"><span class="vsr-badge" style="background:var(--tint);color:var(--ink2);">預定</span></div>
+      <div class="vsr-right"><span class="vsr-badge" style="background:var(--tint);color:var(--ink2);">排定</span></div>
     </div>`).join('');
     html+=`<div style="font-size:11px;color:var(--ink3);padding:8px 2px 0;">蔬菜、南北貨等不定期廠商，當天由管理員開啟</div>`;
   }
   bar.innerHTML=html;
-  // 該日預定叫貨（追蹤品項）
+  // 該日排定叫貨（追蹤品項）
   if(typeof renderScheduledForDate==='function') renderScheduledForDate(viewDateKey());
   else { const st=document.getElementById('stockTracker'); if(st) st.innerHTML=''; }
 }
@@ -1316,7 +1383,7 @@ function setLiveWidgets(show){
 
 function renderOverview(){
   const isAdmin = currentUser && currentUser.role === 'admin';
-  // 非本週 → 預覽模式（唯讀排定廠商＋該日公告＋該日預定叫貨）
+  // 非本週 → 預覽模式（唯讀排定廠商＋該日公告＋該日排定叫貨）
   if(weekOffset!==0){ renderPreviewOverview(isAdmin); return; }
   setLiveWidgets(true);
   const previewNotice=document.getElementById('previewNotice'); if(previewNotice) previewNotice.style.display='none';
@@ -1390,11 +1457,23 @@ function renderOverview(){
         ? `<span style="font-size:10px;background:#E8EFFF;color:#3A6BC4;padding:1px 7px;border-radius:10px;margin-right:4px;cursor:pointer;" onclick="event.stopPropagation();toggleOptIn(${viewDow},'${v}')">✓ 今日點貨 ×</span>`
         : '';
 
-      return {group: state==='done'?'done':'pending', html:`<button class="vendor-status-row${rowCls ? ' '+rowCls : ''}${ordered[viewDow][v] ? ' ordered' : ''}" onclick="openVendor('${v}')" style="width:100%;text-align:left;border:1px solid var(--border);font-family:'Noto Sans TC',sans-serif;">
+      // 截止倒數 chip（只在檢視今天、且未送出的待點廠商顯示）
+      const dl = (state==='done' || !isViewingToday()) ? null : getDeadlineInfo(v);
+      let dlChip = '';
+      if(dl){
+        if(dl.hard){
+          if(dl.overdue) dlChip = `<span class="deadline-chip dl-danger" data-dl-time="${dl.time}" data-dl-hard="1">截止 ${dl.time} · 已逾時</span>`;
+          else { const cls = dl.minsLeft<=60?'dl-warn':'dl-norm'; dlChip = `<span class="deadline-chip ${cls}" data-dl-time="${dl.time}" data-dl-hard="1">截止 ${dl.time} · ${fmtLeft(dl.minsLeft)}</span>`; }
+        }
+        // soft 不顯示 chip：避免每家都掛同一句提醒、佔掉視覺份量，
+        // 只有 hard（如廣弘）這種有實際截止限定的才跳出來。
+      }
+      return {group: state==='done'?'done':'pending', vendor:v, dl, html:`<button class="vendor-status-row${rowCls ? ' '+rowCls : ''}${ordered[viewDow][v] ? ' ordered' : ''}" onclick="openVendor('${v}')" style="width:100%;text-align:left;border:1px solid var(--border);font-family:'Noto Sans TC',sans-serif;">
         <div class="vsr-icon ${iconCls}">${icon}</div>
         <div class="vsr-left">
           <div class="vsr-name">${v}${isOptIn && isEnabled ? '<span style="font-size:9px;background:#E8EFFF;color:#3A6BC4;padding:1px 6px;border-radius:8px;margin-left:6px;font-weight:400;">今日點貨</span>' : ''}</div>
           <div class="vsr-sub">${subText}</div>
+          ${dlChip}
         </div>
         <div class="vsr-right">
           ${isOptIn && isEnabled && isAdmin && state !== 'done'
@@ -1415,6 +1494,18 @@ function renderOverview(){
     // 拆兩段：今日待點（置頂）／已完成（收下方）
     const pendingRows = rows.filter(r => r.group === 'pending');
     const doneRows = rows.filter(r => r.group === 'done');
+    // 緊急排序：逾時硬死線(0) → 即將到期硬死線(1，依剩餘時間) → 軟提醒/無死線(2)
+    const urgencyRank = r => {
+      const d = r.dl;
+      if(d && d.hard && d.overdue) return [0, 0];
+      if(d && d.hard) return [1, d.minsLeft];
+      return [2, 0];
+    };
+    pendingRows.sort((a,b) => {
+      const [ra, ma] = urgencyRank(a), [rb, mb] = urgencyRank(b);
+      if(ra !== rb) return ra - rb;
+      return ma - mb;
+    });
     const secLabel = (text, n, col) => `<div class="ov-section-label" style="margin:8px 0 0;">${text}<span style="font-weight:700;color:${col};font-family:'DM Mono',monospace;letter-spacing:0;">${n}</span></div>`;
     let barHtml = '';
     if(pendingRows.length) barHtml += secLabel('今日待點', pendingRows.length, 'var(--accent)') + pendingRows.map(r => r.html).join('');
@@ -2107,6 +2198,48 @@ let vendorContacts = {
   '廣弘': 'https://line.me/ti/g/DjTQMWBLqQ',
 };
 let vendorNotes = {}; // { '廠商名': '備注文字' }
+// 廠商收單死線：{ '廠商名': {time:'HH:MM', hard:true/false} }
+// hard=true → 真死線（會跑倒數、逾時轉紅、緊急排序置頂）；hard=false → 軟提醒（只顯示建議時間，不轉紅不跳緊急）
+let vendorDeadlines = {
+  '廣弘':  {time:'14:00', hard:true},
+  '豆漿':  {time:'17:00', hard:false},
+  '南北貨':{time:'17:00', hard:false},
+  '毓品':  {time:'17:00', hard:false},
+  '蔬菜':  {time:'17:00', hard:false},
+  '麵包':  {time:'17:00', hard:false},
+};
+// 取得某廠商「現在」的截止狀態（null 表示沒設定）
+function getDeadlineInfo(vendor){
+  const d = vendorDeadlines[vendor];
+  if(!d || !d.time || !/^\d{1,2}:\d{2}$/.test(d.time)) return null;
+  const [hh,mm] = d.time.split(':').map(Number);
+  const nowT = new Date();
+  const due = new Date(nowT.getFullYear(), nowT.getMonth(), nowT.getDate(), hh, mm, 0, 0);
+  const minsLeft = Math.round((due - nowT) / 60000);
+  return { time:d.time, hard:!!d.hard, minsLeft, overdue: minsLeft < 0 };
+}
+// 把剩餘分鐘轉成「剩 2h15m / 剩 45m」
+function fmtLeft(mins){
+  if(mins < 0) return '';
+  const h = Math.floor(mins/60), m = mins%60;
+  return h>0 ? `剩 ${h}h${m>0?String(m).padStart(2,'0')+'m':''}` : `剩 ${m}m`;
+}
+// 就地更新畫面上所有截止 chip 的倒數與顏色（免整頁重繪）
+function tickDeadlines(){
+  document.querySelectorAll('.deadline-chip[data-dl-time]').forEach(el => {
+    const time = el.dataset.dlTime;
+    const hard = el.dataset.dlHard === '1';
+    if(!hard) return; // 軟提醒不跑倒數
+    const [hh,mm] = time.split(':').map(Number);
+    const nowT = new Date();
+    const due = new Date(nowT.getFullYear(), nowT.getMonth(), nowT.getDate(), hh, mm, 0, 0);
+    const minsLeft = Math.round((due - nowT) / 60000);
+    el.classList.remove('dl-norm','dl-warn','dl-danger');
+    if(minsLeft < 0){ el.classList.add('dl-danger'); el.textContent = `截止 ${time} · 已逾時`; }
+    else { el.classList.add(minsLeft<=60?'dl-warn':'dl-norm'); el.textContent = `截止 ${time} · ${fmtLeft(minsLeft)}`; }
+  });
+}
+if(!window._dlTimer){ window._dlTimer = setInterval(tickDeadlines, 30000); }
 
 function showAllOrders(){ showDailySummary(); }
 
@@ -2323,7 +2456,7 @@ function exportConfig(){
       allVendors: ALL_VENDORS,
       optInVendors: OPT_IN_VENDORS,
       weeklySchedule, orderQty,
-      vendorContacts, vendorNotes,
+      vendorContacts, vendorNotes, vendorDeadlines,
       checkerNames,
       items: ITEMS_DEF,
       stockItems: (typeof stockItems!=='undefined'?stockItems:{})
@@ -2372,6 +2505,11 @@ function doResetAllItems() {
     if (!existingIds.has(seedItem.id)) {
       // Firebase 沒有這個 id → 新增
       const newItem = {...seedItem};
+      // 新品項接在「該廠商現有品項」的最後，不洗掉你已排好的順序
+      const maxSort = ITEMS_DEF
+        .filter(i => i.vendor === newItem.vendor)
+        .reduce((m,i) => Math.max(m, (typeof i.sort==='number'?i.sort:0)), -1);
+      newItem.sort = maxSort + 1;
       ITEMS_DEF.push(newItem);
       safeQty[newItem.id] = newItem.safe;
       qty[newItem.id] = '';
@@ -2419,9 +2557,9 @@ function renderItemsAdmin() {
   const inactiveItems = vitems.filter(i => i.active === false);
 
   // 永遠可直接編輯（免切換模式）：品名、單位、需備、增減、最小、倍數，改完自動儲存
-  const header = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+  const header = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px;">
     <span style="font-size:12px;color:var(--ink3);">${itemsAdminVendor}　${activeItems.length} 項${inactiveItems.length?` · ${inactiveItems.length} 已下架`:''}</span>
-    <span style="font-size:11px;color:var(--ok);">改完自動儲存</span>
+    <button onclick="openSortMode('${itemsAdminVendor}')" style="flex-shrink:0;padding:6px 14px;border-radius:20px;border:1.5px solid var(--ink);background:var(--surface);color:var(--ink);font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;white-space:nowrap;">↕ 調整順序</button>
   </div>`;
 
   if (vitems.length === 0) {
@@ -2623,6 +2761,134 @@ function saveDragOrder(container) {
   fbSaveItemsDef();
 }
 
+// ── 全螢幕品項排序模式 ──
+// 在獨立畫面內只列出品名拖曳調整，按「完成」才寫回 item.sort（取消＝不存）
+let sortModeVendor = null;
+function openSortMode(vendor){
+  sortModeVendor = vendor || itemsAdminVendor;
+  const el = document.getElementById('sortMode');
+  renderSortVendors();
+  renderSortList();
+  el.classList.add('open');
+}
+function cancelSort(){
+  document.getElementById('sortMode').classList.remove('open');
+  sortModeVendor = null;
+}
+function switchSortVendor(v){
+  sortModeVendor = v;
+  renderSortVendors();
+  renderSortList();
+}
+function renderSortVendors(){
+  const el = document.getElementById('sortModeVendors');
+  el.innerHTML = ALL_VENDORS.map(v =>
+    `<div class="sm-vchip${v===sortModeVendor?' active':''}" onclick="switchSortVendor('${v}')">${v}</div>`
+  ).join('');
+}
+function renderSortList(){
+  const listEl = document.getElementById('sortModeList');
+  const vitems = ITEMS_DEF
+    .filter(i => i.vendor === sortModeVendor && i.active !== false)
+    .sort((a,b) => (a.sort||0) - (b.sort||0));
+  if(vitems.length === 0){
+    listEl.innerHTML = `<div style="text-align:center;padding:30px;color:var(--ink3);font-size:13px;">此廠商目前沒有上架品項</div>`;
+    return;
+  }
+  listEl.innerHTML = vitems.map((it,idx) =>
+    `<div class="sm-row" data-id="${it.id}">
+      <div class="sm-handle">⠿</div>
+      <span class="sm-idx">${idx+1}</span>
+      <span class="sm-name">${String(it.name||'').replace(/</g,'&lt;')}</span>
+      <span class="sm-unit">${String(it.unit||'').replace(/</g,'&lt;')}</span>
+    </div>`
+  ).join('');
+  initSortDrag(listEl);
+}
+function renumberSortRows(listEl){
+  [...listEl.querySelectorAll('.sm-row .sm-idx')].forEach((el,i)=>{ el.textContent = i+1; });
+}
+function commitSort(){
+  const listEl = document.getElementById('sortModeList');
+  const ids = [...listEl.querySelectorAll('.sm-row[data-id]')].map(el => parseInt(el.dataset.id));
+  // 只重排此廠商「上架」品項的 sort；其他廠商、已下架品項完全不動
+  ids.forEach((id, idx) => {
+    const item = ITEMS_DEF.find(i => i.id === id);
+    if(item) item.sort = idx;
+  });
+  fbSaveItemsDef();
+  document.getElementById('sortMode').classList.remove('open');
+  const n = ids.length, v = sortModeVendor;
+  sortModeVendor = null;
+  renderItemsAdmin();
+  showToast(`✓ 已更新 ${v} 的 ${n} 項順序`);
+}
+// 指標式拖曳（手機/桌機通用）＋ 邊緣自動捲動
+function initSortDrag(listEl){
+  let dragEl=null, ghost=null, offY=0, autoTimer=null;
+  const rowsBelow = (y) => {
+    for(const el of listEl.querySelectorAll('.sm-row')){
+      if(el===dragEl) continue;
+      const r = el.getBoundingClientRect();
+      if(y < r.top + r.height/2) return el;
+    }
+    return null;
+  };
+  const onMove = (clientY) => {
+    if(!dragEl) return;
+    ghost.style.top = (clientY - offY) + 'px';
+    const before = rowsBelow(clientY);
+    if(before) listEl.insertBefore(dragEl, before);
+    else listEl.appendChild(dragEl);
+    // 邊緣自動捲動
+    const lr = listEl.getBoundingClientRect();
+    if(autoTimer){ clearInterval(autoTimer); autoTimer=null; }
+    if(clientY < lr.top + 50) autoTimer = setInterval(()=>{ listEl.scrollTop -= 12; }, 16);
+    else if(clientY > lr.bottom - 50) autoTimer = setInterval(()=>{ listEl.scrollTop += 12; }, 16);
+  };
+  const start = (handle, clientY) => {
+    dragEl = handle.closest('.sm-row');
+    if(!dragEl) return;
+    const r = dragEl.getBoundingClientRect();
+    offY = clientY - r.top;
+    ghost = dragEl.cloneNode(true);
+    ghost.classList.add('sm-ghost');
+    ghost.style.left = r.left + 'px';
+    ghost.style.width = r.width + 'px';
+    ghost.style.top = (clientY - offY) + 'px';
+    document.body.appendChild(ghost);
+    dragEl.classList.add('sm-dragging');
+    if(navigator.vibrate) navigator.vibrate(20);
+  };
+  const end = () => {
+    if(autoTimer){ clearInterval(autoTimer); autoTimer=null; }
+    if(!dragEl) return;
+    if(ghost){ ghost.remove(); ghost=null; }
+    dragEl.classList.remove('sm-dragging');
+    dragEl = null;
+    renumberSortRows(listEl);
+  };
+  // Touch
+  listEl.addEventListener('touchstart', e => {
+    const h = e.target.closest('.sm-handle'); if(!h) return;
+    start(h, e.touches[0].clientY); e.preventDefault();
+  }, {passive:false});
+  listEl.addEventListener('touchmove', e => {
+    if(!dragEl) return; onMove(e.touches[0].clientY); e.preventDefault();
+  }, {passive:false});
+  listEl.addEventListener('touchend', end);
+  listEl.addEventListener('touchcancel', end);
+  // Mouse（桌機）
+  listEl.addEventListener('mousedown', e => {
+    const h = e.target.closest('.sm-handle'); if(!h) return;
+    start(h, e.clientY); e.preventDefault();
+    const mm = ev => onMove(ev.clientY);
+    const mu = () => { end(); document.removeEventListener('mousemove', mm); document.removeEventListener('mouseup', mu); };
+    document.addEventListener('mousemove', mm);
+    document.addEventListener('mouseup', mu);
+  });
+}
+
 function switchItemsVendor(v) {
   if (itemsEditMode) commitItemEdits(); // 切廠商前先存目前編輯，避免遺失
   itemsAdminVendor = v;
@@ -2809,6 +3075,9 @@ function renderSystemAdmin() {
     .map(([k,v]) => `${k}｜${v}`).join('\n');
   document.getElementById('sysVendorNotes').value = Object.entries(vendorNotes)
     .map(([k,v]) => `${k}｜${v}`).join('\n');
+  const dlEl = document.getElementById('sysVendorDeadlines');
+  if (dlEl) dlEl.value = Object.entries(vendorDeadlines)
+    .map(([k,v]) => `${k}｜${(v&&v.time)||''}｜${(v&&v.hard)?'hard':'soft'}`).join('\n');
 }
 
 function saveSystemSettings() {
@@ -2852,6 +3121,18 @@ function saveSystemSettings() {
     const parts = line.trim().split('｜');
     if (parts.length >= 2 && parts[0].trim()) {
       vendorNotes[parts[0].trim()] = parts.slice(1).join('｜').trim();
+    }
+  });
+
+  // 廠商收單死線：廠商名｜HH:MM｜hard/soft
+  const dlRaw = (document.getElementById('sysVendorDeadlines')||{value:''}).value;
+  vendorDeadlines = {};
+  dlRaw.split('\n').forEach(line => {
+    const parts = line.trim().split('｜').map(s=>s.trim());
+    if (parts.length >= 2 && parts[0] && /^\d{1,2}:\d{2}$/.test(parts[1])) {
+      const [h,m] = parts[1].split(':');
+      const time = `${String(parseInt(h)).padStart(2,'0')}:${m}`;
+      vendorDeadlines[parts[0]] = { time, hard: (parts[2]||'soft').toLowerCase()==='hard' };
     }
   });
 
@@ -3364,15 +3645,28 @@ function renderAccountList() {
 }
 
 // ══════════════════════════════════════════
-// 庫存回報系統
+// 庫存追蹤系統
 // ══════════════════════════════════════════
 
 let stockItems = {}; // { itemId: { name, unit, note, threshold, createdAt } }
+let stockPresets = []; // 品項範本清單 [{name, unit, threshold, note}]（後台維護，新增時一鍵帶入）
 let stockReports = {}; // { itemId: [ { date, qty, reporter, time, timestamp, ordered, orderedAt } ] }
 let _stockReportsByDay = {}; // { dateKey: { itemId: report } } — 來源資料
-let _scheduledByDay = {};    // { dateKey: { itemId: {by,createdAt,ordered,orderedAt} } } — 老闆預定叫貨
+let _scheduledByDay = {};    // { dateKey: { itemId: {by,createdAt,ordered,orderedAt} } } — 老闆排定叫貨
 let _stockDayKeys = [];
 let _stockSubscribed = false;
+window._stockReopened = window._stockReopened || new Set(); // 使用者刻意「重新回報」而打開表單的已叫貨品項
+
+// 已叫貨品項按「重新回報」：打開回報表單（刻意動作）
+function reopenStockReport(itemId){
+  window._stockReopened.add(itemId);
+  const rest = document.getElementById(`stock-rest-${itemId}`);
+  const form = document.getElementById(`stock-form-${itemId}`);
+  if(rest) rest.style.display = 'none';
+  if(form) form.style.display = 'flex';
+  const inp = document.getElementById(`stock-qty-${itemId}`);
+  if(inp) inp.focus();
+}
 
 function stockTodayKey(){
   const d = new Date();
@@ -3383,6 +3677,8 @@ function initStockPage() {
   const isAdmin = currentUser && currentUser.role === 'admin';
   const addBtn = document.getElementById('stockAddBtn');
   if (addBtn) addBtn.style.display = isAdmin ? '' : 'none';
+  const presetBtn = document.getElementById('stockPresetBtn');
+  if (presetBtn) presetBtn.style.display = isAdmin ? '' : 'none';
   loadStockData();
   renderStockPage();
 }
@@ -3395,6 +3691,10 @@ function loadStockData() {
   onValue(ref(db, 'jenka/stockAlerts/items'), snap => {
     stockItems = snap.val() || {};
     renderStockViews();
+  });
+  onValue(ref(db, 'jenka/stockAlerts/presets'), snap => {
+    const v = snap.val();
+    stockPresets = Array.isArray(v) ? v.filter(Boolean) : (v ? Object.values(v) : []);
   });
   // 訂閱最近 7 天回報；每天各一個監聽，更新時以來源重建（避免重複堆疊）
   const now2 = new Date();
@@ -3433,7 +3733,7 @@ function getOpenStockReport(itemId){
   const reps = (stockReports[itemId] || []).slice()
     .sort((a,b) => b.date.localeCompare(a.date) || ((b.timestamp||0)-(a.timestamp||0)));
   const latest = reps[0];
-  return (latest && !latest.ordered) ? latest : null;
+  return (latest && !latest.ordered && !latest.dismissed) ? latest : null;
 }
 
 // 緊急程度：無數量(一鍵需補貨)或低於水位→急缺；其餘已回報→偏低
@@ -3451,7 +3751,7 @@ function renderStockViews() {
   renderStockTracker();
 }
 
-// 到期的「老闆預定叫貨」（日期 <= 今天且未結案）
+// 到期的「老闆排定叫貨」（日期 <= 今天且未結案）
 function getDueScheduled(){
   const tk = stockTodayKey();
   const out = [];
@@ -3464,7 +3764,7 @@ function getDueScheduled(){
   return out;
 }
 
-// 總覽頁「待補貨」：員工回報（未結案）＋ 老闆預定（到期未結案），持續顯示至標記完成
+// 總覽頁「待補貨」：員工回報（未結案）＋ 老闆排定（到期未結案），持續顯示至標記完成
 function renderStockTracker(){
   const el = document.getElementById('stockTracker');
   if(!el) return;
@@ -3503,11 +3803,11 @@ function renderStockTracker(){
     const datePre = date===tk ? '今天' : date.slice(5);
     const badge = isAdmin
       ? `<span class="vsr-badge badge-need-order" onclick="event.stopPropagation();markScheduledOrdered('${date}','${id}')" style="cursor:pointer;">已叫貨</span>`
-      : `<span class="vsr-badge badge-progress">預定</span>`;
+      : `<span class="vsr-badge badge-progress">排定</span>`;
     return `<button class="vendor-status-row" onclick="switchTab('stock')" style="width:100%;text-align:left;border:1px solid var(--border);font-family:'Noto Sans TC',sans-serif;">
       <div class="vsr-icon in-progress" style="background:var(--accent);">★</div>
       <div class="vsr-left"><div class="vsr-name">${item.name}</div>
-        <div class="vsr-sub">老闆預定 · ${datePre}</div></div>
+        <div class="vsr-sub">老闆排定 · ${datePre}</div></div>
       <div class="vsr-right">${badge}<span class="vsr-chevron">›</span></div>
     </button>`;
   }).join('');
@@ -3517,7 +3817,7 @@ function renderStockTracker(){
   el.innerHTML = label + repHtml + schedHtml;
 }
 
-// 預覽某未來日期的「預定叫貨」清單（一次性讀取）
+// 預覽某未來日期的「排定叫貨」清單（一次性讀取）
 function renderScheduledForDate(dk){
   const el = document.getElementById('stockTracker');
   if(!el) return;
@@ -3525,7 +3825,7 @@ function renderScheduledForDate(dk){
   const isAdmin = currentUser && currentUser.role === 'admin';
   const { db, ref, get } = window._fb;
   const addBtn = isAdmin
-    ? `<button onclick="scheduleStockOrderForDate('${dk}')" style="width:100%;margin-top:8px;padding:10px;background:none;border:1px dashed var(--border);border-radius:12px;color:var(--ink3);font-size:13px;font-family:'Noto Sans TC',sans-serif;cursor:pointer;">＋ 預定這天要叫的追蹤品項</button>`
+    ? `<button onclick="scheduleStockOrderForDate('${dk}')" style="width:100%;margin-top:8px;padding:10px;background:none;border:1px dashed var(--border);border-radius:12px;color:var(--ink3);font-size:13px;font-family:'Noto Sans TC',sans-serif;cursor:pointer;">＋ 排定這天要叫的追蹤品項</button>`
     : '';
   get(ref(db, `jenka/stockAlerts/scheduled/${dk}`)).then(snap => {
     const data = snap.val() || {};
@@ -3534,13 +3834,13 @@ function renderScheduledForDate(dk){
       el.innerHTML = isAdmin ? `<div style="margin-top:6px;">${addBtn}</div>` : '';
       return;
     }
-    let html = `<div class="ov-section-label" style="margin:14px 0 0;">預定叫貨<span style="font-weight:700;color:var(--accent);font-family:'DM Mono',monospace;letter-spacing:0;">${entries.length}</span></div>`;
+    let html = `<div class="ov-section-label" style="margin:14px 0 0;">排定叫貨<span style="font-weight:700;color:var(--accent);font-family:'DM Mono',monospace;letter-spacing:0;">${entries.length}</span></div>`;
     html += entries.map(([id, sc]) => {
       const item = stockItems[id];
       const done = !!sc.ordered;
       return `<div class="vendor-status-row" style="width:100%;border:1px solid var(--border);cursor:default;">
         <div class="vsr-icon ${done?'done':'in-progress'}" ${done?'':'style="background:var(--accent);"'}>${done?'✓':'★'}</div>
-        <div class="vsr-left"><div class="vsr-name">${item.name}</div><div class="vsr-sub">${done?'已叫貨':'老闆預定'}</div></div>
+        <div class="vsr-left"><div class="vsr-name">${item.name}</div><div class="vsr-sub">${done?'已叫貨':'老闆排定'}</div></div>
         <div class="vsr-right">${isAdmin && !done ? `<span class="vsr-badge" onclick="cancelScheduled('${dk}','${id}')" style="cursor:pointer;background:var(--tint);color:var(--ink3);">取消</span>` : ''}</div>
       </div>`;
     }).join('');
@@ -3549,7 +3849,7 @@ function renderScheduledForDate(dk){
   }).catch(() => { el.innerHTML = isAdmin ? `<div style="margin-top:6px;">${addBtn}</div>` : ''; });
 }
 
-// 寫入一筆預定
+// 寫入一筆排定
 function saveScheduled(dk, itemId){
   if(!window._fb) return;
   const { db, ref, set } = window._fb;
@@ -3567,23 +3867,23 @@ function cancelScheduled(dk, itemId){
   if(!window._fb) return;
   const { db, ref, remove } = window._fb;
   remove(ref(db, `jenka/stockAlerts/scheduled/${dk}/${itemId}`));
-  showToast('已取消預定');
+  showToast('已取消排定');
   if(weekOffset!==0 && viewDateKey()===dk) renderScheduledForDate(dk);
 }
 
-// 從庫存頁某品項預定一個未來日期
+// 從庫存頁某品項排定一個未來日期
 function scheduleStockOrder(itemId){
   if(!currentUser || currentUser.role !== 'admin') return;
   const item = stockItems[itemId]; if(!item) return;
   const d = new Date(); d.setDate(d.getDate()+1);
   const def = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   const modal = document.getElementById('modal'); const overlay = document.getElementById('overlay');
-  modal.innerHTML = `<h2>預定叫貨</h2><div class="modal-sub">${item.name}</div>
-    <div style="margin:14px 0;"><div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">預定哪天要叫</div>
+  modal.innerHTML = `<h2>排定叫貨</h2><div class="modal-sub">${item.name}</div>
+    <div style="margin:14px 0;"><div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">排定哪天要叫</div>
       <input type="date" id="schedDate" value="${def}" min="${stockTodayKey()}"
         style="width:100%;height:40px;border:1.5px solid var(--border);border-radius:9px;padding:0 12px;font-family:'DM Mono',monospace;font-size:14px;background:var(--cream);color:var(--ink);outline:none;"></div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeModal()">取消</button>
-      <button class="btn-order" onclick="confirmScheduleStockOrder('${itemId}')">預定</button></div>`;
+      <button class="btn-order" onclick="confirmScheduleStockOrder('${itemId}')">排定叫貨</button></div>`;
   overlay.classList.add('open');
 }
 window.confirmScheduleStockOrder = function(itemId){
@@ -3591,10 +3891,10 @@ window.confirmScheduleStockOrder = function(itemId){
   if(!dk){ showToast('請選擇日期'); return; }
   saveScheduled(dk, itemId);
   closeModal();
-  showToast(`已預定 ${dk.slice(5)} 叫貨`);
+  showToast(`已排定 ${dk.slice(5)} 叫貨`);
 };
 
-// 從預覽日選一個追蹤品項來預定
+// 從預覽日選一個追蹤品項來排定
 function scheduleStockOrderForDate(dk){
   if(!currentUser || currentUser.role !== 'admin') return;
   const items = Object.entries(stockItems);
@@ -3602,7 +3902,7 @@ function scheduleStockOrderForDate(dk){
   if(items.length===0){ showToast('尚無追蹤品項，請先到庫存頁新增'); return; }
   const opts = items.map(([id,it]) => `<button onclick="confirmScheduleForDate('${dk}','${id}')"
     style="display:block;width:100%;text-align:left;padding:11px 14px;border:1px solid var(--border);border-radius:10px;background:var(--cream);margin-bottom:8px;font-family:'Noto Sans TC',sans-serif;font-size:14px;color:var(--ink);cursor:pointer;">${it.name} <span style="color:var(--ink3);font-size:12px;">${it.unit}</span></button>`).join('');
-  modal.innerHTML = `<h2>預定叫貨</h2><div class="modal-sub">${dk.slice(5)} · 選擇要叫的追蹤品項</div>
+  modal.innerHTML = `<h2>排定叫貨</h2><div class="modal-sub">${dk.slice(5)} · 選擇要叫的追蹤品項</div>
     <div style="margin:14px 0;max-height:50vh;overflow-y:auto;">${opts}</div>
     <div class="modal-actions"><button class="btn-cancel" onclick="closeModal()">關閉</button></div>`;
   overlay.classList.add('open');
@@ -3610,7 +3910,7 @@ function scheduleStockOrderForDate(dk){
 window.confirmScheduleForDate = function(dk, itemId){
   saveScheduled(dk, itemId);
   closeModal();
-  showToast('已預定');
+  showToast('已排定');
   if(weekOffset!==0 && viewDateKey()===dk) renderScheduledForDate(dk);
 };
 
@@ -3631,6 +3931,16 @@ function renderStockPage() {
   const today = new Date();
   const todayKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 
+  // 該處理的置頂：急缺(0) → 偏低(1) → 尚未回報/已解除(2) → 已叫貨靜止(3)。同級維持原順序。
+  const stockRank = (itemId, item) => {
+    const op = getOpenStockReport(itemId);
+    if (op) return stockUrgency(item, op) === 'danger' ? 0 : 1;
+    const reps = (stockReports[itemId] || []).slice().sort((a,b) => b.date.localeCompare(a.date));
+    const lt = reps[0];
+    return (lt && lt.ordered) ? 3 : 2;
+  };
+  items.sort((a,b) => stockRank(a[0],a[1]) - stockRank(b[0],b[1]));
+
   listEl.innerHTML = items.map(([itemId, item]) => {
     const reports = (stockReports[itemId] || []).slice().sort((a,b) => b.date.localeCompare(a.date));
     const latest = reports[0];
@@ -3646,6 +3956,11 @@ function renderStockPage() {
       statusText = '✓ 已叫貨'; statusCls = 'stock-status-ordered';
     }
 
+    // 已叫貨後進入「靜止」狀態：收起回報表單，避免不小心又回報、又通知老闆。
+    // 真的還要再報，點「重新回報」才會打開表單（刻意動作，非預設）。
+    const restingOrdered = !open && latest && latest.ordered && !(window._stockReopened && window._stockReopened.has(itemId));
+    const orderedAtTxt = (latest && latest.orderedAt) ? ` ${latest.orderedAt}` : '';
+
     const thr = (item.threshold!==null && item.threshold!==undefined && item.threshold!=='')
       ? `　·　水位 ${item.threshold}${item.unit}` : '';
 
@@ -3655,7 +3970,7 @@ function renderStockPage() {
         <div>
           <span style="color:var(--ink3);">${r.date.slice(5)}</span>
           <span style="margin-left:8px;">${r.reporter||''}</span>
-          <span style="margin-left:8px;color:${r.ordered?'var(--ok)':'var(--accent)'};">${r.ordered?'✓ 已叫貨':((r.qty===null||r.qty===undefined)?'需補貨':`剩 ${r.qty} ${item.unit}`)}</span>
+          <span style="margin-left:8px;color:${r.dismissed?'var(--ink3)':(r.ordered?'var(--ok)':'var(--accent)')};">${r.dismissed?'— 已解除':(r.ordered?'✓ 已叫貨':((r.qty===null||r.qty===undefined)?'需補貨':`剩 ${r.qty} ${item.unit}`))}</span>
         </div>
       </div>`).join('');
 
@@ -3669,26 +3984,35 @@ function renderStockPage() {
           <span class="stock-status-badge ${statusCls}">${statusText}</span>
           ${isAdmin && open ? `<button onclick="event.stopPropagation();markStockOrdered('${itemId}')"
             style="font-size:11px;padding:3px 11px;border:1px solid var(--ok);border-radius:20px;background:var(--ok-soft);color:var(--ok);cursor:pointer;font-family:'Noto Sans TC',sans-serif;white-space:nowrap;">已叫貨</button>` : ''}
-          ${isAdmin ? `<button onclick="event.stopPropagation();scheduleStockOrder('${itemId}')"
-            style="font-size:11px;padding:3px 11px;border:1px solid var(--accent);border-radius:20px;background:var(--accent-soft);color:var(--accent);cursor:pointer;font-family:'Noto Sans TC',sans-serif;white-space:nowrap;">預定</button>` : ''}
-          ${isAdmin ? `<button onclick="event.stopPropagation();deleteStockItem('${itemId}')"
-            style="font-size:11px;padding:2px 8px;border:1px solid var(--border);border-radius:20px;background:var(--cream);color:var(--ink3);cursor:pointer;font-family:'Noto Sans TC',sans-serif;">刪</button>` : ''}
+          ${isAdmin ? `<button onclick="event.stopPropagation();openStockItemMenu('${itemId}')" aria-label="更多"
+            style="font-size:16px;line-height:1;padding:3px 9px;border:1px solid var(--border);border-radius:20px;background:var(--cream);color:var(--ink3);cursor:pointer;font-family:'Noto Sans TC',sans-serif;">⋯</button>` : ''}
         </div>
       </div>
       <div class="stock-report-form">
-        <div style="display:flex;gap:8px;align-items:center;">
-          <span style="font-size:13px;color:var(--ink2);white-space:nowrap;">目前剩</span>
-          <input type="number" min="0" step="1" placeholder="數量"
-            id="stock-qty-${itemId}"
-            style="width:64px;height:36px;border:1.5px solid var(--border);border-radius:9px;padding:0 10px;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);color:var(--ink);outline:none;text-align:center;">
-          <span style="font-size:13px;color:var(--ink2);">${item.unit}</span>
-          <button onclick="submitStockReport('${itemId}')"
-            style="flex:1;height:36px;background:var(--ink);color:#fff;border:none;border-radius:9px;font-family:'Noto Sans TC',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;cursor:pointer;touch-action:manipulation;">
-            回報
-          </button>
-          <button onclick="quickStockReport('${itemId}')" title="不確定數量，直接通知老闆"
-            style="height:36px;padding:0 12px;background:var(--accent-soft);color:var(--accent);border:none;border-radius:9px;font-family:'Noto Sans TC',sans-serif;font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation;white-space:nowrap;">
-            需補貨
+        ${restingOrdered ? `<div id="stock-rest-${itemId}" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <span style="font-size:13px;color:var(--ink3);display:flex;align-items:center;gap:6px;">已叫貨完成${orderedAtTxt}，暫不需回報</span>
+          <button onclick="reopenStockReport('${itemId}')"
+            style="font-size:12px;padding:7px 14px;background:var(--cream);border:1px solid var(--border);border-radius:9px;color:var(--ink2);font-family:'Noto Sans TC',sans-serif;cursor:pointer;touch-action:manipulation;white-space:nowrap;">重新回報</button>
+        </div>` : ''}
+        <div id="stock-form-${itemId}" style="${restingOrdered ? 'display:none;' : 'display:flex;'}flex-direction:column;gap:8px;">
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span style="font-size:13px;color:var(--ink2);white-space:nowrap;">目前剩</span>
+            <button onclick="stepStockQty('${itemId}',-1)" aria-label="減少"
+              style="width:34px;height:36px;border:1.5px solid var(--border);border-radius:9px;background:var(--cream);color:var(--ink2);font-size:18px;line-height:1;cursor:pointer;touch-action:manipulation;flex:none;">−</button>
+            <input type="number" min="0" step="1" placeholder="數量"
+              id="stock-qty-${itemId}"
+              style="width:52px;height:36px;border:1.5px solid var(--border);border-radius:9px;padding:0 6px;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);color:var(--ink);outline:none;text-align:center;flex:none;">
+            <button onclick="stepStockQty('${itemId}',1)" aria-label="增加"
+              style="width:34px;height:36px;border:1.5px solid var(--border);border-radius:9px;background:var(--cream);color:var(--ink2);font-size:18px;line-height:1;cursor:pointer;touch-action:manipulation;flex:none;">＋</button>
+            <span style="font-size:13px;color:var(--ink2);">${item.unit}</span>
+            <button onclick="submitStockReport('${itemId}')"
+              style="flex:1;height:36px;background:var(--ink);color:#fff;border:none;border-radius:9px;font-family:'Noto Sans TC',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;cursor:pointer;touch-action:manipulation;">
+              回報數量
+            </button>
+          </div>
+          <button onclick="quickStockReport('${itemId}')" title="不確定庫存數量，直接通知老闆"
+            style="width:100%;height:34px;background:var(--accent-soft);color:var(--accent);border:none;border-radius:9px;font-family:'Noto Sans TC',sans-serif;font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation;">
+            不確定庫存數量
           </button>
         </div>
       </div>
@@ -3724,6 +4048,7 @@ function submitStockReport(itemId) {
   });
 
   if (input) input.value = '';
+  window._stockReopened.delete(itemId);
   showToast(`已回報　${item?.name}　剩 ${qty} ${item?.unit}`);
   notifyGAS({ type: 'stockAlert', itemName: item?.name, qty, unit: item?.unit, reporter: currentUser.name, time: timeStr });
 }
@@ -3740,6 +4065,7 @@ function quickStockReport(itemId) {
   set(ref(db, `jenka/stockAlerts/reports/${dateKey}/${itemId}`), {
     qty: null, reporter: currentUser.name, time: timeStr, timestamp: now2.getTime(), ordered: false
   });
+  window._stockReopened.delete(itemId);
   showToast(`已通知老闆　${item?.name}　需補貨`);
   notifyGAS({ type: 'stockAlert', itemName: item?.name, qty: '需補貨', unit: item?.unit, reporter: currentUser.name, time: timeStr });
 }
@@ -3752,16 +4078,70 @@ function markStockOrdered(itemId) {
   const now2 = new Date();
   const timeStr = `${String(now2.getHours()).padStart(2,'0')}:${String(now2.getMinutes()).padStart(2,'0')}`;
   update(ref(db, `jenka/stockAlerts/reports/${dateKey}/${itemId}`), { ordered: true, orderedAt: timeStr });
+  window._stockReopened.delete(itemId);
   showToast('已標記叫貨完成');
+}
+
+// 快捷數量：點 −／＋ 調整數量，免打字
+function stepStockQty(itemId, delta) {
+  const inp = document.getElementById(`stock-qty-${itemId}`);
+  if (!inp) return;
+  let v = parseFloat(inp.value);
+  if (isNaN(v)) v = 0;
+  v = Math.max(0, v + delta);
+  inp.value = v;
+}
+
+// 不需補（解除）：把待補貨結案，但不算叫貨；品項回到一般可回報狀態
+function dismissStockReport(itemId) {
+  if (!window._fb) return;
+  const open = getOpenStockReport(itemId);
+  if (!open) return;
+  const { db, ref, update } = window._fb;
+  const now2 = new Date();
+  const timeStr = `${String(now2.getHours()).padStart(2,'0')}:${String(now2.getMinutes()).padStart(2,'0')}`;
+  update(ref(db, `jenka/stockAlerts/reports/${open.date}/${itemId}`), { dismissed: true, dismissedAt: timeStr });
+  window._stockReopened.delete(itemId);
+  showToast('已解除，不列入待補貨');
+}
+
+// 管理員「⋯」選單：把次要操作收進浮層，卡片只留狀態與主要動作
+function openStockItemMenu(itemId) {
+  if (!currentUser || currentUser.role !== 'admin') return;
+  const item = stockItems[itemId]; if (!item) return;
+  const open = getOpenStockReport(itemId);
+  const modal = document.getElementById('modal');
+  const overlay = document.getElementById('overlay');
+  const rowStyle = "width:100%;text-align:left;height:44px;padding:0 14px;border:1px solid var(--border);border-radius:10px;background:var(--cream);color:var(--ink);font-family:'Noto Sans TC',sans-serif;font-size:14px;cursor:pointer;touch-action:manipulation;";
+  modal.innerHTML = `
+    <h2>${item.name}</h2>
+    <div style="display:flex;flex-direction:column;gap:8px;margin:16px 0;">
+      ${open ? `<button style="${rowStyle}" onclick="markStockOrdered('${itemId}');closeModal();">標記叫貨</button>` : ''}
+      ${open ? `<button style="${rowStyle}" onclick="dismissStockReport('${itemId}');closeModal();">不需補（解除待補貨）</button>` : ''}
+      <button style="${rowStyle}" onclick="closeModal();scheduleStockOrder('${itemId}');">排定叫貨</button>
+      <button style="${rowStyle}color:var(--danger);" onclick="closeModal();deleteStockItem('${itemId}');">刪除品項</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+    </div>`;
+  overlay.classList.add('open');
 }
 
 function showAddStockItem() {
   if (!currentUser || currentUser.role !== 'admin') return;
   const modal = document.getElementById('modal');
   const overlay = document.getElementById('overlay');
+  const presetChips = (stockPresets && stockPresets.length) ? `
+      <div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">品項範本（點一下帶入）</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          ${stockPresets.map((p,i)=>`<button type="button" onclick="applyStockPreset(${i})" style="font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:16px;background:var(--cream);color:var(--ink2);font-family:'Noto Sans TC',sans-serif;cursor:pointer;touch-action:manipulation;">${p.name}</button>`).join('')}
+        </div>
+      </div>` : '';
   modal.innerHTML = `
     <h2>新增追蹤品項</h2>
     <div style="display:flex;flex-direction:column;gap:12px;margin:16px 0;">
+      ${presetChips}
       <div>
         <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">品項名稱</div>
         <input id="stockNewName" type="text" placeholder="例：蛋餅皮"
@@ -3791,6 +4171,58 @@ function showAddStockItem() {
     </div>`;
   overlay.classList.add('open');
   setTimeout(() => document.getElementById('stockNewName')?.focus(), 100);
+}
+
+// 點品項範本標籤 → 自動填入新增表單
+function applyStockPreset(i) {
+  const p = stockPresets[i]; if (!p) return;
+  const n = document.getElementById('stockNewName'); if (n) n.value = p.name || '';
+  const u = document.getElementById('stockNewUnit'); if (u) u.value = p.unit || '';
+  const t = document.getElementById('stockNewThreshold'); if (t) t.value = (p.threshold!=null ? p.threshold : '');
+  const o = document.getElementById('stockNewNote'); if (o) o.value = p.note || '';
+}
+
+// 後台維護「品項範本」清單（管理員）
+function manageStockPresets() {
+  if (!currentUser || currentUser.role !== 'admin') return;
+  const modal = document.getElementById('modal');
+  const overlay = document.getElementById('overlay');
+  const txt = (stockPresets||[]).map(p => {
+    const cells = [p.name||'', p.unit||'', (p.threshold!=null?p.threshold:''), (p.note||'')];
+    while (cells.length && (cells[cells.length-1]==='' || cells[cells.length-1]==null)) cells.pop();
+    return cells.join('｜');
+  }).join('\n');
+  modal.innerHTML = `
+    <h2>品項範本</h2>
+    <div style="font-size:12px;color:var(--ink3);margin:8px 0 10px;line-height:1.7;">
+      一行一個，格式：<code style="background:var(--tag-bg);padding:1px 5px;border-radius:4px;">名稱｜單位｜水位｜備註</code><br>
+      單位省略預設「個」，水位與備註可留空。新增品項時這份清單會變成可一鍵帶入的標籤。
+    </div>
+    <textarea id="stockPresetText" placeholder="蛋餅皮｜包｜2&#10;吐司｜條&#10;鋁箔紙｜捲｜1｜快沒先說"
+      style="width:100%;height:170px;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:12px;background:var(--cream);color:var(--ink);outline:none;resize:vertical;line-height:1.8;">${txt}</textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-order" onclick="saveStockPresets()">儲存</button>
+    </div>`;
+  overlay.classList.add('open');
+}
+
+function saveStockPresets() {
+  if (!window._fb) return;
+  const raw = (document.getElementById('stockPresetText')||{value:''}).value;
+  const arr = [];
+  raw.split('\n').forEach(line => {
+    const s = line.trim(); if (!s) return;
+    const parts = s.split(/[｜|]/).map(x => x.trim());
+    if (!parts[0]) return;
+    const thrRaw = parts[2];
+    const threshold = (thrRaw!=='' && thrRaw!=null && !isNaN(parseFloat(thrRaw))) ? parseFloat(thrRaw) : null;
+    arr.push({ name: parts[0], unit: parts[1] || '個', threshold, note: parts[3] || '' });
+  });
+  const { db, ref, set } = window._fb;
+  set(ref(db, 'jenka/stockAlerts/presets'), arr);
+  closeModal();
+  showToast('已儲存品項範本');
 }
 
 window.confirmAddStockItem = function() {
@@ -4372,6 +4804,7 @@ function fbSaveGlobal() {
     orderGreeting,
     vendorContacts,
     vendorNotes,
+    vendorDeadlines,
   }).catch(e => console.warn('FB global write error', e));
 }
 
@@ -4446,6 +4879,7 @@ function fbInitRest() {
     if (d.orderGreeting) orderGreeting = d.orderGreeting;
     if (d.vendorContacts && Object.keys(d.vendorContacts).length > 0) vendorContacts = d.vendorContacts;
     if (d.vendorNotes) vendorNotes = d.vendorNotes;
+    if (d.vendorDeadlines && typeof d.vendorDeadlines === 'object') vendorDeadlines = d.vendorDeadlines;
     // 更新登入頁店名顯示
     const loginSubtitle = document.getElementById('loginSubtitle');
     if (loginSubtitle) loginSubtitle.textContent = shopName + '點貨系統';
@@ -4474,7 +4908,7 @@ function fbInitRest() {
       });
     })(dow, key);
   }
-  // 全域載入零散品項庫存資料（總覽「待補貨」追蹤用，訂閱一次）
+  // 全域載入追蹤品項庫存資料（總覽「待補貨」追蹤用，訂閱一次）
   if (typeof loadStockData === 'function') loadStockData();
 }
 
