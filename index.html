@@ -94,14 +94,20 @@ window.dispatchEvent(new Event('fbReady'));
   .day-cell.active{background:var(--ink);border-color:var(--ink);}
   .day-cell.active .day-name,.day-cell.active .day-num{color:#fff;}
   .day-cell .day-dot{width:4px;height:4px;border-radius:50%;background:var(--accent);margin:3px auto 0;}
+  .week-bar{display:flex;align-items:center;justify-content:space-between;padding:0 20px 8px;}
+  .week-bar .wb-label{font-size:12px;font-weight:700;letter-spacing:.5px;color:var(--ink2);font-family:'DM Mono',monospace;}
+  .week-bar .wb-today{font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+  .day-nav{flex-shrink:0;width:30px;align-self:stretch;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--ink2);font-size:18px;line-height:1;cursor:pointer;font-family:'DM Mono',monospace;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;appearance:none;outline:none;}
   .day-cell .day-dot.hidden{background:transparent;}
 
-  .alert-banner{margin:10px 20px 0;background:#F6EEDD;border:1px solid #E3CE9A;border-radius:10px;padding:9px 14px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--warn);}
+  .alert-banner{margin:10px 20px 0;background:var(--warn-soft);border-radius:12px;padding:11px 15px;display:flex;align-items:center;gap:9px;font-size:12px;font-weight:500;letter-spacing:.4px;color:var(--warn);}
+  .alert-banner .ab-dot{width:6px;height:6px;border-radius:50%;background:var(--warn);flex-shrink:0;}
   .alert-banner.hidden{display:none;}
-  .completion-banner{margin:10px 20px 0;border-radius:12px;padding:12px 16px;font-size:13px;font-weight:500;line-height:1.5;text-align:center;animation:fadeInDown .4s ease;}
+  .completion-banner{margin:10px 20px 0;border-radius:12px;padding:13px 16px;font-size:13px;font-weight:500;letter-spacing:.6px;line-height:1.5;display:flex;align-items:center;justify-content:center;gap:10px;animation:fadeInDown .4s ease;}
   .completion-banner.hidden{display:none;}
-  .completion-banner.order-done{background:linear-gradient(135deg,#E9EFE9,#DCE7DE);border:1px solid #B6CDBE;color:#4C6B57;}
-  .completion-banner.all-done{background:linear-gradient(135deg,#F6EEDD,#F6EEDD);border:1px solid #E3CE9A;color:#B6863C;}
+  .completion-banner.order-done{background:var(--ok-soft);color:var(--ok);}
+  .completion-banner.all-done{background:var(--accent-soft);color:var(--accent);}
+  .completion-banner .cb-ring{width:18px;height:18px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
   @keyframes fadeInDown{from{opacity:0;transform:translateY(-8px);}to{opacity:1;transform:translateY(0);}}
 
   /* ── 廠商列表 ── */
@@ -188,6 +194,16 @@ window.dispatchEvent(new Event('fbReady'));
   .order-tag.zero{background:var(--tag-bg);color:var(--ink3);}
   .status-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
   .dot-ok{background:var(--ok);}.dot-warn{background:var(--warn);}.dot-danger{background:var(--danger);}.dot-empty{background:#D8D2C6;}
+  .stock-chip{font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;letter-spacing:.5px;line-height:1.6;}
+  .stock-chip.danger{background:var(--danger-soft);color:var(--danger);}
+  .stock-chip.warn{background:var(--warn-soft);color:var(--warn);}
+  .a3-top{display:flex;justify-content:space-between;align-items:baseline;font-size:11.5px;}
+  .a3-l{color:var(--ink3);letter-spacing:.5px;}
+  .a3-r{font-family:'DM Mono',monospace;color:var(--ink2);}
+  .a3-r.ok{color:var(--ok);}
+  .a3-bar{height:3px;background:var(--border);border-radius:2px;margin-top:7px;overflow:hidden;}
+  .a3-fill{height:100%;width:0;background:var(--warn);border-radius:2px;transition:width .25s ease,background .25s ease;}
+  .a3-fill.ok{background:var(--ok);}
   .item-controls{display:flex;align-items:center;justify-content:flex-end;gap:5px;flex-wrap:wrap;}
   .qty-btn{width:30px;height:30px;border-radius:8px;border:0.5px solid var(--border);background:var(--cream);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--ink2);user-select:none;flex-shrink:0;}
   .qty-btn:active{background:var(--border);}
@@ -339,6 +355,8 @@ window.dispatchEvent(new Event('fbReady'));
   .drag-handle{width:28px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3.5px;cursor:grab;flex-shrink:0;opacity:0.3;padding:4px 2px;touch-action:none;}
   .drag-handle:active{cursor:grabbing;opacity:0.6;}
   .drag-handle span{display:block;width:14px;height:2px;background:var(--ink);border-radius:2px;}
+  .iae-input{transition:border-color .35s ease, background-color .35s ease;}
+  .iae-input.saved-flash{border-color:var(--ok)!important;background:var(--ok-soft)!important;}
 
   /* ── 庫存回報頁面 ── */
   #stockPage{display:none;}
@@ -348,10 +366,10 @@ window.dispatchEvent(new Event('fbReady'));
   .stock-item-name{font-weight:600;font-size:14px;}
   .stock-item-meta{font-size:11px;color:var(--ink3);margin-top:2px;}
   .stock-status-badge{font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;white-space:nowrap;}
-  .stock-status-ok{background:#ECE7DD;color:#6E5847;}
-  .stock-status-low{background:#F3E3DC;color:#A2503C;animation:pulse-red 2s infinite;}
-  .stock-status-ordered{background:#E9EFE9;color:#5F8268;}
-  @keyframes pulse-red{0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,0.3);}50%{box-shadow:0 0 0 4px rgba(192,57,43,0);}}
+  .stock-status-ok{background:var(--tint);color:var(--ink2);}
+  .stock-status-low{background:var(--warn-soft);color:var(--warn);}
+  .stock-status-danger{background:var(--danger-soft);color:var(--danger);}
+  .stock-status-ordered{background:var(--ok-soft);color:var(--ok);}
   .stock-history{padding:0 16px 12px;border-top:1px solid var(--border);}
   .stock-history-item{padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;}
   .stock-history-item:last-child{border-bottom:none;}
@@ -545,24 +563,27 @@ window.dispatchEvent(new Event('fbReady'));
         <div class="announce-inner">
           <div class="announce-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l14-5v12L3 14z"/><path d="M11.5 16.5a2.5 2.5 0 0 1-4.9-.6"/><path d="M19 9.5a3 3 0 0 1 0 5"/></svg></div>
           <div class="announce-body">
-            <div class="announce-label">今日公告<span id="announceEditHint" style="display:none;font-weight:500;letter-spacing:0;color:var(--accent);margin-left:8px;">· 點此編輯</span></div>
+            <div class="announce-label"><span id="announceLabelText">今日公告</span><span id="announceEditHint" style="display:none;font-weight:500;letter-spacing:0;color:var(--accent);margin-left:8px;">· 點此編輯</span></div>
             <span id="announcementText"></span>
           </div>
           <button class="announce-close" onclick="event.stopPropagation();closeAnnouncement()" aria-label="關閉">✕</button>
         </div>
       </div>
       <button id="announceSetBtn" onclick="showAnnouncementEditor()" style="display:none;margin:0 20px 14px;width:calc(100% - 40px);padding:10px;background:none;border:1px dashed var(--border);border-radius:12px;color:var(--ink3);font-size:13px;font-family:'Noto Sans TC',sans-serif;cursor:pointer;text-align:center;">＋ 設定今日公告</button>
+      <div class="week-bar" id="weekBar"></div>
       <div class="day-strip" id="dayStrip"></div>
-      <div class="alert-banner hidden" id="alertBanner">⚠️ <span id="alertText"></span></div>
+      <div id="previewNotice" style="display:none;margin:12px 20px 0;background:var(--tint);border-radius:10px;padding:9px 14px;font-size:12px;color:var(--ink2);letter-spacing:.3px;"></div>
+      <div class="alert-banner hidden" id="alertBanner"><span class="ab-dot"></span><span id="alertText"></span></div>
       <div class="completion-banner hidden" id="completionBanner"></div>
-      <div class="ov-section-label">今日廠商點貨</div>
       <div class="vendor-status-bar" id="vendorStatusBar"></div>
+      <div id="progressCaption" style="display:flex;justify-content:space-between;align-items:baseline;margin:16px 20px 0;font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);"><span id="progressLabel">點貨進度</span><span id="progressPct" style="color:var(--ink2);font-family:'DM Mono',monospace;letter-spacing:.5px;">0%</span></div>
       <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
       <div class="summary">
         <div class="stat danger"><div class="label">尚未點貨</div><div class="value" id="statPending">0</div></div>
         <div class="stat warn"><div class="label">尚未叫貨</div><div class="value" id="statProgress">0</div></div>
         <div class="stat ok"><div class="label">已叫貨</div><div class="value" id="statDone">0</div></div>
       </div>
+      <div class="vendor-status-bar" id="stockTracker" style="margin-top:6px;"></div>
     </div>
 
     <!-- VENDOR DETAIL -->
@@ -612,7 +633,7 @@ window.dispatchEvent(new Event('fbReady'));
       <button class="btn-export-all" id="exportAllBtn" onclick="showDailySummary()">今日點貨摘要</button>
     </div>
     <div id="vendorBar" style="display:none;gap:10px;width:100%;flex-direction:column;">
-      <div id="vendorProgress" style="display:none;font-size:12px;color:var(--ink3);text-align:center;padding:4px 0;"></div>
+      <div id="vendorProgress" style="display:none;padding:3px 2px 6px;"></div>
       <div style="display:flex;gap:10px;">
         <button class="btn-clear" onclick="clearVendor()">清除</button>
         <button class="btn-submit" id="vendorSubmitBtn" onclick="submitVendor()">送出點貨單</button>
@@ -661,7 +682,7 @@ window.dispatchEvent(new Event('fbReady'));
       <div class="schedule-editor" id="scheduleEditor"></div>
     </div>
     <div id="qtyAdminView" style="display:none;">
-      <p class="admin-desc" style="margin-top:10px;">設定當天需要備多少庫存。員工點貨填入現有數量後，系統會自動算出叫貨量（需備庫存 − 現有數量）。</p>
+      <p class="admin-desc" style="margin-top:10px;">設定當天需要備多少庫存（需備量）。員工點貨填入現有數量後，系統會自動算出叫貨量（需備量 − 現有數量），最多不超過該品項的「最高上限」。</p>
       <div class="admin-tabs" id="adminTabBar"></div>
       <div id="adminItemContainer"></div>
     </div>
@@ -701,7 +722,7 @@ window.dispatchEvent(new Event('fbReady'));
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
             <div>
-              <div style="font-size:11px;color:var(--ink3);margin-bottom:4px;">需備庫存</div>
+              <div style="font-size:11px;color:var(--ink3);margin-bottom:4px;">最高上限</div>
               <input id="newItemSafe" placeholder="5" type="number" min="0" step="0.1" style="width:100%;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);outline:none;">
             </div>
             <div>
@@ -773,7 +794,7 @@ window.dispatchEvent(new Event('fbReady'));
 
     <!-- 廠商（叫貨營運） -->
     <div id="vendorsAdminView" style="display:none;">
-      <p class="admin-desc" style="margin-top:10px;">設定廠商清單、每日開啟、LINE 連結與備注，儲存後立即生效。</p>
+      <p class="admin-desc" style="margin-top:10px;">設定廠商清單、每日開啟、LINE 連結與備註，儲存後立即生效。</p>
       <div style="margin:12px 20px 0;display:flex;flex-direction:column;gap:10px;">
         <!-- 廠商清單 -->
         <div class="admin-item">
@@ -799,8 +820,8 @@ window.dispatchEvent(new Event('fbReady'));
 
         <!-- 廠商備注 -->
         <div class="admin-item">
-          <div class="admin-item-name">廠商備注</div>
-          <div style="font-size:11px;color:var(--ink3);margin-bottom:8px;">每行一個，格式：廠商名稱｜備注內容（例如：週三休息、最低叫貨 500 元）</div>
+          <div class="admin-item-name">廠商備註</div>
+          <div style="font-size:11px;color:var(--ink3);margin-bottom:8px;">每行一個，格式：廠商名稱｜備註內容（例如：週三休息、最低叫貨 500 元）</div>
           <textarea id="sysVendorNotes" style="width:100%;height:100px;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:12px;background:var(--cream);color:var(--ink);outline:none;resize:vertical;line-height:1.8;"></textarea>
         </div>
       </div>
@@ -826,6 +847,12 @@ window.dispatchEvent(new Event('fbReady'));
             <code style="background:var(--tag-bg);padding:1px 5px;border-radius:4px;">{shop}</code> 會替換為店名，
             <code style="background:var(--tag-bg);padding:1px 5px;border-radius:4px;">{date}</code> 會替換為日期
           </div>
+        </div>
+        <!-- 資料備份 -->
+        <div class="admin-item">
+          <div class="admin-item-name">資料備份</div>
+          <div style="font-size:11px;color:var(--ink3);margin:6px 0 10px;line-height:1.6;">把目前所有後台設定（廠商、品項、排程、需備量、店家資訊）匯出成一個檔案存著。換手機或誤刪時可作為備份依據。</div>
+          <button onclick="exportConfig()" style="width:100%;height:38px;background:var(--ink);color:#fff;border:none;border-radius:10px;font-family:'Noto Sans TC',sans-serif;font-size:14px;font-weight:700;cursor:pointer;touch-action:manipulation;">匯出設定備份</button>
         </div>
       </div>
     </div>
@@ -1059,6 +1086,7 @@ let adminGroup='ops';
 const now=new Date();
 const todayDow=now.getDay();
 let viewDow=todayDow;
+let weekOffset=0; // 0=本週，-1=上週，+1=下週…（用於日期條前後切換）
 let activeVendor=null;
 const qty={};
 ITEMS_DEF.forEach(i=>qty[i.id]='');
@@ -1152,6 +1180,8 @@ function switchAdminGroup(group){
   switchAdminNav(ADMIN_GROUPS[group][0]);
 }
 function switchAdminNav(nav){
+  // 離開品項頁且仍在編輯模式 → 先存檔，避免未存的編輯遺失
+  if(adminNav==='items' && itemsEditMode && nav!=='items'){ if(typeof commitItemEdits==='function') commitItemEdits(); itemsEditMode=false; }
   adminNav=nav;
   // 直接點子分頁時，同步大分類狀態
   const grp=ADMIN_GROUPS.ops.includes(nav)?'ops':'sys';
@@ -1198,16 +1228,77 @@ function backToOverview(){
   document.getElementById('vendorBar').style.display='none';
   renderOverview();
 }
+function viewDate(dow, off){
+  const d=new Date(now);
+  d.setDate(now.getDate() - todayDow + dow + (off!==undefined?off:weekOffset)*7);
+  return d;
+}
+function dateKeyFor(dow, off){
+  const d=viewDate(dow, off);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function viewDateKey(){ return dateKeyFor(viewDow, weekOffset); }
+function isViewingToday(){ return weekOffset===0 && viewDow===todayDow; }
+
 function renderDayStrip(){
-  document.getElementById('dayStrip').innerHTML=[0,1,2,3,4,5,6].map(dow=>{
-    const d=new Date(now);d.setDate(now.getDate()-todayDow+dow);
+  // 週標頭：所視週的日期範圍 ＋（非本週時）回今天
+  const wb=document.getElementById('weekBar');
+  if(wb){
+    const start=viewDate(0), end=viewDate(6);
+    const fmt=d=>`${d.getMonth()+1}/${d.getDate()}`;
+    const label = weekOffset===0 ? `本週 ${fmt(start)}–${fmt(end)}`
+      : `${fmt(start)}–${fmt(end)}`;
+    wb.innerHTML = `<span class="wb-label">${label}</span>`
+      + (weekOffset!==0 ? `<button class="wb-today" onclick="goToday()">回今天</button>` : `<span style="font-size:11px;color:var(--ink3);font-family:'DM Mono',monospace;">第 ${weekOffset>0?'+':''}${weekOffset||0} 週</span>`);
+  }
+  const cells=[0,1,2,3,4,5,6].map(dow=>{
+    const d=viewDate(dow);
+    const isToday = weekOffset===0 && dow===todayDow;
     const hasFixed=(weeklySchedule[dow]||[]).length>0;
-    return`<button class="day-cell${dow===todayDow?' today':''}${dow===viewDow?' active':''}" onclick="switchDay(${dow})" style="font-family:'DM Mono',monospace;border:1px solid var(--border);">
+    return`<button class="day-cell${isToday?' today':''}${dow===viewDow?' active':''}" onclick="switchDay(${dow})" style="font-family:'DM Mono',monospace;">
       <div class="day-name">週${DAY_NAMES[dow]}</div><div class="day-num">${d.getDate()}</div>
       <div class="day-dot${hasFixed?'':' hidden'}"></div></button>`;
   }).join('');
+  document.getElementById('dayStrip').innerHTML =
+    `<button class="day-nav" onclick="switchWeek(-1)" aria-label="上一週">‹</button>`
+    + cells
+    + `<button class="day-nav" onclick="switchWeek(1)" aria-label="下一週">›</button>`;
 }
-function switchDay(dow){viewDow=dow;backToOverview();renderDayStrip();}
+function switchDay(dow){viewDow=dow;backToOverview();renderDayStrip();if(typeof loadAnnouncement==='function')loadAnnouncement();}
+function switchWeek(delta){weekOffset+=delta;activeVendor=null;document.getElementById('vendorView').style.display='none';document.getElementById('overviewView').style.display='block';document.getElementById('overviewBar').style.display='flex';document.getElementById('vendorBar').style.display='none';renderDayStrip();renderOverview();if(typeof loadAnnouncement==='function')loadAnnouncement();}
+function goToday(){weekOffset=0;viewDow=todayDow;backToOverview();renderDayStrip();if(typeof loadAnnouncement==='function')loadAnnouncement();}
+
+// 非本週的預覽模式：唯讀排定廠商＋該日公告＋該日預定叫貨
+function renderPreviewOverview(isAdmin){
+  setLiveWidgets(false);
+  const ab=document.getElementById('alertBanner'); if(ab) ab.classList.add('hidden');
+  const cb=document.getElementById('completionBanner'); if(cb){ cb.className='completion-banner hidden'; cb.innerHTML=''; }
+  const ob=document.getElementById('overviewBar'); if(ob) ob.style.display='none';
+  const d=viewDate(viewDow);
+  const dateLabel=`${d.getMonth()+1}/${d.getDate()} 週${DAY_NAMES[viewDow]}`;
+  const pn=document.getElementById('previewNotice');
+  if(pn){ pn.style.display='block'; pn.innerHTML=`預覽 · ${dateLabel}　<span style="color:var(--ink3);">點貨/叫貨請於當天操作</span>`; }
+  if(typeof syncAnnounceUI==='function') syncAnnounceUI();
+  // 排定處理廠商（唯讀；固定週排程）
+  const bar=document.getElementById('vendorStatusBar');
+  const fixed=(weeklySchedule[viewDow]||[]).filter(v=>!OPT_IN_VENDORS.includes(v));
+  let html='';
+  if(fixed.length===0){
+    html=`<div class="no-vendor-state"><div style="font-size:30px">🗓️</div><p>這天沒有固定廠商<br>如需臨時叫貨可設公告提醒</p></div>`;
+  } else {
+    html=`<div class="ov-section-label" style="margin:8px 0 0;">排定處理廠商<span style="font-weight:700;color:var(--ink2);font-family:'DM Mono',monospace;letter-spacing:0;">${fixed.length}</span></div>`;
+    html+=fixed.map(v=>`<div class="vendor-status-row" style="width:100%;text-align:left;border:1px solid var(--border);cursor:default;">
+      <div class="vsr-icon" style="background:var(--ink3);">–</div>
+      <div class="vsr-left"><div class="vsr-name">${v}</div><div class="vsr-sub">固定排程</div></div>
+      <div class="vsr-right"><span class="vsr-badge" style="background:var(--tint);color:var(--ink2);">預定</span></div>
+    </div>`).join('');
+    html+=`<div style="font-size:11px;color:var(--ink3);padding:8px 2px 0;">蔬菜、南北貨等不定期廠商，當天由管理員開啟</div>`;
+  }
+  bar.innerHTML=html;
+  // 該日預定叫貨（追蹤品項）
+  if(typeof renderScheduledForDate==='function') renderScheduledForDate(viewDateKey());
+  else { const st=document.getElementById('stockTracker'); if(st) st.innerHTML=''; }
+}
 
 function vendorState(vendor,dow){
   if(unlockedRecheck[dow][vendor])return'unlocked';
@@ -1216,8 +1307,19 @@ function vendorState(vendor,dow){
   return filled===0?'pending':'progress';
 }
 
+function setLiveWidgets(show){
+  const disp = show ? '' : 'none';
+  const cap=document.getElementById('progressCaption'); if(cap) cap.style.display = show ? 'flex' : 'none';
+  const pb=document.querySelector('.progress-bar'); if(pb) pb.style.display = disp;
+  const sm=document.querySelector('.summary'); if(sm) sm.style.display = show ? 'grid' : 'none';
+}
+
 function renderOverview(){
   const isAdmin = currentUser && currentUser.role === 'admin';
+  // 非本週 → 預覽模式（唯讀排定廠商＋該日公告＋該日預定叫貨）
+  if(weekOffset!==0){ renderPreviewOverview(isAdmin); return; }
+  setLiveWidgets(true);
+  const previewNotice=document.getElementById('previewNotice'); if(previewNotice) previewNotice.style.display='none';
   const schedVendors = weeklySchedule[viewDow] || [];
 
   // 員工只看到排程廠商 + 已開啟的 opt-in 廠商
@@ -1238,7 +1340,7 @@ function renderOverview(){
   if(vendors.length === 0){
     bar.innerHTML = `<div class="no-vendor-state"><div style="font-size:32px">📭</div><p>今日無進貨廠商<br>可至後台設定新增</p></div>`;
   } else {
-    bar.innerHTML = vendors.map(v => {
+    const rows = vendors.map(v => {
       const isOptIn = OPT_IN_VENDORS.includes(v);
       const isEnabled = optInToday[viewDow][v];
       const state = isOptIn && !isEnabled ? 'opt-off' : vendorState(v, viewDow);
@@ -1246,9 +1348,9 @@ function renderOverview(){
       const filled = vitems.filter(i => qty[i.id] !== '').length;
       const sub = submitted[viewDow][v];
 
-      // opt-in 廠商且未開啟 → 只有管理員能看到，顯示開關卡
+      // opt-in 廠商且未開啟 → 只有管理員能看到，顯示開關卡（歸入待點區）
       if(isOptIn && !isEnabled && isAdmin){
-        return `<div class="vendor-status-row opt-off-row" style="border:1.5px dashed var(--border);background:var(--cream);opacity:0.75;">
+        return {group:'pending', html:`<div class="vendor-status-row opt-off-row" style="border:1.5px dashed var(--border);background:var(--cream);opacity:0.75;">
           <div class="vsr-icon" style="background:var(--tag-bg);font-size:13px;">🔕</div>
           <div class="vsr-left">
             <div class="vsr-name" style="color:var(--ink3);">${v}</div>
@@ -1257,7 +1359,7 @@ function renderOverview(){
           <div class="vsr-right">
             <button class="btn-opt-in-toggle" onclick="toggleOptIn(${viewDow},'${v}')">今日需點貨</button>
           </div>
-        </div>`;
+        </div>`};
       }
 
       // opt-in 廠商已開啟 → 正常顯示，管理員多一個「取消」按鈕
@@ -1268,8 +1370,14 @@ function renderOverview(){
         const isRe = sub.history && sub.history.length > 1;
         badgeText = isRe ? '已重新點貨' : '已送出'; badgeCls = isRe ? 'badge-recheck' : 'badge-done';
         if(isRe) rowCls = 'rechecked';
-        subText = `${sub.checker} · ${sub.time}`;
-        if(ordered[viewDow][v]){ iconCls='ordered'; icon='✓'; subText = `${sub.checker} · ${sub.time} ｜ 已叫貨 ${ordered[viewDow][v].time}`; }
+        // 依本次點貨結果統計急缺/偏低品項，讓人進廠商前就先知道
+        let dCnt=0,wCnt=0;
+        vitems.filter(i=>i.active!==false).forEach(i=>{const s=getItemStatus(i); if(s==='danger')dCnt++; else if(s==='warn')wCnt++;});
+        let stockTag='';
+        if(dCnt>0) stockTag=` <span style="color:var(--danger);font-weight:700;">· 🔴急缺${dCnt}</span>`;
+        else if(wCnt>0) stockTag=` <span style="color:var(--warn);font-weight:700;">· 🟡偏低${wCnt}</span>`;
+        subText = `${sub.checker} · ${sub.time}${stockTag}`;
+        if(ordered[viewDow][v]){ iconCls='ordered'; icon='✓'; subText = `${sub.checker} · ${sub.time}${stockTag} ｜ 已叫貨 ${ordered[viewDow][v].time}`; }
       } else if(state === 'unlocked'){
         icon='–'; iconCls='pending'; badgeText='尚未點貨'; badgeCls='badge-pending'; rowCls='';
         subText = '管理員已回復狀態，等待重新點貨';
@@ -1282,7 +1390,7 @@ function renderOverview(){
         ? `<span style="font-size:10px;background:#E8EFFF;color:#3A6BC4;padding:1px 7px;border-radius:10px;margin-right:4px;cursor:pointer;" onclick="event.stopPropagation();toggleOptIn(${viewDow},'${v}')">✓ 今日點貨 ×</span>`
         : '';
 
-      return `<button class="vendor-status-row${rowCls ? ' '+rowCls : ''}${ordered[viewDow][v] ? ' ordered' : ''}" onclick="openVendor('${v}')" style="width:100%;text-align:left;border:1px solid var(--border);font-family:'Noto Sans TC',sans-serif;">
+      return {group: state==='done'?'done':'pending', html:`<button class="vendor-status-row${rowCls ? ' '+rowCls : ''}${ordered[viewDow][v] ? ' ordered' : ''}" onclick="openVendor('${v}')" style="width:100%;text-align:left;border:1px solid var(--border);font-family:'Noto Sans TC',sans-serif;">
         <div class="vsr-icon ${iconCls}">${icon}</div>
         <div class="vsr-left">
           <div class="vsr-name">${v}${isOptIn && isEnabled ? '<span style="font-size:9px;background:#E8EFFF;color:#3A6BC4;padding:1px 6px;border-radius:8px;margin-left:6px;font-weight:400;">今日點貨</span>' : ''}</div>
@@ -1301,8 +1409,17 @@ function renderOverview(){
           }
           <span class="vsr-chevron">›</span>
         </div>
-      </button>`;
-    }).join('');
+      </button>`};
+    });
+
+    // 拆兩段：今日待點（置頂）／已完成（收下方）
+    const pendingRows = rows.filter(r => r.group === 'pending');
+    const doneRows = rows.filter(r => r.group === 'done');
+    const secLabel = (text, n, col) => `<div class="ov-section-label" style="margin:8px 0 0;">${text}<span style="font-weight:700;color:${col};font-family:'DM Mono',monospace;letter-spacing:0;">${n}</span></div>`;
+    let barHtml = '';
+    if(pendingRows.length) barHtml += secLabel('今日待點', pendingRows.length, 'var(--accent)') + pendingRows.map(r => r.html).join('');
+    if(doneRows.length) barHtml += secLabel('已完成', doneRows.length, 'var(--ok)') + doneRows.map(r => r.html).join('');
+    bar.innerHTML = barHtml;
   }
 
   const allVisible = [...visibleScheduled, ...activeOptIn];
@@ -1315,7 +1432,15 @@ function renderOverview(){
   document.getElementById('statProgress').textContent = statUnordered;
   document.getElementById('statDone').textContent = statOrdered;
   const _sub=document.getElementById('subtitle'); if(_sub) _sub.textContent = `週${DAY_NAMES[viewDow]} · ${statOrdered}/${allVisible.length} 廠商已叫貨`;
-  document.getElementById('progressFill').style.width = allVisible.length > 0 ? (statOrdered / allVisible.length * 100).toFixed(0) + '%' : '0%';
+  // 進度依身分切換：員工看「點貨進度」(已送出/全部)、管理員看「叫貨進度」(已叫貨/全部)
+  const statSubmitted = statUnordered + statOrdered;
+  const progNum = isAdmin ? statOrdered : statSubmitted;
+  const progPct = allVisible.length > 0 ? Math.round(progNum / allVisible.length * 100) : 0;
+  const progLabelEl = document.getElementById('progressLabel');
+  const progPctEl = document.getElementById('progressPct');
+  if(progLabelEl) progLabelEl.textContent = isAdmin ? '叫貨進度' : '點貨進度';
+  if(progPctEl) progPctEl.textContent = `${progNum}/${allVisible.length}　${progPct}%`;
+  document.getElementById('progressFill').style.width = progPct + '%';
 
   // 歸零的統計卡變淡
   document.querySelector('.stat.danger').classList.toggle('dimmed', statPending === 0);
@@ -1323,40 +1448,24 @@ function renderOverview(){
   // 已叫貨：還沒開始叫（全0）時也變淡，全叫完才顯眼
   document.querySelector('.stat.ok').classList.toggle('dimmed', statOrdered === 0);
 
-  // ── 完成提醒 banner ──
-  const MSGS_ORDER_DONE = [
-    '🎉 點貨全部完成！可以通知老闆叫貨了',
-    '👏 今日點貨 100%，等待叫貨中',
-    '✅ 今天所有廠商都點完囉，辛苦了！',
-  ];
-  const MSGS_ALL_DONE = [
-    '🎊 今天的叫貨全部完成囉！',
-    '✨ 今日叫貨搞定，明天食材不用擔心～',
-    '🙌 所有廠商都叫貨完畢，收工！',
-    '🎉 今天該叫的貨都叫好囉，辛苦了！',
-    '🌟 叫貨任務完成，明天開店沒問題！',
-  ];
+  // ── 完成提醒 banner（固定文案，安靜宣告）──
   const banner = document.getElementById('completionBanner');
   const allSubmitted = allVisible.length > 0 && allVisible.every(v => vendorState(v, viewDow) === 'done');
   const allOrdered = allVisible.length > 0 && allVisible.every(v => !!ordered[viewDow][v]);
 
   if (allOrdered) {
-    // 今天種子訊息固定（避免每次 render 都換），用日期當 seed
-    const seed = new Date().getDate() * 7 + viewDow;
-    const msg = MSGS_ALL_DONE[seed % MSGS_ALL_DONE.length];
     banner.className = 'completion-banner all-done';
-    banner.textContent = msg;
+    banner.innerHTML = '<span class="cb-ring">✓</span>今日叫貨完成・辛苦了';
   } else if (allSubmitted) {
-    const seed = new Date().getDate() * 3 + viewDow;
-    const msg = MSGS_ORDER_DONE[seed % MSGS_ORDER_DONE.length];
     banner.className = 'completion-banner order-done';
-    banner.textContent = msg;
+    banner.innerHTML = '<span class="cb-ring">✓</span>今日點貨完成・可通知叫貨';
   } else {
     banner.className = 'completion-banner hidden';
-    banner.textContent = '';
+    banner.innerHTML = '';
   }
   // 同步公告橫幅/編輯入口（依登入身分）
   if (typeof syncAnnounceUI === 'function') syncAnnounceUI();
+  if (typeof renderStockTracker === 'function') renderStockTracker();
 }
 
 // ── Vendor detail ──
@@ -1386,6 +1495,11 @@ function getItemStatus(item){
   if(v>=target)return'ok';
   if(v>=target*0.5)return'warn';
   return'danger';
+}
+function stockChip(st){
+  if(st==='danger') return '<span class="stock-chip danger">🔴 急缺</span>';
+  if(st==='warn') return '<span class="stock-chip warn">🟡 偏低</span>';
+  return '';
 }
 function formatTime(d){return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
 
@@ -1491,11 +1605,13 @@ function renderVendorDetail(){
       </div>
       <div id="info-${item.id}" style="display:flex;align-items:center;gap:5px;padding:3px 4px 0;">
         <span class="status-dot dot-${st}" id="dot-${item.id}"></span>
-        <span class="safe-tag">備 ${safeQty[item.id]}${item.unit}</span>
+        <span class="stock-chip-wrap" id="chip-${item.id}">${stockChip(st)}</span>
+        <span class="safe-tag">上限 ${safeQty[item.id]}${item.unit}</span>
         <span class="${otagCls}" id="otag-${item.id}">${otagText}</span>
       </div>
     </div>`;
   }).join('');
+  updateVendorProgress();
 }
 
 function onCheckerChange(){
@@ -1512,6 +1628,8 @@ var updateQty = function(id,val){
   if(el)el.className=`item status-${st}${locked?' submitted-item':''}`;
   const dot=document.getElementById(`dot-${id}`);
   if(dot)dot.className=`status-dot dot-${st}`;
+  const chip=document.getElementById(`chip-${id}`);
+  if(chip)chip.innerHTML=stockChip(st);
   const oAmt=calcOrderAmt(item,viewDow);
   const oEl=document.getElementById(`otag-${id}`);
   if(oEl){
@@ -1521,26 +1639,21 @@ var updateQty = function(id,val){
     else t=`<span class="order-tag need">叫 ${oAmt}${item.unit}</span>`;
     oEl.innerHTML=t;
   }
-  // 更新進度提示
-  if(activeVendor){
-    const vitems=ITEMS_DEF.filter(i=>i.vendor===activeVendor&&i.active!==false);
-    const unfilled=vitems.filter(i=>{
-      const o=calcOrderAmt(i,viewDow);
-      return o!==null&&(qty[i.id]===''||qty[i.id]===undefined||isNaN(parseFloat(qty[i.id])));
-    });
-    const progEl=document.getElementById('vendorProgress');
-    if(progEl){
-      if(unfilled.length>0){
-        progEl.style.display='block';
-        progEl.textContent=`還有 ${unfilled.length} 項未填`;
-        progEl.style.color='var(--warn)';
-      } else {
-        progEl.style.display='block';
-        progEl.textContent='✓ 所有品項已填寫';
-        progEl.style.color='var(--ok)';
-      }
-    }
-  }
+  // 更新進度提示（微進度）
+  if(activeVendor) updateVendorProgress();
+}
+function updateVendorProgress(){
+  const progEl=document.getElementById('vendorProgress');
+  if(!progEl||!activeVendor)return;
+  const required=ITEMS_DEF.filter(i=>i.vendor===activeVendor&&i.active!==false&&calcOrderAmt(i,viewDow)!==null);
+  const total=required.length;
+  const filled=required.filter(i=>qty[i.id]!==''&&qty[i.id]!==undefined&&!isNaN(parseFloat(qty[i.id]))).length;
+  const done=total>0&&filled===total;
+  const pct=total>0?Math.round(filled/total*100):0;
+  progEl.style.display='block';
+  progEl.innerHTML=`
+    <div class="a3-top"><span class="a3-l">點貨進度</span><span class="a3-r${done?' ok':''}">${filled} / ${total}${done?'　已可送出':''}</span></div>
+    <div class="a3-bar"><div class="a3-fill${done?' ok':''}" style="width:${pct}%"></div></div>`;
 }
 function slidePresets(id, dir) {
   const itemEl = document.getElementById(`item-${id}`);
@@ -1691,7 +1804,7 @@ function submitVendor(){
       const o=calcOrderAmt(item,viewDow);
       const cur=qty[item.id]!==''?`現有 ${qty[item.id]}${item.unit}`:'未盤點';
       return`<div class="order-item"><div><span style="font-weight:500">${item.name}</span><br>
-        <span style="color:var(--ink3);font-size:11px">${cur} · 需備 ${safeQty[item.id]}${item.unit}</span></div>
+        <span style="color:var(--ink3);font-size:11px">${cur} · 上限 ${safeQty[item.id]}${item.unit}</span></div>
         <div class="need">叫 ${o}${item.unit}</div></div>`;
     }).join('');
   }
@@ -1774,8 +1887,14 @@ function syncAnnounceUI() {
   const textEl = document.getElementById('announcementText');
   const setBtn = document.getElementById('announceSetBtn');
   const editHint = document.getElementById('announceEditHint');
+  const labelText = document.getElementById('announceLabelText');
   const isAdmin = currentUser && currentUser.role === 'admin';
   if (!banner || !textEl) return;
+  const today = isViewingToday();
+  const d = viewDate(viewDow);
+  const dLabel = `${d.getMonth()+1}/${d.getDate()}`;
+  if (labelText) labelText.textContent = today ? '今日公告' : `${dLabel} 公告`;
+  if (setBtn) setBtn.textContent = today ? '＋ 設定今日公告' : `＋ 設定 ${dLabel} 公告`;
   if (announcement) {
     textEl.textContent = announcement;
     banner.style.display = 'block';
@@ -1784,17 +1903,18 @@ function syncAnnounceUI() {
     if (setBtn) setBtn.style.display = 'none';
   } else {
     banner.style.display = 'none';
-    // 沒有公告時，只有管理員看到「設定今日公告」入口
+    // 沒有公告時，只有管理員看到「設定公告」入口
     if (setBtn) setBtn.style.display = isAdmin ? 'block' : 'none';
   }
 }
 
+let _annUnsub = null;
 function loadAnnouncement() {
   if (!window._fb) return;
   const { db, ref, onValue } = window._fb;
-  const now2 = new Date();
-  const dateKey = `${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}-${String(now2.getDate()).padStart(2,'0')}`;
-  onValue(ref(db, `jenka/${dateKey}/announcement`), snap => {
+  if (_annUnsub) { try { _annUnsub(); } catch(e){} _annUnsub = null; }
+  const key = viewDateKey();
+  _annUnsub = onValue(ref(db, `jenka/${key}/announcement`), snap => {
     announcement = snap.val() || '';
     syncAnnounceUI();
   });
@@ -1815,16 +1935,19 @@ function showAnnouncementEditor() {
   if (!currentUser || currentUser.role !== 'admin') return;
   const modal = document.getElementById('modal');
   const overlay = document.getElementById('overlay');
+  const today = isViewingToday();
+  const d = viewDate(viewDow);
+  const dLabel = `${d.getMonth()+1}/${d.getDate()} 週${DAY_NAMES[viewDow]}`;
   modal.innerHTML = `
-    <h2>今日臨時公告</h2>
-    <div class="modal-sub">顯示給所有人看的當日提醒</div>
+    <h2>${today ? '今日臨時公告' : '排定公告'}</h2>
+    <div class="modal-sub">${today ? '顯示給所有人看的當日提醒' : `${dLabel} · 到當天會自動顯示`}</div>
     <div style="margin:14px 0;">
-      <textarea id="announcementInput" placeholder="例如：今天麵包廠商休息、南北貨改明天叫..."
+      <textarea id="announcementInput" placeholder="例如：明天公休、連假叫貨多備兩天、南北貨改週四叫..."
         style="width:100%;height:100px;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;resize:none;line-height:1.6;">${announcement}</textarea>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">取消</button>
-      <button class="btn-order" onclick="saveAnnouncement()">發布公告</button>
+      <button class="btn-order" onclick="saveAnnouncement()">${today ? '發布公告' : '排定公告'}</button>
     </div>`;
   overlay.classList.add('open');
   setTimeout(() => document.getElementById('announcementInput')?.focus(), 100);
@@ -1834,11 +1957,12 @@ function saveAnnouncement() {
   const text = document.getElementById('announcementInput').value.trim();
   if (!window._fb) return;
   const { db, ref, set } = window._fb;
-  const now2 = new Date();
-  const dateKey = `${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}-${String(now2.getDate()).padStart(2,'0')}`;
-  set(ref(db, `jenka/${dateKey}/announcement`), text || null);
+  const key = viewDateKey();
+  set(ref(db, `jenka/${key}/announcement`), text || null);
+  // 非今天（預覽）時不會有 live 訂閱回填，先本地更新
+  if (!isViewingToday()) { announcement = text || ''; syncAnnounceUI(); }
   closeModal();
-  showToast(text ? '✓ 公告已發布' : '✓ 公告已清除');
+  showToast(text ? '公告已排定' : '公告已清除');
 }
 
 function showDailyNote() {
@@ -2096,8 +2220,10 @@ function renderAdminTabs(){document.getElementById('adminTabBar').innerHTML=ALL_
 function switchAdminTab(v){adminActiveVendor=v;renderAdminTabs();renderAdminItems();}
 function renderAdminItems(){
   const vitems=ITEMS_DEF.filter(i=>i.vendor===adminActiveVendor);
+  const fixedDows=[1,2,3,4,5,6,0].filter(dow=>(weeklySchedule[dow]||[]).includes(adminActiveVendor)||ALWAYS_VENDORS.includes(adminActiveVendor));
   document.getElementById('adminItemContainer').innerHTML=`<div class="admin-section">
-    <div class="admin-section-title">${adminActiveVendor} — 各天需備庫存量</div>
+    <div class="admin-section-title">${adminActiveVendor} — 各天需備量</div>
+    <div style="font-size:11px;color:var(--ink3);margin-bottom:10px;line-height:1.6;">填一個「需備量」按「套用到叫貨日」就會帶入所有有排程的日子；要某天不一樣再展開「逐日微調」。改完自動儲存。</div>
     ${vitems.map(item=>{
       const cols=[1,2,3,4,5,6,0].map(dow=>{
         const isFixed=(weeklySchedule[dow]||[]).includes(adminActiveVendor)||ALWAYS_VENDORS.includes(adminActiveVendor);
@@ -2109,9 +2235,27 @@ function renderAdminItems(){
             value="${display}" placeholder="—" oninput="updateDraft(${item.id},${dow},this.value,this)">
         </div>`;
       }).join('');
+      // 主需備量：若所有叫貨日值相同則帶出，否則留白
+      const dvals=fixedDows.map(dow=>adminDraft[item.id]?.[dow]).filter(v=>v!==null&&v!==undefined);
+      const allSame=dvals.length>0 && dvals.length===fixedDows.length && dvals.every(v=>v===dvals[0]);
+      const mainVal=allSame?dvals[0]:'';
+      const noSchedule=fixedDows.length===0;
       return`<div class="admin-item">
         <div class="admin-item-name">${item.name}<span class="unit-tag">${item.unit}</span></div>
-        <div class="admin-grid">${cols}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+          <span style="font-size:12px;color:var(--ink2);white-space:nowrap;">需備量</span>
+          <input id="main-qty-${item.id}" class="iae-input" type="number" min="0" step="${item.step||1}" placeholder="${noSchedule?'此廠商今日無排程':'填一個數'}" value="${mainVal}" ${noSchedule?'disabled':''}
+            onkeydown="if(event.key==='Enter')applyMainQty(${item.id})"
+            style="width:70px;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 8px;text-align:center;font-family:'DM Mono',monospace;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
+          <span style="font-size:12px;color:var(--ink3);">${item.unit}</span>
+          <button onclick="applyMainQty(${item.id})" ${noSchedule?'disabled':''}
+            style="height:34px;padding:0 12px;border:none;border-radius:8px;background:${noSchedule?'var(--tint)':'var(--accent-soft)'};color:${noSchedule?'var(--ink3)':'var(--accent)'};font-size:12px;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:${noSchedule?'default':'pointer'};touch-action:manipulation;white-space:nowrap;">套用到叫貨日</button>
+        </div>
+        <button onclick="toggleQtyDays(${item.id})" id="qd-toggle-${item.id}"
+          style="display:inline-flex;align-items:center;gap:6px;background:var(--cream);border:1px solid var(--border);border-radius:8px;color:var(--ink2);font-size:12px;font-weight:500;font-family:'Noto Sans TC',sans-serif;cursor:pointer;padding:7px 13px;margin-bottom:8px;touch-action:manipulation;"><span id="qd-arrow-${item.id}">▾</span>逐日微調（不同日不同量）</button>
+        <div id="qd-days-${item.id}" style="display:none;">
+          <div class="admin-grid">${cols}</div>
+        </div>
         <div class="admin-safe-row">
           <span class="admin-safe-label">最高叫貨上限：</span>
           <input class="admin-safe-input" type="number" min="0" step="1" value="${safeQty[item.id]}" oninput="updateSafe(${item.id},this.value)">
@@ -2122,8 +2266,81 @@ function renderAdminItems(){
     }).join('')}
   </div>`;
 }
-function updateDraft(id,dow,val,el){if(!adminDraft[id])adminDraft[id]={};const n=parseFloat(val);adminDraft[id][dow]=(val===''||isNaN(n))?null:n;el.classList.toggle('has-value',val!==''&&!isNaN(n));}
-function updateSafe(id,val){const n=parseFloat(val);if(!isNaN(n)&&n>=0)safeQty[id]=n;}
+// 逐日微調展開/收合
+function toggleQtyDays(id){
+  const el=document.getElementById(`qd-days-${id}`);
+  const ar=document.getElementById(`qd-arrow-${id}`);
+  if(!el)return;
+  const open=el.style.display!=='none';
+  el.style.display=open?'none':'block';
+  if(ar)ar.textContent=open?'▾':'▴';
+}
+// 主需備量一鍵套用到所有叫貨日（先跳確認視窗）
+function applyMainQty(id){
+  const el=document.getElementById(`main-qty-${id}`);
+  const n=parseFloat(el?.value);
+  if(isNaN(n)||n<0){ showToast('請先填一個需備量'); return; }
+  const item=ITEMS_DEF.find(i=>i.id===id);
+  const modal=document.getElementById('modal'); const overlay=document.getElementById('overlay');
+  modal.innerHTML=`<h2>套用需備量</h2>
+    <div style="padding:12px 0 4px;font-size:14px;color:var(--ink2);line-height:1.7;">將需備庫存量套用至所有叫貨日中${item?`<br><span style="font-size:12px;color:var(--ink3);">${item.name}　${n} ${item.unit}</span>`:''}</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">返回</button>
+      <button class="btn-order" onclick="confirmApplyMainQty(${id})">確定</button>
+    </div>`;
+  overlay.classList.add('open');
+}
+function confirmApplyMainQty(id){
+  const el=document.getElementById(`main-qty-${id}`);
+  const n=parseFloat(el?.value);
+  if(isNaN(n)||n<0){ closeModal(); return; }
+  const vendor=ITEMS_DEF.find(i=>i.id===id)?.vendor;
+  if(!adminDraft[id])adminDraft[id]={};
+  [0,1,2,3,4,5,6].forEach(dow=>{
+    if((weeklySchedule[dow]||[]).includes(vendor)||ALWAYS_VENDORS.includes(vendor)) adminDraft[id][dow]=n;
+  });
+  closeModal();
+  renderAdminItems();
+  commitQtyQuiet();
+  showToast('已套用到叫貨日並儲存');
+}
+// 安靜提交（自動存，不洗版）
+function commitQtyQuiet(){
+  Object.keys(adminDraft).forEach(id=>{ if(!orderQty[id])orderQty[id]={}; Object.keys(adminDraft[id]).forEach(dow=>{ orderQty[id][dow]=adminDraft[id][dow]; }); });
+  if(typeof fbSaveGlobal==='function') fbSaveGlobal();
+}
+let _qtyAutoTimer=null;
+function qtyAutoSave(){ if(_qtyAutoTimer)clearTimeout(_qtyAutoTimer); _qtyAutoTimer=setTimeout(()=>{ commitQtyQuiet(); showToast('叫貨量已自動儲存'); }, 800); }
+let _safeAutoTimer=null;
+function safeAutoSave(){ if(_safeAutoTimer)clearTimeout(_safeAutoTimer); _safeAutoTimer=setTimeout(()=>{ if(typeof fbSaveItemsDef==='function') fbSaveItemsDef(); }, 800); }
+
+// 匯出後台設定備份（下載 JSON）
+function exportConfig(){
+  try{
+    const cfg = {
+      exportedAt: new Date().toISOString(),
+      shopName, orderGreeting,
+      allVendors: ALL_VENDORS,
+      optInVendors: OPT_IN_VENDORS,
+      weeklySchedule, orderQty,
+      vendorContacts, vendorNotes,
+      checkerNames,
+      items: ITEMS_DEF,
+      stockItems: (typeof stockItems!=='undefined'?stockItems:{})
+    };
+    const blob = new Blob([JSON.stringify(cfg, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const d = new Date();
+    const stamp = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+    a.href = url; a.download = `庄腳設定備份-${stamp}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 1000);
+    showToast('設定備份已匯出');
+  }catch(e){ showToast('匯出失敗，請稍後再試'); }
+}
+function updateDraft(id,dow,val,el){if(!adminDraft[id])adminDraft[id]={};const n=parseFloat(val);adminDraft[id][dow]=(val===''||isNaN(n))?null:n;el.classList.toggle('has-value',val!==''&&!isNaN(n));qtyAutoSave();}
+function updateSafe(id,val){const n=parseFloat(val);if(!isNaN(n)&&n>=0){safeQty[id]=n;const it=ITEMS_DEF.find(i=>i.id===id);if(it)it.safe=n;safeAutoSave();}}
 var adminSave = function(){Object.keys(adminDraft).forEach(id=>{if(!orderQty[id])orderQty[id]={};Object.keys(adminDraft[id]).forEach(dow=>{orderQty[id][dow]=adminDraft[id][dow];});});showToast('✓ 叫貨量已儲存');}
 function adminReset(){ITEMS_DEF.filter(i=>i.vendor===adminActiveVendor).forEach(item=>{adminDraft[item.id]={};for(let d=0;d<7;d++){const a=(weeklySchedule[d]||[]).includes(item.vendor)||ALWAYS_VENDORS.includes(item.vendor);adminDraft[item.id][d]=a?safeQty[item.id]:null;}});renderAdminItems();showToast(`已重設 ${adminActiveVendor}`);}
 
@@ -2177,6 +2394,7 @@ function doResetAllItems() {
 
 // ── 品項管理 ──
 let itemsAdminVendor = ALL_VENDORS[0];
+let itemsEditMode = false; // 品項後台「編輯內容」行內批次編輯模式
 let nextItemId = 200; // 新增品項從 200 開始編號避免衝突
 
 function renderItemsAdmin() {
@@ -2197,43 +2415,46 @@ function renderItemsAdmin() {
       if (aA !== bA) return aA ? -1 : 1;
       return (a.sort||0) - (b.sort||0);
     });
+  const activeItems = vitems.filter(i => i.active !== false);
+  const inactiveItems = vitems.filter(i => i.active === false);
+
+  // 永遠可直接編輯（免切換模式）：品名、單位、需備、增減、最小、倍數，改完自動儲存
+  const header = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+    <span style="font-size:12px;color:var(--ink3);">${itemsAdminVendor}　${activeItems.length} 項${inactiveItems.length?` · ${inactiveItems.length} 已下架`:''}</span>
+    <span style="font-size:11px;color:var(--ok);">改完自動儲存</span>
+  </div>`;
 
   if (vitems.length === 0) {
-    listEl.innerHTML = `<div style="text-align:center;padding:20px;color:var(--ink3);font-size:13px;">此廠商目前無品項</div>`;
+    listEl.innerHTML = header + `<div style="text-align:center;padding:20px;color:var(--ink3);font-size:13px;">此廠商目前無品項</div>`;
   } else {
-    const activeItems = vitems.filter(i => i.active !== false);
-    const inactiveItems = vitems.filter(i => i.active === false);
-
-    const renderItem = (item, idx) => {
+    const esc = s => String(s==null?'':s).replace(/"/g,'&quot;');
+    const numInputStyle = "width:100%;height:32px;border:1.5px solid var(--border);border-radius:8px;padding:0 4px;text-align:center;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);color:var(--ink);outline:none;";
+    const edNum = (label,id,field,val,step) => `<div><div style="font-size:10px;color:var(--ink3);margin-bottom:3px;text-align:center;">${label}</div><input class="iae-input" type="number" step="${step}" min="0" value="${val}" onchange="saveItemField(${id},'${field}',this.value,this)" style="${numInputStyle}"></div>`;
+    const row = (item) => {
       const isActive = item.active !== false;
-      const tags = [];
-      if ((item.step||1) !== 1) tags.push(`每次增減量 ${item.step}`);
-      if (item.minOrder && item.minOrder !== 1) tags.push(`最小 ${item.minOrder}${item.unit}`);
-      if (item.multiple && item.multiple > 1) tags.push(`倍數 ${item.multiple}`);
       return `<div class="drag-item" data-id="${item.id}" data-active="${isActive}"
-        draggable="true"
-        style="background:${isActive?'var(--card)':'var(--cream)'};border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;opacity:${isActive?1:0.6};">
-        <div class="drag-handle" title="拖曳排序">⠿</div>
-        <div style="flex:1;min-width:0;">
-          <div style="font-weight:500;font-size:13px;${isActive?'':'color:var(--ink3);text-decoration:line-through;'}">${item.name}</div>
-          <div style="font-size:11px;color:var(--ink3);margin-top:2px;">
-            ${item.unit}　備 ${safeQty[item.id]}${item.unit}
-            ${tags.length ? '　' + tags.join('　') : ''}
-          </div>
+        style="background:${isActive?'var(--card)':'var(--cream)'};border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:8px;${isActive?'':'opacity:.6;'}">
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+          <div class="drag-handle" draggable="true" title="拖曳排序">⠿</div>
+          <input class="iae-input" value="${esc(item.name)}" placeholder="品名" onchange="saveItemField(${item.id},'name',this.value,this)" style="flex:1;min-width:0;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'Noto Sans TC',sans-serif;font-size:13px;font-weight:500;background:var(--cream);color:var(--ink);outline:none;${isActive?'':'text-decoration:line-through;color:var(--ink3);'}">
+          <input class="iae-input" value="${esc(item.unit)}" placeholder="單位" onchange="saveItemField(${item.id},'unit',this.value,this)" style="width:48px;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 6px;text-align:center;font-family:'Noto Sans TC',sans-serif;font-size:13px;background:var(--cream);color:var(--ink);outline:none;">
+          <button onclick="toggleItemActive(${item.id})" style="padding:3px 9px;height:30px;border:1px solid ${isActive?'var(--warn)':'var(--ok)'};border-radius:8px;font-size:11px;font-family:'Noto Sans TC',sans-serif;background:${isActive?'#FFFBF2':'#EAF3EE'};color:${isActive?'var(--warn)':'var(--ok)'};cursor:pointer;touch-action:manipulation;white-space:nowrap;flex-shrink:0;">${isActive?'下架':'上架'}</button>
+          <button onclick="removeItem(${item.id})" style="padding:3px 9px;height:30px;border:1.5px solid var(--danger);border-radius:8px;font-size:11px;font-family:'Noto Sans TC',sans-serif;background:#FFF0F0;color:var(--danger);cursor:pointer;touch-action:manipulation;flex-shrink:0;">刪</button>
         </div>
-        <div style="display:flex;gap:5px;flex-shrink:0;">
-          <button onclick="toggleItemActive(${item.id})" style="padding:3px 9px;height:28px;border:1px solid ${isActive?'var(--warn)':'var(--ok)'};border-radius:8px;font-size:11px;font-family:'Noto Sans TC',sans-serif;background:${isActive?'#FFFBF2':'#EAF3EE'};color:${isActive?'var(--warn)':'var(--ok)'};cursor:pointer;touch-action:manipulation;">${isActive?'下架':'上架'}</button>
-          <button onclick="editItemStep(${item.id})" style="padding:3px 9px;height:28px;border:1px solid var(--border);border-radius:8px;font-size:11px;font-family:'Noto Sans TC',sans-serif;background:var(--cream);cursor:pointer;touch-action:manipulation;">編輯</button>
-          <button onclick="removeItem(${item.id})" style="padding:3px 9px;height:28px;border:1.5px solid var(--danger);border-radius:8px;font-size:11px;font-family:'Noto Sans TC',sans-serif;background:#FFF0F0;color:var(--danger);cursor:pointer;touch-action:manipulation;">刪</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;">
+          ${edNum('最高上限',item.id,'safe',safeQty[item.id],'0.5')}
+          ${edNum('增減',item.id,'step',item.step||1,'0.1')}
+          ${edNum('最小',item.id,'minOrder',item.minOrder||1,'1')}
+          ${edNum('倍數',item.id,'multiple',item.multiple||0,'1')}
         </div>
       </div>`;
     };
-
-    let html = '';
-    activeItems.forEach((item, idx) => { html += renderItem(item, idx); });
+    let html = header
+      + `<div style="font-size:11px;color:var(--ink3);margin-bottom:8px;line-height:1.6;">直接點欄位修改即可，改完自動儲存；握把 ⠿ 可拖曳排序。</div>`;
+    activeItems.forEach(item => { html += row(item); });
     if (inactiveItems.length > 0) {
       html += `<div style="font-size:11px;color:var(--ink3);letter-spacing:.5px;margin:10px 0 6px;padding-top:8px;border-top:1px dashed var(--border);">已下架</div>`;
-      inactiveItems.forEach((item, idx) => { html += renderItem(item, idx); });
+      inactiveItems.forEach(item => { html += row(item); });
     }
     listEl.innerHTML = html;
     initDragSort(listEl);
@@ -2242,6 +2463,71 @@ function renderItemsAdmin() {
   const vendorSel = document.getElementById('newItemVendor');
   if (vendorSel) vendorSel.innerHTML = ALL_VENDORS.map(v => `<option value="${v}">${v}</option>`).join('');
 }
+
+// 單一欄位即時存檔（品項後台直接編輯）
+function saveItemField(id, field, value, el){
+  const item = ITEMS_DEF.find(i => i.id === id);
+  if (!item) return;
+  if (field === 'name'){
+    const v = String(value).trim();
+    if (!v){ if(el) el.value = item.name; return; } // 空白不接受，還原
+    item.name = v;
+  } else if (field === 'unit'){
+    const v = String(value).trim();
+    if (!v){ if(el) el.value = item.unit; return; }
+    item.unit = v;
+  } else {
+    const n = parseFloat(value);
+    const revert = { safe: safeQty[id], step: item.step||1, minOrder: item.minOrder||1, multiple: item.multiple||0 };
+    if (isNaN(n) || n < 0){ if(el) el.value = revert[field]; return; }
+    if (field === 'safe'){ item.safe = n; safeQty[id] = n; }
+    else if (field === 'step'){ item.step = n > 0 ? n : 1; if(el && item.step!==n) el.value = item.step; }
+    else if (field === 'minOrder'){ item.minOrder = n; }
+    else if (field === 'multiple'){ item.multiple = n; }
+  }
+  fbSaveItemsDef();
+  if (el){ el.classList.add('saved-flash'); setTimeout(() => el.classList.remove('saved-flash'), 600); }
+}
+
+// 讀取編輯模式所有欄位、套用到 ITEMS_DEF（回傳更新筆數）
+function commitItemEdits(){
+  let n = 0;
+  ITEMS_DEF.filter(i => i.vendor === itemsAdminVendor).forEach(item => {
+    const nameEl = document.getElementById(`ed-name-${item.id}`);
+    if (!nameEl) return; // 不在編輯 DOM 中
+    const name = nameEl.value.trim();
+    const unitEl = document.getElementById(`ed-unit-${item.id}`);
+    const unit = (unitEl && unitEl.value.trim()) || item.unit;
+    const safe = parseFloat(document.getElementById(`ed-safe-${item.id}`).value);
+    const step = parseFloat(document.getElementById(`ed-step-${item.id}`).value);
+    const mn = parseFloat(document.getElementById(`ed-min-${item.id}`).value);
+    const mul = parseFloat(document.getElementById(`ed-mul-${item.id}`).value);
+    if (name) item.name = name;
+    item.unit = unit;
+    if (!isNaN(safe) && safe >= 0) { item.safe = safe; safeQty[item.id] = safe; }
+    if (!isNaN(step) && step > 0) item.step = step;
+    item.minOrder = (!isNaN(mn) && mn >= 0) ? mn : 1;
+    item.multiple = (!isNaN(mul) && mul >= 0) ? mul : 0;
+    n++;
+  });
+  if (n > 0) fbSaveItemsDef();
+  return n;
+}
+window.toggleItemsEditMode = function(){
+  if (itemsEditMode) {
+    const n = commitItemEdits();
+    itemsEditMode = false;
+    renderItemsAdmin();
+    showToast(`已更新 ${n} 項`);
+  } else {
+    itemsEditMode = true;
+    renderItemsAdmin();
+  }
+};
+window.cancelItemsEdit = function(){
+  itemsEditMode = false;
+  renderItemsAdmin();
+};
 
 // ── 拖曳排序 ──
 function initDragSort(container) {
@@ -2338,6 +2624,7 @@ function saveDragOrder(container) {
 }
 
 function switchItemsVendor(v) {
+  if (itemsEditMode) commitItemEdits(); // 切廠商前先存目前編輯，避免遺失
   itemsAdminVendor = v;
   renderItemsAdmin();
 }
@@ -2428,7 +2715,7 @@ window.editItemStep = function(id) {
     <div class="modal-sub">${item.name}　${item.unit}</div>
     <div style="display:flex;flex-direction:column;gap:12px;margin:16px 0;">
       <div>
-        <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">需備庫存</div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">最高上限</div>
         <div style="display:flex;align-items:center;gap:8px;">
           <input id="editSafeInput" type="number" min="0" step="0.5" value="${safeQty[id]}"
             style="flex:1;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-size:14px;font-family:'DM Mono',monospace;background:var(--cream);color:var(--ink);outline:none;">
@@ -2478,7 +2765,7 @@ window.confirmEditItemStep = function(id) {
   const minOrderVal = parseFloat(document.getElementById('editMinOrderInput').value);
   const multipleVal = parseFloat(document.getElementById('editMultipleInput').value);
   if (isNaN(stepVal) || stepVal <= 0) { showToast('⚠️ 每次增減量請輸入有效數字'); return; }
-  if (isNaN(safeVal) || safeVal < 0) { showToast('⚠️ 需備庫存請輸入有效數字'); return; }
+  if (isNaN(safeVal) || safeVal < 0) { showToast('⚠️ 最高上限請輸入有效數字'); return; }
   item.step = stepVal;
   safeQty[id] = safeVal;
   item.safe = safeVal;
@@ -2630,7 +2917,7 @@ function showOrderView(vendor){
     html+=`<div style="display:grid;grid-template-columns:1fr auto auto auto auto;gap:8px;align-items:center;padding:0 0 6px;border-bottom:1px solid var(--border);margin-bottom:4px;">
       <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;">品項</span>
       <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;text-align:center;min-width:56px;">現有數量</span>
-      <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;text-align:center;min-width:56px;">需備庫存</span>
+      <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;text-align:center;min-width:56px;">最高上限</span>
       <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;text-align:center;min-width:72px;">系統建議叫貨量</span>
       <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;text-align:center;min-width:96px;">實際叫貨</span>
     </div>`;
@@ -3080,51 +3367,252 @@ function renderAccountList() {
 // 庫存回報系統
 // ══════════════════════════════════════════
 
-let stockItems = {}; // { itemId: { name, unit, note, createdAt } }
-let stockReports = {}; // { itemId: [ { date, qty, status, reporter, timestamp, ordered, orderedAt } ] }
+let stockItems = {}; // { itemId: { name, unit, note, threshold, createdAt } }
+let stockReports = {}; // { itemId: [ { date, qty, reporter, time, timestamp, ordered, orderedAt } ] }
+let _stockReportsByDay = {}; // { dateKey: { itemId: report } } — 來源資料
+let _scheduledByDay = {};    // { dateKey: { itemId: {by,createdAt,ordered,orderedAt} } } — 老闆預定叫貨
+let _stockDayKeys = [];
+let _stockSubscribed = false;
+
+function stockTodayKey(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 
 function initStockPage() {
   const isAdmin = currentUser && currentUser.role === 'admin';
   const addBtn = document.getElementById('stockAddBtn');
   if (addBtn) addBtn.style.display = isAdmin ? '' : 'none';
   loadStockData();
+  renderStockPage();
 }
 
 function loadStockData() {
   if (!window._fb) return;
+  if (_stockSubscribed) return; // 只訂閱一次（總覽與庫存頁共用）
+  _stockSubscribed = true;
   const { db, ref, onValue } = window._fb;
   onValue(ref(db, 'jenka/stockAlerts/items'), snap => {
     stockItems = snap.val() || {};
-    loadStockReports();
+    renderStockViews();
   });
-}
-
-function loadStockReports() {
-  if (!window._fb) return;
-  const { db, ref, onValue } = window._fb;
-  // 讀取最近 7 天的回報
+  // 訂閱最近 7 天回報；每天各一個監聽，更新時以來源重建（避免重複堆疊）
   const now2 = new Date();
-  stockReports = {};
-  let loaded = 0;
-  const days = 7;
-  for (let i = 0; i < days; i++) {
+  _stockDayKeys = [];
+  for (let i = 0; i < 7; i++) {
     const d = new Date(now2);
     d.setDate(now2.getDate() - i);
     const dk = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    _stockDayKeys.push(dk);
     onValue(ref(db, `jenka/stockAlerts/reports/${dk}`), snap => {
-      const data = snap.val();
-      if (data) {
-        Object.entries(data).forEach(([itemId, report]) => {
-          if (!stockReports[itemId]) stockReports[itemId] = [];
-          stockReports[itemId].push({ ...report, date: dk });
-        });
-      }
-      loaded++;
-      if (loaded === days) renderStockPage();
+      _stockReportsByDay[dk] = snap.val() || {};
+      rebuildStockReports();
+      renderStockViews();
+    });
+    onValue(ref(db, `jenka/stockAlerts/scheduled/${dk}`), snap => {
+      _scheduledByDay[dk] = snap.val() || {};
+      renderStockViews();
     });
   }
-  if (Object.keys(stockItems).length === 0) renderStockPage();
 }
+
+function rebuildStockReports() {
+  stockReports = {};
+  _stockDayKeys.forEach(dk => {
+    const day = _stockReportsByDay[dk];
+    if (!day) return;
+    Object.entries(day).forEach(([itemId, report]) => {
+      if (!stockReports[itemId]) stockReports[itemId] = [];
+      stockReports[itemId].push({ ...report, date: dk });
+    });
+  });
+}
+
+// 取得某品項「仍未叫貨」的最新一筆回報（持續追蹤的依據）
+function getOpenStockReport(itemId){
+  const reps = (stockReports[itemId] || []).slice()
+    .sort((a,b) => b.date.localeCompare(a.date) || ((b.timestamp||0)-(a.timestamp||0)));
+  const latest = reps[0];
+  return (latest && !latest.ordered) ? latest : null;
+}
+
+// 緊急程度：無數量(一鍵需補貨)或低於水位→急缺；其餘已回報→偏低
+function stockUrgency(item, rep){
+  if(!rep) return 'ok';
+  if(rep.qty===null || rep.qty===undefined) return 'danger';
+  const t = item.threshold;
+  if(t!==null && t!==undefined && t!=='' && Number(rep.qty) <= Number(t)) return 'danger';
+  return 'warn';
+}
+
+function renderStockViews() {
+  const sp = document.getElementById('stockPage');
+  if (sp && sp.style.display !== 'none') renderStockPage();
+  renderStockTracker();
+}
+
+// 到期的「老闆預定叫貨」（日期 <= 今天且未結案）
+function getDueScheduled(){
+  const tk = stockTodayKey();
+  const out = [];
+  Object.entries(_scheduledByDay).forEach(([dk, items]) => {
+    if(dk > tk) return; // 還沒到那天
+    Object.entries(items||{}).forEach(([itemId, sc]) => {
+      if(sc && !sc.ordered && stockItems[itemId]) out.push({ id:itemId, item:stockItems[itemId], date:dk, sched:sc });
+    });
+  });
+  return out;
+}
+
+// 總覽頁「待補貨」：員工回報（未結案）＋ 老闆預定（到期未結案），持續顯示至標記完成
+function renderStockTracker(){
+  const el = document.getElementById('stockTracker');
+  if(!el) return;
+  if(weekOffset!==0) return; // 預覽週由 renderScheduledForDate 處理
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  const tk = stockTodayKey();
+
+  const reportRows = Object.entries(stockItems)
+    .map(([id,item]) => ({ id, item, rep: getOpenStockReport(id) }))
+    .filter(x => x.rep)
+    .sort((a,b)=> (stockUrgency(a.item,a.rep)==='danger'?0:1) - (stockUrgency(b.item,b.rep)==='danger'?0:1));
+  const reportedIds = new Set(reportRows.map(x => x.id));
+  const schedRows = getDueScheduled().filter(x => !reportedIds.has(x.id));
+
+  if(reportRows.length===0 && schedRows.length===0){ el.innerHTML=''; return; }
+
+  const repHtml = reportRows.map(({id,item,rep}) => {
+    const u = stockUrgency(item, rep);
+    const qtyText = (rep.qty===null||rep.qty===undefined) ? '需補貨' : `剩 ${rep.qty} ${item.unit}`;
+    const datePre = rep.date===tk ? '' : rep.date.slice(5)+' ';
+    const iconCls = u==='danger' ? 'pending' : 'in-progress';
+    const iconCh = u==='danger' ? '!' : '–';
+    const subQty = isAdmin ? `${qtyText} · ` : '';
+    const badge = isAdmin
+      ? `<span class="vsr-badge badge-need-order" onclick="event.stopPropagation();markStockOrdered('${id}')" style="cursor:pointer;">已叫貨</span>`
+      : `<span class="vsr-badge ${u==='danger'?'badge-pending':'badge-progress'}">${qtyText}</span>`;
+    return `<button class="vendor-status-row" onclick="switchTab('stock')" style="width:100%;text-align:left;border:1px solid var(--border);font-family:'Noto Sans TC',sans-serif;">
+      <div class="vsr-icon ${iconCls}">${iconCh}</div>
+      <div class="vsr-left"><div class="vsr-name">${item.name}</div>
+        <div class="vsr-sub">${subQty}${datePre}${rep.reporter||''}${rep.time?(' · '+rep.time):''}</div></div>
+      <div class="vsr-right">${badge}<span class="vsr-chevron">›</span></div>
+    </button>`;
+  }).join('');
+
+  const schedHtml = schedRows.map(({id,item,date}) => {
+    const datePre = date===tk ? '今天' : date.slice(5);
+    const badge = isAdmin
+      ? `<span class="vsr-badge badge-need-order" onclick="event.stopPropagation();markScheduledOrdered('${date}','${id}')" style="cursor:pointer;">已叫貨</span>`
+      : `<span class="vsr-badge badge-progress">預定</span>`;
+    return `<button class="vendor-status-row" onclick="switchTab('stock')" style="width:100%;text-align:left;border:1px solid var(--border);font-family:'Noto Sans TC',sans-serif;">
+      <div class="vsr-icon in-progress" style="background:var(--accent);">★</div>
+      <div class="vsr-left"><div class="vsr-name">${item.name}</div>
+        <div class="vsr-sub">老闆預定 · ${datePre}</div></div>
+      <div class="vsr-right">${badge}<span class="vsr-chevron">›</span></div>
+    </button>`;
+  }).join('');
+
+  const total = reportRows.length + schedRows.length;
+  const label = `<div class="ov-section-label" style="margin:14px 0 0;">待補貨<span style="font-weight:700;color:var(--danger);font-family:'DM Mono',monospace;letter-spacing:0;">${total}</span></div>`;
+  el.innerHTML = label + repHtml + schedHtml;
+}
+
+// 預覽某未來日期的「預定叫貨」清單（一次性讀取）
+function renderScheduledForDate(dk){
+  const el = document.getElementById('stockTracker');
+  if(!el) return;
+  if(!window._fb){ el.innerHTML=''; return; }
+  const isAdmin = currentUser && currentUser.role === 'admin';
+  const { db, ref, get } = window._fb;
+  const addBtn = isAdmin
+    ? `<button onclick="scheduleStockOrderForDate('${dk}')" style="width:100%;margin-top:8px;padding:10px;background:none;border:1px dashed var(--border);border-radius:12px;color:var(--ink3);font-size:13px;font-family:'Noto Sans TC',sans-serif;cursor:pointer;">＋ 預定這天要叫的追蹤品項</button>`
+    : '';
+  get(ref(db, `jenka/stockAlerts/scheduled/${dk}`)).then(snap => {
+    const data = snap.val() || {};
+    const entries = Object.entries(data).filter(([id]) => stockItems[id]);
+    if(entries.length===0){
+      el.innerHTML = isAdmin ? `<div style="margin-top:6px;">${addBtn}</div>` : '';
+      return;
+    }
+    let html = `<div class="ov-section-label" style="margin:14px 0 0;">預定叫貨<span style="font-weight:700;color:var(--accent);font-family:'DM Mono',monospace;letter-spacing:0;">${entries.length}</span></div>`;
+    html += entries.map(([id, sc]) => {
+      const item = stockItems[id];
+      const done = !!sc.ordered;
+      return `<div class="vendor-status-row" style="width:100%;border:1px solid var(--border);cursor:default;">
+        <div class="vsr-icon ${done?'done':'in-progress'}" ${done?'':'style="background:var(--accent);"'}>${done?'✓':'★'}</div>
+        <div class="vsr-left"><div class="vsr-name">${item.name}</div><div class="vsr-sub">${done?'已叫貨':'老闆預定'}</div></div>
+        <div class="vsr-right">${isAdmin && !done ? `<span class="vsr-badge" onclick="cancelScheduled('${dk}','${id}')" style="cursor:pointer;background:var(--tint);color:var(--ink3);">取消</span>` : ''}</div>
+      </div>`;
+    }).join('');
+    html += addBtn;
+    el.innerHTML = html;
+  }).catch(() => { el.innerHTML = isAdmin ? `<div style="margin-top:6px;">${addBtn}</div>` : ''; });
+}
+
+// 寫入一筆預定
+function saveScheduled(dk, itemId){
+  if(!window._fb) return;
+  const { db, ref, set } = window._fb;
+  set(ref(db, `jenka/stockAlerts/scheduled/${dk}/${itemId}`), { by: currentUser?.name || '', createdAt: Date.now(), ordered: false });
+}
+function markScheduledOrdered(dk, itemId){
+  if(!window._fb) return;
+  const { db, ref, update } = window._fb;
+  const now2 = new Date();
+  const t = `${String(now2.getHours()).padStart(2,'0')}:${String(now2.getMinutes()).padStart(2,'0')}`;
+  update(ref(db, `jenka/stockAlerts/scheduled/${dk}/${itemId}`), { ordered: true, orderedAt: t });
+  showToast('已標記叫貨完成');
+}
+function cancelScheduled(dk, itemId){
+  if(!window._fb) return;
+  const { db, ref, remove } = window._fb;
+  remove(ref(db, `jenka/stockAlerts/scheduled/${dk}/${itemId}`));
+  showToast('已取消預定');
+  if(weekOffset!==0 && viewDateKey()===dk) renderScheduledForDate(dk);
+}
+
+// 從庫存頁某品項預定一個未來日期
+function scheduleStockOrder(itemId){
+  if(!currentUser || currentUser.role !== 'admin') return;
+  const item = stockItems[itemId]; if(!item) return;
+  const d = new Date(); d.setDate(d.getDate()+1);
+  const def = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const modal = document.getElementById('modal'); const overlay = document.getElementById('overlay');
+  modal.innerHTML = `<h2>預定叫貨</h2><div class="modal-sub">${item.name}</div>
+    <div style="margin:14px 0;"><div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">預定哪天要叫</div>
+      <input type="date" id="schedDate" value="${def}" min="${stockTodayKey()}"
+        style="width:100%;height:40px;border:1.5px solid var(--border);border-radius:9px;padding:0 12px;font-family:'DM Mono',monospace;font-size:14px;background:var(--cream);color:var(--ink);outline:none;"></div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-order" onclick="confirmScheduleStockOrder('${itemId}')">預定</button></div>`;
+  overlay.classList.add('open');
+}
+window.confirmScheduleStockOrder = function(itemId){
+  const dk = document.getElementById('schedDate')?.value;
+  if(!dk){ showToast('請選擇日期'); return; }
+  saveScheduled(dk, itemId);
+  closeModal();
+  showToast(`已預定 ${dk.slice(5)} 叫貨`);
+};
+
+// 從預覽日選一個追蹤品項來預定
+function scheduleStockOrderForDate(dk){
+  if(!currentUser || currentUser.role !== 'admin') return;
+  const items = Object.entries(stockItems);
+  const modal = document.getElementById('modal'); const overlay = document.getElementById('overlay');
+  if(items.length===0){ showToast('尚無追蹤品項，請先到庫存頁新增'); return; }
+  const opts = items.map(([id,it]) => `<button onclick="confirmScheduleForDate('${dk}','${id}')"
+    style="display:block;width:100%;text-align:left;padding:11px 14px;border:1px solid var(--border);border-radius:10px;background:var(--cream);margin-bottom:8px;font-family:'Noto Sans TC',sans-serif;font-size:14px;color:var(--ink);cursor:pointer;">${it.name} <span style="color:var(--ink3);font-size:12px;">${it.unit}</span></button>`).join('');
+  modal.innerHTML = `<h2>預定叫貨</h2><div class="modal-sub">${dk.slice(5)} · 選擇要叫的追蹤品項</div>
+    <div style="margin:14px 0;max-height:50vh;overflow-y:auto;">${opts}</div>
+    <div class="modal-actions"><button class="btn-cancel" onclick="closeModal()">關閉</button></div>`;
+  overlay.classList.add('open');
+}
+window.confirmScheduleForDate = function(dk, itemId){
+  saveScheduled(dk, itemId);
+  closeModal();
+  showToast('已預定');
+  if(weekOffset!==0 && viewDateKey()===dk) renderScheduledForDate(dk);
+};
 
 function renderStockPage() {
   const listEl = document.getElementById('stockItemList');
@@ -3144,59 +3632,63 @@ function renderStockPage() {
   const todayKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
 
   listEl.innerHTML = items.map(([itemId, item]) => {
-    const reports = (stockReports[itemId] || []).sort((a,b) => b.date.localeCompare(a.date));
+    const reports = (stockReports[itemId] || []).slice().sort((a,b) => b.date.localeCompare(a.date));
     const latest = reports[0];
-    const todayReport = reports.find(r => r.date === todayKey);
+    const open = getOpenStockReport(itemId);
 
-    // 狀態判斷
+    // 狀態：以「未結案回報」為主，跟總覽待補貨一致
     let statusText = '尚未回報', statusCls = 'stock-status-ok';
-    if (todayReport) {
-      if (todayReport.ordered) {
-        statusText = '✓ 已叫貨'; statusCls = 'stock-status-ordered';
-      } else {
-        statusText = `剩 ${todayReport.qty} ${item.unit}`; statusCls = 'stock-status-low';
-      }
-    } else if (latest) {
-      statusText = `${latest.date.slice(5)} 剩 ${latest.qty} ${item.unit}`;
+    if (open) {
+      const u = stockUrgency(item, open);
+      statusText = (open.qty===null||open.qty===undefined) ? '需補貨' : `剩 ${open.qty} ${item.unit}`;
+      statusCls = u === 'danger' ? 'stock-status-danger' : 'stock-status-low';
+    } else if (latest && latest.ordered) {
+      statusText = '✓ 已叫貨'; statusCls = 'stock-status-ordered';
     }
 
-    // 歷史記錄（最近5筆）
+    const thr = (item.threshold!==null && item.threshold!==undefined && item.threshold!=='')
+      ? `　·　水位 ${item.threshold}${item.unit}` : '';
+
+    // 歷史記錄（最近5筆，唯讀）
     const historyHtml = reports.slice(0, 5).map(r => `
       <div class="stock-history-item" style="display:flex;justify-content:space-between;align-items:center;">
         <div>
           <span style="color:var(--ink3);">${r.date.slice(5)}</span>
-          <span style="margin-left:8px;">${r.reporter}</span>
-          <span style="margin-left:8px;color:${r.ordered?'var(--ok)':'var(--accent)'};">${r.ordered?'✓ 已叫貨':`剩 ${r.qty} ${item.unit}`}</span>
+          <span style="margin-left:8px;">${r.reporter||''}</span>
+          <span style="margin-left:8px;color:${r.ordered?'var(--ok)':'var(--accent)'};">${r.ordered?'✓ 已叫貨':((r.qty===null||r.qty===undefined)?'需補貨':`剩 ${r.qty} ${item.unit}`)}</span>
         </div>
-        ${isAdmin && !r.ordered && r.date === todayKey ?
-          `<button onclick="markStockOrdered('${itemId}')"
-            style="font-size:11px;padding:3px 10px;border:1px solid var(--ok);border-radius:20px;background:#EAF3EE;color:var(--ok);cursor:pointer;font-family:'Noto Sans TC',sans-serif;">
-            已叫貨
-          </button>` : ''}
       </div>`).join('');
 
     return `<div class="stock-item-card">
       <div class="stock-item-header" onclick="toggleStockHistory('${itemId}')">
         <div>
           <div class="stock-item-name">${item.name}</div>
-          <div class="stock-item-meta">${item.unit}${item.note ? '　' + item.note : ''}</div>
+          <div class="stock-item-meta">${item.unit}${item.note ? '　' + item.note : ''}${thr}</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
           <span class="stock-status-badge ${statusCls}">${statusText}</span>
+          ${isAdmin && open ? `<button onclick="event.stopPropagation();markStockOrdered('${itemId}')"
+            style="font-size:11px;padding:3px 11px;border:1px solid var(--ok);border-radius:20px;background:var(--ok-soft);color:var(--ok);cursor:pointer;font-family:'Noto Sans TC',sans-serif;white-space:nowrap;">已叫貨</button>` : ''}
+          ${isAdmin ? `<button onclick="event.stopPropagation();scheduleStockOrder('${itemId}')"
+            style="font-size:11px;padding:3px 11px;border:1px solid var(--accent);border-radius:20px;background:var(--accent-soft);color:var(--accent);cursor:pointer;font-family:'Noto Sans TC',sans-serif;white-space:nowrap;">預定</button>` : ''}
           ${isAdmin ? `<button onclick="event.stopPropagation();deleteStockItem('${itemId}')"
-            style="font-size:11px;padding:2px 8px;border:1px solid var(--danger);border-radius:20px;background:#FFF0F0;color:var(--danger);cursor:pointer;font-family:'Noto Sans TC',sans-serif;">刪</button>` : ''}
+            style="font-size:11px;padding:2px 8px;border:1px solid var(--border);border-radius:20px;background:var(--cream);color:var(--ink3);cursor:pointer;font-family:'Noto Sans TC',sans-serif;">刪</button>` : ''}
         </div>
       </div>
       <div class="stock-report-form">
         <div style="display:flex;gap:8px;align-items:center;">
-          <span style="font-size:13px;color:var(--ink2);">今日庫存剩</span>
+          <span style="font-size:13px;color:var(--ink2);white-space:nowrap;">目前剩</span>
           <input type="number" min="0" step="1" placeholder="數量"
             id="stock-qty-${itemId}"
-            style="width:70px;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 10px;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);color:var(--ink);outline:none;text-align:center;">
+            style="width:64px;height:36px;border:1.5px solid var(--border);border-radius:9px;padding:0 10px;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);color:var(--ink);outline:none;text-align:center;">
           <span style="font-size:13px;color:var(--ink2);">${item.unit}</span>
           <button onclick="submitStockReport('${itemId}')"
-            style="flex:1;height:34px;background:#C0392B;color:#fff;border:none;border-radius:8px;font-family:'Noto Sans TC',sans-serif;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation;">
+            style="flex:1;height:36px;background:var(--ink);color:#fff;border:none;border-radius:9px;font-family:'Noto Sans TC',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;cursor:pointer;touch-action:manipulation;">
             回報
+          </button>
+          <button onclick="quickStockReport('${itemId}')" title="不確定數量，直接通知老闆"
+            style="height:36px;padding:0 12px;background:var(--accent-soft);color:var(--accent);border:none;border-radius:9px;font-family:'Noto Sans TC',sans-serif;font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation;white-space:nowrap;">
+            需補貨
           </button>
         </div>
       </div>
@@ -3217,7 +3709,7 @@ function toggleStockHistory(itemId) {
 function submitStockReport(itemId) {
   const input = document.getElementById(`stock-qty-${itemId}`);
   const qty = parseFloat(input?.value);
-  if (isNaN(qty) || qty < 0) { showToast('⚠️ 請輸入有效數量'); return; }
+  if (isNaN(qty) || qty < 0) { showToast('請輸入有效數量'); return; }
   if (!currentUser) return;
   if (!window._fb) return;
 
@@ -3232,20 +3724,35 @@ function submitStockReport(itemId) {
   });
 
   if (input) input.value = '';
-  showToast(`✓ 已回報 ${item?.name} 剩 ${qty} ${item?.unit}`);
-
-  // 通知老闆（GAS）
+  showToast(`已回報　${item?.name}　剩 ${qty} ${item?.unit}`);
   notifyGAS({ type: 'stockAlert', itemName: item?.name, qty, unit: item?.unit, reporter: currentUser.name, time: timeStr });
+}
+
+// 一鍵「需補貨」：不填數量，直接通知老闆（qty=null）
+function quickStockReport(itemId) {
+  if (!currentUser) return;
+  if (!window._fb) return;
+  const { db, ref, set } = window._fb;
+  const now2 = new Date();
+  const dateKey = `${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}-${String(now2.getDate()).padStart(2,'0')}`;
+  const timeStr = `${String(now2.getHours()).padStart(2,'0')}:${String(now2.getMinutes()).padStart(2,'0')}`;
+  const item = stockItems[itemId];
+  set(ref(db, `jenka/stockAlerts/reports/${dateKey}/${itemId}`), {
+    qty: null, reporter: currentUser.name, time: timeStr, timestamp: now2.getTime(), ordered: false
+  });
+  showToast(`已通知老闆　${item?.name}　需補貨`);
+  notifyGAS({ type: 'stockAlert', itemName: item?.name, qty: '需補貨', unit: item?.unit, reporter: currentUser.name, time: timeStr });
 }
 
 function markStockOrdered(itemId) {
   if (!window._fb) return;
   const { db, ref, update } = window._fb;
+  const open = getOpenStockReport(itemId);
+  const dateKey = open ? open.date : stockTodayKey();
   const now2 = new Date();
-  const dateKey = `${now2.getFullYear()}-${String(now2.getMonth()+1).padStart(2,'0')}-${String(now2.getDate()).padStart(2,'0')}`;
   const timeStr = `${String(now2.getHours()).padStart(2,'0')}:${String(now2.getMinutes()).padStart(2,'0')}`;
   update(ref(db, `jenka/stockAlerts/reports/${dateKey}/${itemId}`), { ordered: true, orderedAt: timeStr });
-  showToast('✓ 已標記叫貨完成');
+  showToast('已標記叫貨完成');
 }
 
 function showAddStockItem() {
@@ -3267,10 +3774,15 @@ function showAddStockItem() {
             style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
         </div>
         <div>
-          <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">備注（選填）</div>
-          <input id="stockNewNote" type="text" placeholder="例：快沒提醒老闆"
-            style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
+          <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">提醒水位（選填）</div>
+          <input id="stockNewThreshold" type="number" min="0" step="1" placeholder="剩幾就急缺"
+            style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-family:'DM Mono',monospace;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
         </div>
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">備註（選填）</div>
+        <input id="stockNewNote" type="text" placeholder="例：快沒提醒老闆"
+          style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
       </div>
     </div>
     <div class="modal-actions">
@@ -3285,13 +3797,15 @@ window.confirmAddStockItem = function() {
   const name = document.getElementById('stockNewName').value.trim();
   const unit = document.getElementById('stockNewUnit').value.trim() || '個';
   const note = document.getElementById('stockNewNote').value.trim();
-  if (!name) { showToast('⚠️ 請填寫品項名稱'); return; }
+  const thrRaw = document.getElementById('stockNewThreshold')?.value;
+  const threshold = (thrRaw!=='' && thrRaw!=null && !isNaN(parseFloat(thrRaw))) ? parseFloat(thrRaw) : null;
+  if (!name) { showToast('請填寫品項名稱'); return; }
   if (!window._fb) return;
   const { db, ref, push, set } = window._fb;
   const newRef = push(ref(db, 'jenka/stockAlerts/items'));
-  set(newRef, { name, unit, note, createdAt: Date.now() });
+  set(newRef, { name, unit, note, threshold, createdAt: Date.now() });
   closeModal();
-  showToast(`✓ 已新增：${name}`);
+  showToast(`已新增：${name}`);
 };
 
 window.deleteStockItem = function(itemId) {
@@ -3778,7 +4292,7 @@ function renderTrendChart(days, groupName, unit, safeVal, filterVendor, isMultiV
       </svg>
       <div class="hist-legend">
         <div class="hist-legend-item"><div class="hist-legend-dot" style="background:var(--accent);"></div>叫貨量（${unit}）</div>
-        ${safeVal > 0 ? `<div class="hist-legend-item"><div style="width:12px;height:2px;background:var(--ok);border-top:1px dashed var(--ok);"></div>需備庫存 ${safeVal}${unit}</div>` : ''}
+        ${safeVal > 0 ? `<div class="hist-legend-item"><div style="width:12px;height:2px;background:var(--ok);border-top:1px dashed var(--ok);"></div>最高上限 ${safeVal}${unit}</div>` : ''}
         <div class="hist-legend-item"><div style="width:12px;height:2px;background:var(--warn);border-top:1px dashed var(--warn);"></div>平均 ${avg}${unit}</div>
       </div>
       ${vendorNote}
@@ -3799,7 +4313,7 @@ function renderTrendChart(days, groupName, unit, safeVal, filterVendor, isMultiV
         </div>
       </div>
       <div style="margin-top:10px;padding:10px 12px;background:#F0F4FF;border:1px solid #B8CEFF;border-radius:10px;font-size:13px;color:#3A6BC4;line-height:1.6;">
-        <strong>建議需備庫存：${(parseFloat(avg) * 1.2).toFixed(1)} ${unit}</strong>
+        <strong>建議最高上限：${(parseFloat(avg) * 1.2).toFixed(1)} ${unit}</strong>
         <div style="font-size:11px;color:var(--ink3);margin-top:2px;">根據平均叫貨量 × 1.2 計算，目前設定 ${safeVal} ${unit}</div>
       </div>
     </div>`;
@@ -3960,6 +4474,8 @@ function fbInitRest() {
       });
     })(dow, key);
   }
+  // 全域載入零散品項庫存資料（總覽「待補貨」追蹤用，訂閱一次）
+  if (typeof loadStockData === 'function') loadStockData();
 }
 
 // 覆寫需要同步的函式
