@@ -328,6 +328,22 @@ window.dispatchEvent(new Event('fbReady'));
   .admin-day-label{font-size:10px;font-weight:700;color:var(--ink3);text-align:center;padding:2px 0;}
   .admin-day-label.has-fixed{color:var(--accent);}
   .admin-day-input{width:100%;height:32px;border:1.5px solid var(--border);border-radius:8px;text-align:center;font-family:'DM Mono',monospace;font-size:12px;background:var(--cream);color:var(--ink);outline:none;}
+  /* ── 試算表式需備量週表格 ── */
+  .wk-table{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--card);}
+  .wk-row{display:grid;align-items:center;border-bottom:1px solid var(--border);}
+  .wk-row:last-child{border-bottom:none;}
+  .wk-head{background:var(--tag-bg);}
+  .wk-name{padding:10px 12px;font-size:13px;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .wk-h{padding:9px 0;font-size:11px;color:var(--ink2);text-align:center;}
+  .wk-cellwrap{padding:6px 7px;}
+  .wk-skip-btn{display:none;width:100%;margin-top:4px;height:24px;border:1px solid #DBB4A6;border-radius:6px;background:#F3E3DC;color:#A2503C;font-size:11px;font-family:'Noto Sans TC',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+  .wk-cellwrap.editing .wk-skip-btn{display:block;}
+  .wk-cell{width:100%;height:34px;border:1px solid var(--border);border-radius:7px;text-align:center;font-family:'DM Mono',monospace;font-size:14px;background:var(--cream);color:var(--ink);outline:none;-moz-appearance:textfield;}
+  .wk-cell::-webkit-outer-spin-button,.wk-cell::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+  .wk-cell:focus{border-color:var(--accent);}
+  .wk-cell:not(.opt):not(.has-value){border:1px solid #DBB4A6;background:#F3E3DC;color:#A2503C;}
+  .wk-cell:not(.opt):not(.has-value)::placeholder{color:#A2503C;opacity:1;font-family:'Noto Sans TC',sans-serif;font-size:11px;}
+  .wk-cell.opt::placeholder{color:var(--ink3);}
   .admin-day-input:focus{border-color:var(--admin-accent);}
   .admin-day-input.has-value{border-color:var(--accent);background:#FCFAF6;}
   .admin-safe-row{display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);flex-wrap:wrap;}
@@ -688,7 +704,7 @@ window.dispatchEvent(new Event('fbReady'));
 
     <!-- A 群組：叫貨營運 子分頁 -->
     <div class="admin-nav" id="adminNavOps">
-      <button class="admin-nav-btn active" id="navQty" onclick="switchAdminNav('qty')">叫貨量</button>
+      <button class="admin-nav-btn active" id="navQty" onclick="switchAdminNav('qty')">備貨量</button>
       <button class="admin-nav-btn" id="navSchedule" onclick="switchAdminNav('schedule')">排程</button>
       <button class="admin-nav-btn" id="navVendors" onclick="switchAdminNav('vendors')">廠商</button>
       <button class="admin-nav-btn" id="navItems" onclick="switchAdminNav('items')">品項</button>
@@ -711,7 +727,7 @@ window.dispatchEvent(new Event('fbReady'));
       <div class="schedule-editor" id="scheduleEditor"></div>
     </div>
     <div id="qtyAdminView" style="display:none;">
-      <p class="admin-desc" style="margin-top:10px;">設定當天需要備多少庫存（需備量）。員工點貨填入現有數量後，系統會自動算出叫貨量（需備量 − 現有數量），最多不超過該品項的「最高上限」。</p>
+      <p class="admin-desc" style="margin-top:10px;">用試算表的方式設定每個品項各天要備多少（需備量）。固定進貨日的廠商只顯示進貨日那幾欄；蔬菜、南北貨這類當天才開的廠商只有一欄。點格子直接改、改完自動存。</p>
       <div class="admin-tabs" id="adminTabBar"></div>
       <div id="adminItemContainer"></div>
     </div>
@@ -1111,16 +1127,16 @@ const ITEMS_SEED=[
   {id:310,vendor:'廣弘',name:'紅龍全熟卡啦（辣味）',unit:'包',safe:5},
   {id:311,vendor:'廣弘',name:'紅龍雞塊',unit:'包',safe:4},
   {id:312,vendor:'廣弘',name:'富統小熱狗',unit:'包',safe:3},
-  {id:60,vendor:'蔬菜',name:'高麗菜',unit:'顆',safe:2},{id:61,vendor:'蔬菜',name:'馬鈴薯',unit:'顆',safe:28,step:4,oUnit:'斤',factor:0.33,oStep:0.5},
-  {id:62,vendor:'蔬菜',name:'美生菜',unit:'顆',safe:12,oUnit:'斤',factor:0.75,oStep:0.5},{id:63,vendor:'蔬菜',name:'牛番茄',unit:'顆',safe:20,step:4,oUnit:'斤',factor:0.25,oStep:0.5},
+  {id:60,vendor:'蔬菜',name:'高麗菜',unit:'顆',safe:2},{id:61,vendor:'蔬菜',name:'馬鈴薯',unit:'顆',safe:28,step:4,oUnit:'斤',gramsPerUnit:200,factor:0.333,oStep:0.5,oRound:0.5},
+  {id:62,vendor:'蔬菜',name:'美生菜',unit:'顆',safe:12,oUnit:'斤',gramsPerUnit:450,factor:0.75,oStep:0.5,oRound:0.5},{id:63,vendor:'蔬菜',name:'牛番茄',unit:'顆',safe:20,step:4,oUnit:'斤',gramsPerUnit:150,factor:0.25,oStep:0.5,oRound:0.5},
   {id:64,vendor:'蔬菜',name:'紫洋蔥',unit:'顆',safe:2},{id:65,vendor:'蔬菜',name:'蘿蔓',unit:'包',safe:1},
-  {id:66,vendor:'蔬菜',name:'紫高麗菜',unit:'顆',safe:1},{id:67,vendor:'蔬菜',name:'小番茄',unit:'盒',safe:1},
-  {id:68,vendor:'蔬菜',name:'紅地瓜',unit:'斤',safe:3},{id:69,vendor:'蔬菜',name:'香菇',unit:'包',safe:3},
-  {id:70,vendor:'蔬菜',name:'秀珍菇',unit:'包',safe:3},{id:71,vendor:'蔬菜',name:'杏鮑菇',unit:'包',safe:3},
+  {id:66,vendor:'蔬菜',name:'紫高麗菜',unit:'顆',safe:1},{id:67,vendor:'蔬菜',name:'小番茄',unit:'包',safe:1,oUnit:'斤',gramsPerUnit:300,factor:0.5,oStep:0.5,oRound:0.5},
+  {id:68,vendor:'蔬菜',name:'紅地瓜',unit:'顆',safe:3,oUnit:'斤',gramsPerUnit:200,factor:0.333,oStep:0.5,oRound:0.5},{id:69,vendor:'蔬菜',name:'香菇',unit:'包',safe:3,oUnit:'斤',gramsPerUnit:300,factor:0.5,oStep:0.5,oRound:0.5},
+  {id:70,vendor:'蔬菜',name:'秀珍菇',unit:'包',safe:3,oUnit:'斤',gramsPerUnit:200,factor:0.333,oStep:0.5,oRound:0.5},{id:71,vendor:'蔬菜',name:'杏鮑菇',unit:'包',safe:3,oUnit:'斤',gramsPerUnit:250,factor:0.417,oStep:0.5,oRound:0.5},
   {id:72,vendor:'蔬菜',name:'甜菜根',unit:'顆',safe:1},{id:73,vendor:'蔬菜',name:'洋蔥',unit:'顆',safe:2},
-  {id:74,vendor:'蔬菜',name:'帶皮蒜頭',unit:'顆',safe:1},{id:75,vendor:'蔬菜',name:'九層塔',unit:'把',safe:1},
+  {id:74,vendor:'蔬菜',name:'帶皮蒜頭',unit:'顆',safe:1,oUnit:'斤',gramsPerUnit:50,factor:0.083,oStep:0.5,oRound:0.5},{id:75,vendor:'蔬菜',name:'九層塔',unit:'包',safe:1,oUnit:'斤',gramsPerUnit:75,factor:0.125,oStep:0.5,oRound:0.5},
   {id:76,vendor:'蔬菜',name:'中華嫩豆腐',unit:'盒',safe:2},{id:77,vendor:'蔬菜',name:'鹹蛋',unit:'顆',safe:3},
-  {id:78,vendor:'蔬菜',name:'無籽檸檬',unit:'顆',safe:1},
+  {id:78,vendor:'蔬菜',name:'無籽檸檬',unit:'瓶',safe:1},
   {id:79,vendor:'麵包',name:'山型吐司',unit:'條',safe:24},{id:80,vendor:'麵包',name:'山型厚片',unit:'條',safe:5},
   {id:81,vendor:'麵包',name:'美式漢堡',unit:'個',safe:120},{id:82,vendor:'麵包',name:'滿福堡',unit:'個',safe:50},
   {id:83,vendor:'麵包',name:'24切去邊吐司',unit:'條',safe:8},{id:84,vendor:'麵包',name:'24切去邊全麥',unit:'條',safe:4},
@@ -1562,7 +1578,17 @@ function renderOverview(){
 
 // ── Vendor detail ──
 // 叫貨單位：有設 oUnit（換算品項，如蔬菜以斤叫貨）就用 oUnit，否則沿用點貨單位
-function oUnitOf(item){return item.oUnit||item.unit;}
+function oUnitOf(item){return (item.factor&&item.factor!==1&&item.oUnit)?item.oUnit:item.unit;}
+function recalcFactor(item){
+  const G=600; // 1 台斤 = 600 公克
+  if(item.oUnit&&item.unit&&item.oUnit!==item.unit&&item.gramsPerUnit>0){
+    item.factor=Math.round(item.gramsPerUnit/G*1000)/1000;
+    if(item.oStep==null)item.oStep=0.5;
+    if(item.oRound==null)item.oRound=0.5;
+  } else {
+    item.factor=1; // 同單位或缺重量 → 不換算
+  }
+}
 function calcOrderAmt(item,dow){
   const target=orderQty[item.id]?.[dow]; // 每日需備量（換算品項以叫貨單位計，例：番茄 4 斤）
   if(target===null||target===undefined)return null;
@@ -1607,7 +1633,7 @@ function renderVendorDetail(){
   const state=vendorState(activeVendor,viewDow);
   const isSubmitted=state==='done';
   const isUnlocked=state==='unlocked';
-  const vitems=ITEMS_DEF.filter(i=>i.vendor===activeVendor&&i.active!==false).sort((a,b)=>(a.sort||0)-(b.sort||0));
+  const vitems=ITEMS_DEF.filter(i=>i.vendor===activeVendor&&i.active!==false&&calcOrderAmt(i,viewDow)!==null).sort((a,b)=>(a.sort||0)-(b.sort||0));
   document.getElementById('vendorViewTitle').textContent=activeVendor;
   const badge=document.getElementById('vendorViewBadge');
   badge.textContent='今日進貨';
@@ -1702,11 +1728,9 @@ function renderVendorDetail(){
           <span class="qty-unit">${item.unit}</span>
         </div>
       </div>
-      <div id="info-${item.id}" style="display:flex;align-items:center;gap:5px;padding:3px 4px 0;">
+      <div id="info-${item.id}" style="display:flex;align-items:center;gap:5px;padding:3px 4px 0;min-height:14px;">
         <span class="status-dot dot-${st}" id="dot-${item.id}"></span>
         <span class="stock-chip-wrap" id="chip-${item.id}">${stockChip(st)}</span>
-        <span class="safe-tag">上限 ${safeQty[item.id]}${item.unit}</span>
-        <span class="${otagCls}" id="otag-${item.id}">${otagText}</span>
       </div>
     </div>`;
   }).join('');
@@ -1903,7 +1927,7 @@ function submitVendor(){
       const o=calcOrderAmt(item,viewDow);
       const cur=qty[item.id]!==''?`現有 ${qty[item.id]}${item.unit}`:'未盤點';
       return`<div class="order-item"><div><span style="font-weight:500">${item.name}</span><br>
-        <span style="color:var(--ink3);font-size:11px">${cur} · 上限 ${safeQty[item.id]}${item.unit}</span></div>
+        <span style="color:var(--ink3);font-size:11px">${cur}</span></div>
         <div class="need">叫 ${o}${oUnitOf(item)}</div></div>`;
     }).join('');
   }
@@ -2360,53 +2384,77 @@ function resetSchedule(){scheduleDraft={0:['廣弘'],1:['豆漿','麵包','毓�
 function renderAdminTabs(){document.getElementById('adminTabBar').innerHTML=ALL_VENDORS.map(v=>`<div class="admin-tab${v===adminActiveVendor?' active':''}" onclick="switchAdminTab('${v}')">${v}</div>`).join('');}
 function switchAdminTab(v){adminActiveVendor=v;renderAdminTabs();renderAdminItems();}
 function renderAdminItems(){
-  const vitems=ITEMS_DEF.filter(i=>i.vendor===adminActiveVendor);
-  const isOptInVendor=OPT_IN_VENDORS.includes(adminActiveVendor); // opt-in 廠商（蔬菜/南北貨）不綁週排程，可任何一天開啟，故視為每天皆可設需備量
-  const fixedDows=isOptInVendor?[1,2,3,4,5,6,0]:[1,2,3,4,5,6,0].filter(dow=>(weeklySchedule[dow]||[]).includes(adminActiveVendor)||ALWAYS_VENDORS.includes(adminActiveVendor));
-  document.getElementById('adminItemContainer').innerHTML=`<div class="admin-section">
-    <div class="admin-section-title">${adminActiveVendor} — 各天需備量</div>
-    <div style="font-size:11px;color:var(--ink3);margin-bottom:10px;line-height:1.6;">${isOptInVendor?'此廠商需每日開啟。填一個「需備量」按「套用到每一天」，哪天開啟點貨都會以此為標準量計算叫貨量；要某天不一樣再展開「逐日微調」。改完自動儲存。':'填一個「需備量」按「套用到叫貨日」就會帶入所有有排程的日子；要某天不一樣再展開「逐日微調」。改完自動儲存。'}</div>
-    ${vitems.map(item=>{
-      const cols=[1,2,3,4,5,6,0].map(dow=>{
-        const isFixed=(weeklySchedule[dow]||[]).includes(adminActiveVendor)||ALWAYS_VENDORS.includes(adminActiveVendor);
-        const val=adminDraft[item.id]?.[dow];
-        const display=(val!==null&&val!==undefined)?val:'';
-        return`<div class="admin-day-col">
-          <div class="admin-day-label${isFixed?' has-fixed':''}">週${DAY_NAMES[dow]}</div>
-          <input class="admin-day-input${display!==''?' has-value':''}" type="number" min="0" step="${item.factor?(item.oStep||0.5):(item.step||1)}"
-            value="${display}" placeholder="—" oninput="updateDraft(${item.id},${dow},this.value,this)">
-        </div>`;
+  const vendor=adminActiveVendor;
+  const isOptIn=OPT_IN_VENDORS.includes(vendor);
+  const cont=document.getElementById('adminItemContainer');
+  if(!cont)return;
+  const vitems=ITEMS_DEF.filter(i=>i.vendor===vendor&&i.active!==false).sort((a,b)=>(a.sort||0)-(b.sort||0));
+  if(vitems.length===0){
+    cont.innerHTML=`<div class="admin-section"><div style="text-align:center;padding:24px;color:var(--ink3);font-size:13px;line-height:1.8;">此廠商目前沒有上架品項<br><span style="font-size:11px;">可到上方「品項」分頁新增</span></div></div>`;
+    return;
+  }
+  let cols=null;
+  if(!isOptIn){
+    cols=[0,1,2,3,4,5,6].filter(d=>(weeklySchedule[d]||[]).includes(vendor));
+    if(cols.length===0){
+      cont.innerHTML=`<div class="admin-section"><div style="text-align:center;padding:24px;color:var(--ink3);font-size:13px;line-height:1.8;">${vendor} 目前沒有進貨日<br><span style="font-size:11px;">請先到上方「排程」設定哪幾天進貨</span></div></div>`;
+      return;
+    }
+  }
+  const optLabel=vendor==='蔬菜'?'每次抓':vendor==='南北貨'?'補到':'需備量';
+  const headHint=isOptIn
+    ?(vendor==='蔬菜'?'鮮度型 · 一次抓約 3 天、不囤':vendor==='南北貨'?'補滿型 · 補到固定庫存':'當天開啟才點貨')
+    :('進貨日：'+cols.map(d=>'週'+DAY_NAMES[d]).join('、'));
+  const colCount=isOptIn?1:cols.length;
+  const gridCols='1fr '+('62px '.repeat(colCount)).trim();
+  const headCells=isOptIn
+    ?`<div class="wk-h">${optLabel}</div>`
+    :cols.map(d=>`<div class="wk-h">週${DAY_NAMES[d]}</div>`).join('');
+  const stepOf=item=>item.factor?(item.oStep||0.5):(item.step||1);
+  const rowHtml=vitems.map(item=>{
+    let cells;
+    if(isOptIn){
+      let rep='';
+      for(let d=0;d<7;d++){const v=adminDraft[item.id]?.[d];if(v!==null&&v!==undefined){rep=v;break;}}
+      const has=rep!=='';
+      cells=`<div class="wk-cellwrap"><input class="wk-cell opt${has?' has-value':''}" type="number" min="0" step="${stepOf(item)}" value="${has?rep:''}" placeholder="—" oninput="updateDraftAll(${item.id},this.value,this)"></div>`;
+    } else {
+      cells=cols.map(d=>{
+        const v=adminDraft[item.id]?.[d];
+        const has=(v!==null&&v!==undefined);
+        return `<div class="wk-cellwrap"><input class="wk-cell${has?' has-value':''}" type="number" min="0" step="${stepOf(item)}" value="${has?v:''}" placeholder="不點" oninput="updateDraft(${item.id},${d},this.value,this)" onfocus="this.parentNode.classList.add('editing')" onblur="var w=this.parentNode;setTimeout(function(){w.classList.remove('editing');},200)"><button type="button" class="wk-skip-btn" onpointerdown="event.preventDefault();skipCell(${item.id},${d})">設為不點</button></div>`;
       }).join('');
-      // 主需備量：若所有叫貨日值相同則帶出，否則留白
-      const dvals=fixedDows.map(dow=>adminDraft[item.id]?.[dow]).filter(v=>v!==null&&v!==undefined);
-      const allSame=dvals.length>0 && dvals.length===fixedDows.length && dvals.every(v=>v===dvals[0]);
-      const mainVal=allSame?dvals[0]:'';
-      const noSchedule=fixedDows.length===0;
-      return`<div class="admin-item">
-        <div class="admin-item-name">${item.name}<span class="unit-tag">${oUnitOf(item)}</span>${item.factor?`<span style="font-size:11px;color:var(--ink3);font-weight:400;margin-left:6px;">需備量以 ${oUnitOf(item)} 計（員工數 ${item.unit}，系統自動換算）</span>`:''}</div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-          <span style="font-size:12px;color:var(--ink2);white-space:nowrap;">需備量</span>
-          <input id="main-qty-${item.id}" class="iae-input" type="number" min="0" step="${item.factor?(item.oStep||0.5):(item.step||1)}" placeholder="${noSchedule?'此廠商今日無排程':'填一個數'}" value="${mainVal}" ${noSchedule?'disabled':''}
-            onkeydown="if(event.key==='Enter')applyMainQty(${item.id})"
-            style="width:70px;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 8px;text-align:center;font-family:'DM Mono',monospace;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
-          <span style="font-size:12px;color:var(--ink3);">${oUnitOf(item)}</span>
-          <button onclick="applyMainQty(${item.id})" ${noSchedule?'disabled':''}
-            style="height:34px;padding:0 12px;border:none;border-radius:8px;background:${noSchedule?'var(--tint)':'var(--accent-soft)'};color:${noSchedule?'var(--ink3)':'var(--accent)'};font-size:12px;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:${noSchedule?'default':'pointer'};touch-action:manipulation;white-space:nowrap;">${isOptInVendor?'套用到每一天':'套用到叫貨日'}</button>
-        </div>
-        <button onclick="toggleQtyDays(${item.id})" id="qd-toggle-${item.id}"
-          style="display:inline-flex;align-items:center;gap:6px;background:var(--cream);border:1px solid var(--border);border-radius:8px;color:var(--ink2);font-size:12px;font-weight:500;font-family:'Noto Sans TC',sans-serif;cursor:pointer;padding:7px 13px;margin-bottom:8px;touch-action:manipulation;"><span id="qd-arrow-${item.id}">▾</span>逐日微調（不同日不同量）</button>
-        <div id="qd-days-${item.id}" style="display:none;">
-          <div class="admin-grid">${cols}</div>
-        </div>
-        <div class="admin-safe-row">
-          <span class="admin-safe-label">最高叫貨上限：</span>
-          <input class="admin-safe-input" type="number" min="0" step="1" value="${safeQty[item.id]}" oninput="updateSafe(${item.id},this.value)">
-          <span style="font-size:11px;color:var(--ink3)">${item.unit}</span>
-          <span class="admin-tip">超過此上限時自動截止，防止叫太多</span>
-        </div>
-      </div>`;
-    }).join('')}
+    }
+    return `<div class="wk-row" style="grid-template-columns:${gridCols};"><div class="wk-name">${item.name}</div>${cells}</div>`;
+  }).join('');
+  const helper=isOptIn
+    ?`哪天開啟點貨都會用這個量。上限・倍數・換算・叫貨名稱請到上方「品項」分頁調整。`
+    :`點格子直接改數字，改完自動存。某天不進貨就把那格清空（會變成紅色「不點」），員工點貨頁那天就不會出現這個品項。上限・倍數・換算・叫貨名稱請到上方「品項」分頁調整。`;
+  cont.innerHTML=`<div class="admin-section">
+    <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px;">
+      <span style="font-size:15px;font-weight:600;color:var(--ink);">${vendor}</span>
+      <span style="font-size:11px;color:var(--ink3);">${headHint}</span>
+    </div>
+    <div style="font-size:11px;color:var(--ink3);line-height:1.6;margin-bottom:10px;">${helper}</div>
+    <div class="wk-table">
+      <div class="wk-row wk-head" style="grid-template-columns:${gridCols};"><div class="wk-name" style="color:var(--ink3);font-weight:400;font-size:11px;">品項</div>${headCells}</div>
+      ${rowHtml}
+    </div>
   </div>`;
+}
+function updateDraftAll(id,val,el){
+  if(!adminDraft[id])adminDraft[id]={};
+  const n=parseFloat(val);
+  const stored=(val===''||isNaN(n))?null:n;
+  for(let d=0;d<7;d++) adminDraft[id][d]=stored;
+  if(el) el.classList.toggle('has-value', stored!==null);
+  qtyAutoSave();
+}
+function skipCell(id,dow){
+  if(!adminDraft[id])adminDraft[id]={};
+  adminDraft[id][dow]=null;
+  qtyAutoSave();
+  renderAdminItems();
 }
 // 逐日微調展開/收合
 function toggleQtyDays(id){
@@ -2484,7 +2532,7 @@ function exportConfig(){
 function updateDraft(id,dow,val,el){if(!adminDraft[id])adminDraft[id]={};const n=parseFloat(val);adminDraft[id][dow]=(val===''||isNaN(n))?null:n;el.classList.toggle('has-value',val!==''&&!isNaN(n));qtyAutoSave();}
 function updateSafe(id,val){const n=parseFloat(val);if(!isNaN(n)&&n>=0){safeQty[id]=n;const it=ITEMS_DEF.find(i=>i.id===id);if(it)it.safe=n;safeAutoSave();}}
 var adminSave = function(){Object.keys(adminDraft).forEach(id=>{if(!orderQty[id])orderQty[id]={};Object.keys(adminDraft[id]).forEach(dow=>{orderQty[id][dow]=adminDraft[id][dow];});});showToast('✓ 叫貨量已儲存');}
-function adminReset(){ITEMS_DEF.filter(i=>i.vendor===adminActiveVendor).forEach(item=>{adminDraft[item.id]={};for(let d=0;d<7;d++){const a=(weeklySchedule[d]||[]).includes(item.vendor)||ALWAYS_VENDORS.includes(item.vendor);adminDraft[item.id][d]=a?safeQty[item.id]:null;}});renderAdminItems();showToast(`已重設 ${adminActiveVendor}`);}
+function adminReset(){ITEMS_DEF.filter(i=>i.vendor===adminActiveVendor).forEach(item=>{adminDraft[item.id]={};for(let d=0;d<7;d++){const a=(weeklySchedule[d]||[]).includes(item.vendor)||ALWAYS_VENDORS.includes(item.vendor)||OPT_IN_VENDORS.includes(item.vendor);adminDraft[item.id][d]=a?safeQty[item.id]:null;}});renderAdminItems();commitQtyQuiet();showToast(`已重設並儲存 ${adminActiveVendor}`);}
 
 function confirmResetAllItems() {
   const modal = document.getElementById('modal');
@@ -2526,16 +2574,25 @@ function doResetAllItems() {
       if (newItem.id >= nextItemId) nextItemId = newItem.id + 1;
       addedCount++;
     } else {
-      // Firebase 已有同 id：保留你的設定，但若種子「標記了換算(factor)」而現有品項尚未啟用換算
-      // → 一次性帶入換算設定（已啟用或你自己改過的不會被覆蓋）
+      // Firebase 已有同 id：保留你的設定，但帶入「換算標準（公克）」——只在你尚未設定時帶入，不覆蓋你調過的值
       const cur = ITEMS_DEF.find(i => i.id === seedItem.id);
-      if (cur && seedItem.factor && !cur.factor) {
+      if (cur && seedItem.gramsPerUnit && cur.gramsPerUnit == null) {
+        cur.gramsPerUnit = seedItem.gramsPerUnit;
+        if (cur.oUnit == null) cur.oUnit = seedItem.oUnit;
+        if (seedItem.oStep != null && cur.oStep == null) cur.oStep = seedItem.oStep;
+        if (seedItem.oRound != null && cur.oRound == null) cur.oRound = seedItem.oRound;
+        recalcFactor(cur); // oUnit 與盤點單位不同且有重量才換算，否則 factor=1
+        if (seedItem.safe != null && (cur.safe == null || cur.safe < seedItem.safe)) {
+          cur.safe = seedItem.safe;
+          safeQty[cur.id] = seedItem.safe;
+        }
+        upgradedCount++;
+      } else if (cur && seedItem.factor && !cur.factor) {
         cur.factor = seedItem.factor;
         cur.oUnit = seedItem.oUnit;
         if (seedItem.oStep != null) cur.oStep = seedItem.oStep;
         if (seedItem.oRound != null) cur.oRound = seedItem.oRound;
         if (seedItem.step != null) cur.step = seedItem.step;
-        // 點貨上限取較大值，確保點貨格能涵蓋換算後的需備量（只升不降，不動你調高過的值）
         if (seedItem.safe != null && (cur.safe == null || cur.safe < seedItem.safe)) {
           cur.safe = seedItem.safe;
           safeQty[cur.id] = seedItem.safe;
@@ -2608,11 +2665,23 @@ function renderItemsAdmin() {
           <button onclick="toggleItemActive(${item.id})" style="padding:3px 9px;height:30px;border:1px solid ${isActive?'var(--warn)':'var(--ok)'};border-radius:8px;font-size:11px;font-family:'Noto Sans TC',sans-serif;background:${isActive?'#FFFBF2':'#EAF3EE'};color:${isActive?'var(--warn)':'var(--ok)'};cursor:pointer;touch-action:manipulation;white-space:nowrap;flex-shrink:0;">${isActive?'下架':'上架'}</button>
           <button onclick="removeItem(${item.id})" style="padding:3px 9px;height:30px;border:1.5px solid var(--danger);border-radius:8px;font-size:11px;font-family:'Noto Sans TC',sans-serif;background:#FFF0F0;color:var(--danger);cursor:pointer;touch-action:manipulation;flex-shrink:0;">刪</button>
         </div>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+          <span style="font-size:10px;color:var(--ink3);white-space:nowrap;flex-shrink:0;">叫貨名稱</span>
+          <input class="iae-input" value="${esc(item.orderName||'')}" placeholder="留空＝同品名（傳給廠商時用的全名，如：神駒玉米罐頭易開罐）" onchange="saveItemField(${item.id},'orderName',this.value,this)" style="flex:1;min-width:0;height:32px;border:1px dashed var(--border);border-radius:8px;padding:0 10px;font-family:'Noto Sans TC',sans-serif;font-size:12px;background:var(--cream);color:var(--ink2);outline:none;">
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;">
           ${edNum('最高上限',item.id,'safe',safeQty[item.id],'0.5')}
           ${edNum('增減',item.id,'step',item.step||1,'0.1')}
           ${edNum('最小',item.id,'minOrder',item.minOrder||1,'1')}
           ${edNum('倍數',item.id,'multiple',item.multiple||0,'1')}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;">
+          <span style="font-size:10px;color:var(--ink3);white-space:nowrap;">叫貨語言</span>
+          <input class="iae-input" value="${esc(item.oUnit||item.unit)}" onchange="saveItemField(${item.id},'oUnit',this.value,this)" style="width:50px;height:30px;border:1px solid var(--border);border-radius:7px;text-align:center;font-family:'Noto Sans TC',sans-serif;font-size:12px;background:var(--cream);color:var(--ink);outline:none;">
+          <span style="font-size:10px;color:var(--ink3);white-space:nowrap;">單位重量</span>
+          <input class="iae-input" type="number" min="0" step="1" value="${item.gramsPerUnit||''}" placeholder="—" onchange="saveItemField(${item.id},'gramsPerUnit',this.value,this)" style="width:60px;height:30px;border:1px solid var(--border);border-radius:7px;text-align:center;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);color:var(--ink);outline:none;">
+          <span style="font-size:10px;color:var(--ink3);">公克</span>
+          ${(item.factor&&item.factor!==1&&item.oUnit)?`<span style="font-size:10px;color:var(--accent);margin-left:auto;">1${item.unit}≈${(item.gramsPerUnit/600).toFixed(2)}斤</span>`:((item.oUnit&&item.oUnit!==item.unit)?`<span style="font-size:10px;color:var(--danger);margin-left:auto;">缺重量，暫不換算</span>`:`<span style="font-size:10px;color:var(--ink3);margin-left:auto;">同單位免換算</span>`)}
         </div>
       </div>`;
     };
@@ -2635,6 +2704,7 @@ function renderItemsAdmin() {
 function saveItemField(id, field, value, el){
   const item = ITEMS_DEF.find(i => i.id === id);
   if (!item) return;
+  let reRender=false;
   if (field === 'name'){
     const v = String(value).trim();
     if (!v){ if(el) el.value = item.name; return; } // 空白不接受，還原
@@ -2642,7 +2712,16 @@ function saveItemField(id, field, value, el){
   } else if (field === 'unit'){
     const v = String(value).trim();
     if (!v){ if(el) el.value = item.unit; return; }
-    item.unit = v;
+    item.unit = v; recalcFactor(item); reRender=true;
+  } else if (field === 'orderName'){
+    item.orderName = String(value).trim(); // 可留空，留空時叫貨文字沿用品名
+  } else if (field === 'oUnit'){
+    const v = String(value).trim();
+    item.oUnit = v || item.unit; recalcFactor(item); reRender=true;
+  } else if (field === 'gramsPerUnit'){
+    const n = parseFloat(value);
+    item.gramsPerUnit = (value===''||isNaN(n)||n<=0) ? undefined : n;
+    recalcFactor(item); reRender=true;
   } else {
     const n = parseFloat(value);
     const revert = { safe: safeQty[id], step: item.step||1, minOrder: item.minOrder||1, multiple: item.multiple||0 };
@@ -2654,6 +2733,7 @@ function saveItemField(id, field, value, el){
   }
   fbSaveItemsDef();
   if (el){ el.classList.add('saved-flash'); setTimeout(() => el.classList.remove('saved-flash'), 600); }
+  if (reRender && typeof renderItemsAdmin === 'function') renderItemsAdmin();
 }
 
 // 讀取編輯模式所有欄位、套用到 ITEMS_DEF（回傳更新筆數）
@@ -3107,6 +3187,7 @@ function fbSaveItemsDef() {
     vendor: i.vendor,
     name: i.name,
     unit: i.unit,
+    ...(i.orderName ? { orderName: i.orderName } : {}),
     safe: safeQty[i.id] ?? i.safe,
     ...(i.step && i.step !== 1 ? { step: i.step } : {}),
     ...(i.active === false ? { active: false } : {}),
@@ -3114,6 +3195,7 @@ function fbSaveItemsDef() {
     ...(i.minOrder && i.minOrder !== 1 ? { minOrder: i.minOrder } : {}),
     ...(i.multiple && i.multiple > 1 ? { multiple: i.multiple } : {}),
     ...(i.oUnit ? { oUnit: i.oUnit } : {}),
+    ...(i.gramsPerUnit ? { gramsPerUnit: i.gramsPerUnit } : {}),
     ...(i.factor && i.factor !== 1 ? { factor: i.factor } : {}),
     ...(i.oStep ? { oStep: i.oStep } : {}),
     ...(i.oRound ? { oRound: i.oRound } : {}),
@@ -3212,7 +3294,7 @@ function showOrderView(vendor){
   const isAdmin = currentUser && currentUser.role === 'admin';
   const sub=submitted[viewDow][vendor];
   const isOrdered=!!ordered[viewDow][vendor];
-  const vitems=ITEMS_DEF.filter(i=>i.vendor===vendor);
+  const vitems=ITEMS_DEF.filter(i=>i.vendor===vendor&&i.active!==false).sort((a,b)=>(a.sort||0)-(b.sort||0));
   const needItems=vitems.filter(i=>{const o=calcOrderAmt(i,viewDow);return o!==null&&o>0;});
   const okItems=vitems.filter(i=>{const o=calcOrderAmt(i,viewDow);return o!==null&&o===0;});
   const exportTxt=buildExportText(vendor,viewDow);
@@ -3253,11 +3335,9 @@ function showOrderView(vendor){
 
     html+=`<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);text-transform:uppercase;padding:4px 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px;">需叫貨 ${needItems.length} 項</div>`;
 
-    html+=`<div style="display:grid;grid-template-columns:1fr auto auto auto auto;gap:8px;align-items:center;padding:0 0 6px;border-bottom:1px solid var(--border);margin-bottom:4px;">
+    html+=`<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:0 0 6px;border-bottom:1px solid var(--border);margin-bottom:4px;">
       <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;">品項</span>
       <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;text-align:center;min-width:56px;">現有數量</span>
-      <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;text-align:center;min-width:56px;">最高上限</span>
-      <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;text-align:center;min-width:72px;">系統建議叫貨量</span>
       <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;text-align:center;min-width:96px;">實際叫貨</span>
     </div>`;
 
@@ -3265,11 +3345,9 @@ function showOrderView(vendor){
       const o = calcOrderAmt(item, viewDow);
       const cur = qty[item.id]!==''?qty[item.id]:'—';
       const adjVal = window._orderAdj[adjKey][item.id] ?? o;
-      return`<div style="display:grid;grid-template-columns:1fr auto auto auto auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);">
-        <div style="font-weight:500;font-size:13px;">${item.name}</div>
+      return`<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);">
+        <div style="font-weight:500;font-size:13px;">${item.name}${item.orderName&&item.orderName!==item.name?`<br><span style="font-weight:400;font-size:10px;color:var(--ink3);">叫貨：${item.orderName}</span>`:''}</div>
         <div style="text-align:center;min-width:56px;font-size:13px;color:var(--ink2);">${cur} <span style="font-size:11px;color:var(--ink3);">${item.unit}</span></div>
-        <div style="text-align:center;min-width:56px;font-size:13px;color:var(--ink2);">${safeQty[item.id]} <span style="font-size:11px;color:var(--ink3);">${item.unit}</span></div>
-        <div style="text-align:center;min-width:72px;font-size:13px;color:var(--ink3);">${o} <span style="font-size:11px;">${oUnitOf(item)}</span></div>
         <div style="display:flex;align-items:center;gap:4px;min-width:96px;justify-content:center;">
           <button onclick="adjOrderQty('${adjKey}',${item.id},-${item.factor?(item.oStep||0.5):(item.step||1)},'${oUnitOf(item)}','${vendor}')" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--cream);cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;font-family:monospace;flex-shrink:0;">−</button>
           <span id="adj-${adjKey}-${item.id}" style="font-size:13px;font-weight:600;min-width:28px;text-align:center;color:var(--accent);">${adjVal}</span>
@@ -3334,7 +3412,7 @@ function updateExportBoxView(vendor) {
   if(!sub) return;
 
   const adjKey = `orderAdj_${vendor}_${viewDow}`;
-  const vitems = ITEMS_DEF.filter(i => i.vendor === vendor);
+  const vitems = ITEMS_DEF.filter(i => i.vendor === vendor && i.active !== false).sort((a,b)=>(a.sort||0)-(b.sort||0));
   const needItems = vitems.filter(i => {
     const adj = window._orderAdj?.[adjKey]?.[i.id];
     return adj !== undefined ? adj > 0 : (calcOrderAmt(i, viewDow) ?? 0) > 0;
@@ -3347,7 +3425,7 @@ function updateExportBoxView(vendor) {
   let txt = orderGreeting.replace('{shop}', shopName).replace('{date}', dateStr) + '\n\n';
   needItems.forEach(item => {
     const o = window._orderAdj?.[adjKey]?.[item.id] ?? calcOrderAmt(item, viewDow);
-    txt += `・${item.name}　${o} ${oUnitOf(item)}\n`;
+    txt += `・${item.orderName||item.name}　${o} ${oUnitOf(item)}\n`;
   });
   if(sub.note) txt += `\n備註：${sub.note}`;
   box.textContent = txt.trimEnd();
@@ -3375,7 +3453,7 @@ function buildExportText(vendor,dow){
     .replace('{date}', dateStr) + '\n\n';
   needItems.forEach(item=>{
     const o=calcOrderAmt(item,dow);
-    txt+=`・${item.name}　${o} ${oUnitOf(item)}\n`;
+    txt+=`・${item.orderName||item.name}　${o} ${oUnitOf(item)}\n`;
   });
   if(sub.note) txt+=`\n備註：${sub.note}`;
   return txt.trimEnd();
@@ -3421,13 +3499,13 @@ function showExportAll(){
   let combined=`📦 ${dateStr} 叫貨總整理\n${'─'.repeat(24)}\n\n`;
   let anyNeed=false;
   submittedVendors.forEach(v=>{
-    const vitems=ITEMS_DEF.filter(i=>i.vendor===v);
+    const vitems=ITEMS_DEF.filter(i=>i.vendor===v&&i.active!==false).sort((a,b)=>(a.sort||0)-(b.sort||0));
     const needItems=vitems.filter(i=>{const o=calcOrderAmt(i,viewDow);return o!==null&&o>0;});
     if(needItems.length===0)return;
     anyNeed=true;
     combined+=`【${v}】\n`;
     needItems.forEach(item=>{
-      combined+=`  ・${item.name}　${calcOrderAmt(item,viewDow)} ${oUnitOf(item)}\n`;
+      combined+=`  ・${item.orderName||item.name}　${calcOrderAmt(item,viewDow)} ${oUnitOf(item)}\n`;
     });
     combined+=`\n`;
   });
@@ -3443,7 +3521,7 @@ function showExportAll(){
 
   // Per-vendor rows
   let perVendorHtml=submittedVendors.map(v=>{
-    const vitems=ITEMS_DEF.filter(i=>i.vendor===v);
+    const vitems=ITEMS_DEF.filter(i=>i.vendor===v&&i.active!==false).sort((a,b)=>(a.sort||0)-(b.sort||0));
     const need=vitems.filter(i=>{const o=calcOrderAmt(i,viewDow);return o!==null&&o>0;});
     const isOrdered=!!ordered[viewDow][v];
     const sub=submitted[viewDow][v];
