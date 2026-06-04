@@ -2352,7 +2352,7 @@ function toggleScheduleVendor(dow,vendor){
   const c=document.getElementById(`scount-${dow}`);
   if(c)c.textContent=`${scheduleDraft[dow].length} 個廠商`;
 }
-var saveSchedule = function(){weeklySchedule=JSON.parse(JSON.stringify(scheduleDraft));orderQty=buildDefaultOrders();showToast('✓ 排程已儲存');}
+var saveSchedule = function(){weeklySchedule=JSON.parse(JSON.stringify(scheduleDraft));const prev=orderQty;orderQty=buildDefaultOrders();ITEMS_DEF.forEach(item=>{if(OPT_IN_VENDORS.includes(item.vendor)&&prev[item.id]){for(let d=0;d<7;d++){if(prev[item.id][d]!=null)orderQty[item.id][d]=prev[item.id][d];}}});showToast('✓ 排程已儲存');}
 function resetSchedule(){scheduleDraft={0:['廣弘'],1:['豆漿','麵包','毓品'],2:[],3:['廣弘'],4:['豆漿','毓品','麵包'],5:[],6:[]};renderScheduleEditor();showToast('已重設為預設排程');}
 
 // ── Qty ──
@@ -2360,10 +2360,11 @@ function renderAdminTabs(){document.getElementById('adminTabBar').innerHTML=ALL_
 function switchAdminTab(v){adminActiveVendor=v;renderAdminTabs();renderAdminItems();}
 function renderAdminItems(){
   const vitems=ITEMS_DEF.filter(i=>i.vendor===adminActiveVendor);
-  const fixedDows=[1,2,3,4,5,6,0].filter(dow=>(weeklySchedule[dow]||[]).includes(adminActiveVendor)||ALWAYS_VENDORS.includes(adminActiveVendor));
+  const isOptInVendor=OPT_IN_VENDORS.includes(adminActiveVendor); // opt-in 廠商（蔬菜/南北貨）不綁週排程，可任何一天開啟，故視為每天皆可設需備量
+  const fixedDows=isOptInVendor?[1,2,3,4,5,6,0]:[1,2,3,4,5,6,0].filter(dow=>(weeklySchedule[dow]||[]).includes(adminActiveVendor)||ALWAYS_VENDORS.includes(adminActiveVendor));
   document.getElementById('adminItemContainer').innerHTML=`<div class="admin-section">
     <div class="admin-section-title">${adminActiveVendor} — 各天需備量</div>
-    <div style="font-size:11px;color:var(--ink3);margin-bottom:10px;line-height:1.6;">填一個「需備量」按「套用到叫貨日」就會帶入所有有排程的日子；要某天不一樣再展開「逐日微調」。改完自動儲存。</div>
+    <div style="font-size:11px;color:var(--ink3);margin-bottom:10px;line-height:1.6;">${isOptInVendor?'此廠商需每日開啟。填一個「需備量」按「套用到每一天」，哪天開啟點貨都會以此為標準量計算叫貨量；要某天不一樣再展開「逐日微調」。改完自動儲存。':'填一個「需備量」按「套用到叫貨日」就會帶入所有有排程的日子；要某天不一樣再展開「逐日微調」。改完自動儲存。'}</div>
     ${vitems.map(item=>{
       const cols=[1,2,3,4,5,6,0].map(dow=>{
         const isFixed=(weeklySchedule[dow]||[]).includes(adminActiveVendor)||ALWAYS_VENDORS.includes(adminActiveVendor);
@@ -2389,7 +2390,7 @@ function renderAdminItems(){
             style="width:70px;height:34px;border:1.5px solid var(--border);border-radius:8px;padding:0 8px;text-align:center;font-family:'DM Mono',monospace;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
           <span style="font-size:12px;color:var(--ink3);">${oUnitOf(item)}</span>
           <button onclick="applyMainQty(${item.id})" ${noSchedule?'disabled':''}
-            style="height:34px;padding:0 12px;border:none;border-radius:8px;background:${noSchedule?'var(--tint)':'var(--accent-soft)'};color:${noSchedule?'var(--ink3)':'var(--accent)'};font-size:12px;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:${noSchedule?'default':'pointer'};touch-action:manipulation;white-space:nowrap;">套用到叫貨日</button>
+            style="height:34px;padding:0 12px;border:none;border-radius:8px;background:${noSchedule?'var(--tint)':'var(--accent-soft)'};color:${noSchedule?'var(--ink3)':'var(--accent)'};font-size:12px;font-weight:700;font-family:'Noto Sans TC',sans-serif;cursor:${noSchedule?'default':'pointer'};touch-action:manipulation;white-space:nowrap;">${isOptInVendor?'套用到每一天':'套用到叫貨日'}</button>
         </div>
         <button onclick="toggleQtyDays(${item.id})" id="qd-toggle-${item.id}"
           style="display:inline-flex;align-items:center;gap:6px;background:var(--cream);border:1px solid var(--border);border-radius:8px;color:var(--ink2);font-size:12px;font-weight:500;font-family:'Noto Sans TC',sans-serif;cursor:pointer;padding:7px 13px;margin-bottom:8px;touch-action:manipulation;"><span id="qd-arrow-${item.id}">▾</span>逐日微調（不同日不同量）</button>
