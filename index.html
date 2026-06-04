@@ -722,7 +722,7 @@ window.dispatchEvent(new Event('fbReady'));
         <div style="background:#F0F4FF;border:1px solid #B8CEFF;border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
           <div style="font-size:12px;color:#3A6BC4;line-height:1.6;">
             <strong>同步系統品項</strong><br>
-            <span style="font-size:11px;color:var(--ink3);">將開發者新增的品項同步進來，你自己在後台新增或修改過的品項不受影響</span>
+            <span style="font-size:11px;color:var(--ink3);">將開發者新增的品項、以及換算等新功能同步進來；你自己在後台新增或修改過的設定不受影響</span>
           </div>
           <button onclick="confirmResetAllItems()" style="flex-shrink:0;padding:6px 14px;border-radius:20px;border:1.5px solid #3A6BC4;background:#E8EFFF;color:#3A6BC4;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;white-space:nowrap;">同步品項</button>
         </div>
@@ -2508,6 +2508,7 @@ function doResetAllItems() {
   // 合併邏輯：種子資料中有但 ITEMS_DEF（Firebase）沒有的才新增
   const existingIds = new Set(ITEMS_DEF.map(i => i.id));
   let addedCount = 0;
+  let upgradedCount = 0;
 
   ITEMS_SEED.forEach(seedItem => {
     if (!existingIds.has(seedItem.id)) {
@@ -2523,17 +2524,36 @@ function doResetAllItems() {
       qty[newItem.id] = '';
       if (newItem.id >= nextItemId) nextItemId = newItem.id + 1;
       addedCount++;
+    } else {
+      // Firebase 已有同 id：保留你的設定，但若種子「標記了換算(factor)」而現有品項尚未啟用換算
+      // → 一次性帶入換算設定（已啟用或你自己改過的不會被覆蓋）
+      const cur = ITEMS_DEF.find(i => i.id === seedItem.id);
+      if (cur && seedItem.factor && !cur.factor) {
+        cur.factor = seedItem.factor;
+        cur.oUnit = seedItem.oUnit;
+        if (seedItem.oStep != null) cur.oStep = seedItem.oStep;
+        if (seedItem.oRound != null) cur.oRound = seedItem.oRound;
+        if (seedItem.step != null) cur.step = seedItem.step;
+        // 點貨上限取較大值，確保點貨格能涵蓋換算後的需備量（只升不降，不動你調高過的值）
+        if (seedItem.safe != null && (cur.safe == null || cur.safe < seedItem.safe)) {
+          cur.safe = seedItem.safe;
+          safeQty[cur.id] = seedItem.safe;
+        }
+        upgradedCount++;
+      }
     }
-    // Firebase 已有同 id → 完全保留，不修改
   });
 
   // 寫入 Firebase
   fbSaveItemsDef();
 
-  if (addedCount > 0) {
-    showToast(`✓ 已新增 ${addedCount} 個品項並同步至 Firebase`);
+  if (addedCount > 0 || upgradedCount > 0) {
+    const parts = [];
+    if (addedCount > 0) parts.push(`新增 ${addedCount} 個品項`);
+    if (upgradedCount > 0) parts.push(`啟用 ${upgradedCount} 項換算`);
+    showToast(`✓ 已${parts.join('、')}並同步至 Firebase`);
   } else {
-    showToast('✓ 品項已是最新，無需新增');
+    showToast('✓ 品項已是最新，無需更新');
   }
   renderItemsAdmin();
 }
