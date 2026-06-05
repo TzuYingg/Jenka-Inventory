@@ -102,9 +102,6 @@ window.dispatchEvent(new Event('fbReady'));
   .day-nav{flex-shrink:0;width:30px;align-self:stretch;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--ink2);font-size:18px;line-height:1;cursor:pointer;font-family:'DM Mono',monospace;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;appearance:none;outline:none;}
   .day-cell .day-dot.hidden{background:transparent;}
 
-  .alert-banner{margin:10px 20px 0;background:var(--warn-soft);border-radius:12px;padding:11px 15px;display:flex;align-items:center;gap:9px;font-size:12px;font-weight:500;letter-spacing:.4px;color:var(--warn);}
-  .alert-banner .ab-dot{width:6px;height:6px;border-radius:50%;background:var(--warn);flex-shrink:0;}
-  .alert-banner.hidden{display:none;}
   .completion-banner{margin:10px 20px 0;border-radius:12px;padding:13px 16px;font-size:13px;font-weight:500;letter-spacing:.6px;line-height:1.5;display:flex;align-items:center;justify-content:center;gap:10px;animation:fadeInDown .4s ease;}
   .completion-banner.hidden{display:none;}
   .completion-banner.order-done{background:var(--ok-soft);color:var(--ok);}
@@ -230,7 +227,8 @@ window.dispatchEvent(new Event('fbReady'));
 
   .overlay{position:fixed;inset:0;background:rgba(28,26,20,.55);z-index:160;display:none;align-items:flex-end;}
   .overlay.open{display:flex;}
-  .modal{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:680px;margin:0 auto;padding:24px 20px calc(28px + env(safe-area-inset-bottom));max-height:88vh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
+  /* 底緣抬到底部分頁列之上（58px+安全區＝本專案既有的底欄高度慣例），不論固定元素堆疊誰在上層，modal 動作鈕都不會被遮、也能正常捲到底 */
+  .modal{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-width:680px;margin:0 auto calc(58px + env(safe-area-inset-bottom));padding:24px 20px 28px;max-height:calc(88vh - 58px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;}
   .modal h2{font-size:18px;font-weight:700;margin-bottom:4px;}
   .modal-sub{font-size:12px;color:var(--ink3);font-family:'DM Mono',monospace;margin-bottom:14px;}
   .modal-meta{background:var(--tag-bg);border-radius:8px;padding:8px 12px;margin-bottom:14px;font-size:12px;color:var(--ink2);display:flex;gap:16px;flex-wrap:wrap;}
@@ -564,14 +562,43 @@ window.dispatchEvent(new Event('fbReady'));
 
   /* ═══ 色系套用收尾（Rei 定案）：圓點 icon ＋ 中性 badge ＋ 留白 ═══ */
   /* 廠商列：圓點承擔狀態色，名稱起點對齊；圓點→名稱 16px */
-  .vendor-status-row{gap:16px;}
+  .vendor-status-row{gap:16px;border:none;box-shadow:none;}
+  .vendor-status-row:hover{border:none;box-shadow:none;transform:none;}
   .vendor-status-row .vsr-icon{width:10px;height:10px;min-width:10px;border-radius:50%;font-size:0;color:transparent;box-shadow:none;padding:0;background:var(--ink3);}
-  .vsr-icon.pending{background:var(--danger);}
-  .vsr-icon.in-progress,.vsr-icon.unlocked{background:var(--warn);}
+  .vsr-icon.pending{background:#D8D2C6;}                       /* 待點＝中性灰，不漆紅；急迫交給截止 chip */
+  .vsr-icon.in-progress,.vsr-icon.unlocked{background:#D8D2C6;}
   .vsr-icon.done{background:var(--ok);}
-  /* badge 退成中性灰（顏色已交給圓點，避免雙重狀態色） */
-  .vsr-badge.badge-pending,.vsr-badge.badge-progress,.vsr-badge.badge-done,.vsr-badge.badge-recheck,.vsr-badge.badge-opt{
-    background:var(--tint);color:var(--ink2);border:1px solid var(--line);}
+  /* 被動狀態 → 純文字（無底、無框、無膠囊；顏色交給圓點，文字退成中性） */
+  .vsr-badge.badge-pending,.vsr-badge.badge-progress,.vsr-badge.badge-done,.vsr-badge.badge-recheck,.vsr-badge.badge-opt,.vsr-badge.badge-ordered-done{
+    background:none;border:none;padding:0;min-width:0;font-weight:500;color:var(--ink3);}
+  .vsr-badge.badge-done,.vsr-badge.badge-recheck,.vsr-badge.badge-ordered-done{color:var(--ok);}  /* 已送出／已叫貨＝青 */
+  /* 已完成收合 */
+  .done-collapse{display:flex;flex-direction:column;gap:9px;}
+  .done-rows{display:flex;flex-direction:column;gap:9px;}
+  .done-summary .done-chevron{transition:none;}
+  /* 單行日期導覽 */
+  #weekBar.datenav{display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 16px 12px;border-bottom:1px solid var(--line);}
+  .dn-row{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:240px;}
+  .dn-today-row{display:flex;justify-content:center;margin-top:-2px;}
+  .nav-arrow{width:30px;height:30px;border:none;background:none;color:var(--ink2);font-size:20px;line-height:1;cursor:pointer;border-radius:8px;font-family:'DM Mono',monospace;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;appearance:none;-webkit-appearance:none;outline:none;flex-shrink:0;}
+  .nav-arrow:active{background:var(--tint);}
+  .wk-dots{display:flex;align-items:center;gap:7px;}
+  .wk-dot{width:7px;height:7px;min-width:7px;border-radius:50%;border:none;padding:0;background:var(--line);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;appearance:none;-webkit-appearance:none;outline:none;transition:transform .12s,background .12s;}
+  .wk-dot.today{box-shadow:0 0 0 2px var(--cream),0 0 0 3px var(--ink3);}
+  .wk-dot.sel{background:var(--accent);transform:scale(1.3);}
+  .nav-date{border:none;background:none;font-size:17px;font-weight:700;color:var(--ink);cursor:pointer;font-family:'Noto Sans TC',sans-serif;padding:2px 4px;letter-spacing:.5px;white-space:nowrap;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;appearance:none;-webkit-appearance:none;outline:none;}
+  .dn-md{color:var(--ink3);font-weight:400;font-size:13px;margin-left:3px;letter-spacing:.3px;font-family:'DM Mono',monospace;}
+  .nav-today{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);cursor:pointer;font-family:'Noto Sans TC',sans-serif;white-space:nowrap;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;appearance:none;outline:none;}
+  /* 月曆 */
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin:2px 0 12px;}
+  .cal-title{font-size:15px;font-weight:700;font-family:'DM Mono',monospace;color:var(--ink);}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+  .cal-dow{text-align:center;font-size:11px;color:var(--ink3);padding:4px 0;font-weight:600;}
+  .cal-cell{height:40px;border:none;background:none;border-radius:10px;font-size:14px;font-family:'DM Mono',monospace;color:var(--ink);cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;appearance:none;-webkit-appearance:none;outline:none;}
+  .cal-cell.empty{visibility:hidden;cursor:default;}
+  .cal-cell:active{background:var(--tint);}
+  .cal-cell.today{color:var(--accent);font-weight:700;}
+  .cal-cell.sel{background:var(--ink);color:#fff;font-weight:700;}
 </style>
 </head>
 <body>
@@ -656,16 +683,10 @@ window.dispatchEvent(new Event('fbReady'));
       <div class="week-bar" id="weekBar"></div>
       <div class="day-strip" id="dayStrip"></div>
       <div id="previewNotice" style="display:none;margin:12px 20px 0;background:var(--tint);border-radius:10px;padding:9px 14px;font-size:12px;color:var(--ink2);letter-spacing:.3px;"></div>
-      <div class="alert-banner hidden" id="alertBanner"><span class="ab-dot"></span><span id="alertText"></span></div>
       <div class="completion-banner hidden" id="completionBanner"></div>
       <div class="vendor-status-bar" id="vendorStatusBar"></div>
-      <div id="progressCaption" style="display:flex;justify-content:space-between;align-items:baseline;margin:16px 20px 0;font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);"><span id="progressLabel">點貨進度</span><span id="progressPct" style="color:var(--ink2);font-family:'DM Mono',monospace;letter-spacing:.5px;">0%</span></div>
-      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
-      <div class="summary">
-        <div class="stat danger"><div class="label">尚未點貨</div><div class="value" id="statPending">0</div></div>
-        <div class="stat warn"><div class="label">尚未叫貨</div><div class="value" id="statProgress">0</div></div>
-        <div class="stat ok"><div class="label">已叫貨</div><div class="value" id="statDone">0</div></div>
-      </div>
+      <div id="progressCaption" style="display:flex;justify-content:space-between;align-items:baseline;margin:18px 20px 0;font-size:12px;letter-spacing:.3px;color:var(--ink2);"><span id="progressLabel">今日點貨</span><span id="progressPct" style="color:var(--ink);font-family:'DM Mono',monospace;letter-spacing:.5px;font-size:13px;"></span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%;background:var(--ok);"></div></div>
       <div class="vendor-status-bar" id="stockTracker" style="margin-top:6px;"></div>
     </div>
 
@@ -1364,37 +1385,98 @@ function viewDateKey(){ return dateKeyFor(viewDow, weekOffset); }
 function isViewingToday(){ return weekOffset===0 && viewDow===todayDow; }
 
 function renderDayStrip(){
-  // 週標頭：所視週的日期範圍 ＋（非本週時）回今天
   const wb=document.getElementById('weekBar');
-  if(wb){
-    const start=viewDate(0), end=viewDate(6);
-    const fmt=d=>`${d.getMonth()+1}/${d.getDate()}`;
-    const label = weekOffset===0 ? `本週 ${fmt(start)}–${fmt(end)}`
-      : `${fmt(start)}–${fmt(end)}`;
-    wb.innerHTML = `<span class="wb-label">${label}</span>`
-      + (weekOffset!==0 ? `<button class="wb-today" onclick="goToday()">回今天</button>` : `<span style="font-size:11px;color:var(--ink3);font-family:'DM Mono',monospace;">第 ${weekOffset>0?'+':''}${weekOffset||0} 週</span>`);
-  }
-  const cells=[0,1,2,3,4,5,6].map(dow=>{
-    const d=viewDate(dow);
+  const ds=document.getElementById('dayStrip');
+  if(ds){ ds.innerHTML=''; ds.style.display='none'; }   // 舊日期條收掉，改單行內嵌
+  if(!wb) return;
+  wb.classList.add('datenav');
+  const d=viewDate(viewDow);
+  const dateLabel=`週${DAY_NAMES[viewDow]}<span class="dn-md">${d.getMonth()+1}/${d.getDate()}</span>`;
+  // 第一行：‹ 週四 6/5 ›（點日期開月曆）
+  const dots=[0,1,2,3,4,5,6].map(dow=>{
+    const isSel = dow===viewDow;
     const isToday = weekOffset===0 && dow===todayDow;
-    const hasFixed=(weeklySchedule[dow]||[]).length>0;
-    return`<button class="day-cell${isToday?' today':''}${dow===viewDow?' active':''}" onclick="switchDay(${dow})" style="font-family:'DM Mono',monospace;">
-      <div class="day-name">週${DAY_NAMES[dow]}</div><div class="day-num">${d.getDate()}</div>
-      <div class="day-dot${hasFixed?'':' hidden'}"></div></button>`;
+    return `<button class="wk-dot nav-js${isSel?' sel':''}${isToday?' today':''}" onclick="switchDay(${dow})" aria-label="週${DAY_NAMES[dow]}"></button>`;
   }).join('');
-  document.getElementById('dayStrip').innerHTML =
-    `<button class="day-nav" onclick="switchWeek(-1)" aria-label="上一週">‹</button>`
-    + cells
-    + `<button class="day-nav" onclick="switchWeek(1)" aria-label="下一週">›</button>`;
+  // 第二行：7 顆週點補方位感；翻離今天時再補「回今天」
+  const backToday = !isViewingToday() ? `<div class="dn-today-row"><button class="nav-today nav-js" onclick="goToday()">回今天</button></div>` : '';
+  wb.innerHTML =
+    `<div class="dn-row">`
+    +   `<button class="nav-arrow nav-js" onclick="shiftDay(-1)" aria-label="前一天">‹</button>`
+    +   `<button class="nav-date nav-js" onclick="showDatePicker()">${dateLabel}</button>`
+    +   `<button class="nav-arrow nav-js" onclick="shiftDay(1)" aria-label="後一天">›</button>`
+    + `</div>`
+    + `<div class="wk-dots">${dots}</div>`
+    + backToday;
 }
 function switchDay(dow){viewDow=dow;backToOverview();renderDayStrip();if(typeof loadAnnouncement==='function')loadAnnouncement();}
 function switchWeek(delta){weekOffset+=delta;activeVendor=null;document.getElementById('vendorView').style.display='none';document.getElementById('overviewView').style.display='block';document.getElementById('overviewBar').style.display='flex';document.getElementById('vendorBar').style.display='none';document.body.classList.add('dm-allow');var _isbW=document.getElementById('invSubmitBar');if(_isbW)_isbW.style.display='none';renderDayStrip();renderOverview();if(typeof loadAnnouncement==='function')loadAnnouncement();}
 function goToday(){weekOffset=0;viewDow=todayDow;backToOverview();renderDayStrip();if(typeof loadAnnouncement==='function')loadAnnouncement();}
+function shiftDay(delta){
+  let dow=viewDow+delta, off=weekOffset;
+  while(dow>6){dow-=7;off++;}
+  while(dow<0){dow+=7;off--;}
+  viewDow=dow; weekOffset=off;
+  backToOverview(); renderDayStrip(); if(typeof loadAnnouncement==='function')loadAnnouncement();
+}
+let _pickerYM=null;
+function showDatePicker(){
+  const d=viewDate(viewDow);
+  _pickerYM={y:d.getFullYear(), m:d.getMonth()};
+  renderDatePicker();
+  const ov=document.getElementById('overlay'); if(ov) ov.classList.add('open');
+}
+function datePickerNav(delta){
+  if(!_pickerYM) return;
+  let m=_pickerYM.m+delta, y=_pickerYM.y;
+  while(m>11){m-=12;y++;} while(m<0){m+=12;y--;}
+  _pickerYM={y,m};
+  renderDatePicker();
+}
+function renderDatePicker(){
+  if(!_pickerYM) return;
+  const {y,m}=_pickerYM;
+  const startDow=new Date(y,m,1).getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const selKey=viewDateKey();
+  const pad=n=>String(n).padStart(2,'0');
+  const todayKey=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+  const dowHead=['日','一','二','三','四','五','六'].map(x=>`<div class="cal-dow">${x}</div>`).join('');
+  let cells='';
+  for(let i=0;i<startDow;i++) cells+=`<div class="cal-cell empty"></div>`;
+  for(let day=1;day<=daysInMonth;day++){
+    const key=`${y}-${pad(m+1)}-${pad(day)}`;
+    const isSel=key===selKey, isToday=key===todayKey;
+    cells+=`<button class="cal-cell${isSel?' sel':''}${isToday?' today':''}" onclick="pickDate(${y},${m},${day})">${day}</button>`;
+  }
+  const modal=document.getElementById('modal');
+  if(!modal) return;
+  modal.innerHTML=`<h2>選擇日期</h2>
+    <div class="cal-head">
+      <button class="nav-arrow" onclick="datePickerNav(-1)" aria-label="上個月">‹</button>
+      <span class="cal-title">${y} 年 ${m+1} 月</span>
+      <button class="nav-arrow" onclick="datePickerNav(1)" aria-label="下個月">›</button>
+    </div>
+    <div class="cal-grid">${dowHead}${cells}</div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-order" onclick="goToday();closeModal();">回今天</button>
+    </div>`;
+}
+function pickDate(y,m,day){
+  const picked=new Date(y,m,day);
+  const dow=picked.getDay();
+  const todayStart=new Date(now); todayStart.setHours(0,0,0,0); todayStart.setDate(todayStart.getDate()-todayDow);
+  const pickStart=new Date(picked); pickStart.setHours(0,0,0,0); pickStart.setDate(pickStart.getDate()-dow);
+  const off=Math.round((pickStart-todayStart)/(7*24*3600*1000));
+  viewDow=dow; weekOffset=off;
+  closeModal();
+  backToOverview(); renderDayStrip(); if(typeof loadAnnouncement==='function')loadAnnouncement();
+}
 
 // 非本週的預覽模式：唯讀排定廠商＋該日公告＋該日排定叫貨
 function renderPreviewOverview(isAdmin){
   setLiveWidgets(false);
-  const ab=document.getElementById('alertBanner'); if(ab) ab.classList.add('hidden');
   const cb=document.getElementById('completionBanner'); if(cb){ cb.className='completion-banner hidden'; cb.innerHTML=''; }
   const ob=document.getElementById('overviewBar'); if(ob) ob.style.display='none';
   const d=viewDate(viewDow);
@@ -1434,7 +1516,17 @@ function setLiveWidgets(show){
   const disp = show ? '' : 'none';
   const cap=document.getElementById('progressCaption'); if(cap) cap.style.display = show ? 'flex' : 'none';
   const pb=document.querySelector('.progress-bar'); if(pb) pb.style.display = disp;
-  const sm=document.querySelector('.summary'); if(sm) sm.style.display = show ? 'grid' : 'none';
+}
+
+function toggleDoneSection(e){
+  if(e) e.stopPropagation();
+  const wrap = e.currentTarget.closest('.done-collapse');
+  if(!wrap) return;
+  const rows = wrap.querySelector('.done-rows');
+  const chev = wrap.querySelector('.done-chevron');
+  const open = rows.style.display !== 'none';
+  rows.style.display = open ? 'none' : '';
+  if(chev) chev.textContent = open ? '›' : '⌄';
 }
 
 function renderOverview(){
@@ -1454,10 +1546,6 @@ function renderOverview(){
     ? [...visibleScheduled, ...OPT_IN_VENDORS]
     : [...visibleScheduled, ...activeOptIn];
 
-  const pending = visibleScheduled.filter(v => { const s = vendorState(v, viewDow); return s === 'pending' || s === 'progress'; });
-  const alertBanner = document.getElementById('alertBanner');
-  if(pending.length > 0){ alertBanner.classList.remove('hidden'); document.getElementById('alertText').textContent = `尚未送出叫貨：${pending.join('、')}`; }
-  else alertBanner.classList.add('hidden');
 
   const bar = document.getElementById('vendorStatusBar');
   if(vendors.length === 0){
@@ -1524,7 +1612,7 @@ function renderOverview(){
         // soft 不顯示 chip：避免每家都掛同一句提醒、佔掉視覺份量，
         // 只有 hard（如廣弘）這種有實際截止限定的才跳出來。
       }
-      return {group: state==='done'?'done':'pending', vendor:v, dl, html:`<button class="vendor-status-row${rowCls ? ' '+rowCls : ''}${ordered[viewDow][v] ? ' ordered' : ''}" onclick="openVendor('${v}')" style="width:100%;text-align:left;border:1px solid var(--border);font-family:'Noto Sans TC',sans-serif;">
+      return {group: state==='done'?'done':'pending', vendor:v, dl, html:`<button class="vendor-status-row${rowCls ? ' '+rowCls : ''}${ordered[viewDow][v] ? ' ordered' : ''}" onclick="openVendor('${v}')" style="width:100%;text-align:left;font-family:'Noto Sans TC',sans-serif;">
         <div class="vsr-icon ${iconCls}">${icon}</div>
         <div class="vsr-left">
           <div class="vsr-name">${v}${isOptIn && isEnabled ? '<span style="font-size:9px;background:#E8EFFF;color:#3A6BC4;padding:1px 6px;border-radius:8px;margin-left:6px;font-weight:400;">今日點貨</span>' : ''}</div>
@@ -1565,7 +1653,23 @@ function renderOverview(){
     const secLabel = (text, n, col) => `<div class="ov-section-label" style="margin:8px 0 0;">${text}<span style="font-weight:700;color:${col};font-family:'DM Mono',monospace;letter-spacing:0;">${n}</span></div>`;
     let barHtml = '';
     if(pendingRows.length) barHtml += secLabel('今日待點', pendingRows.length, 'var(--accent)') + pendingRows.map(r => r.html).join('');
-    if(doneRows.length) barHtml += secLabel('已完成', doneRows.length, 'var(--ok)') + doneRows.map(r => r.html).join('');
+    if(doneRows.length){
+      const doneNames = doneRows.map(r => r.vendor);
+      const shownNames = doneNames.slice(0,3).join('、') + (doneNames.length>3 ? ` +${doneNames.length-3}` : '');
+      const needOrder = doneRows.filter(r => !ordered[viewDow][r.vendor]).length;
+      barHtml += secLabel('已完成', doneRows.length, 'var(--ok)')
+        + `<div class="done-collapse">
+            <button class="vendor-status-row done-summary" onclick="toggleDoneSection(event)" style="width:100%;text-align:left;font-family:'Noto Sans TC',sans-serif;">
+              <span class="vsr-icon done"></span>
+              <div class="vsr-left">
+                <div class="vsr-name" style="font-weight:500;color:var(--ink2);">${shownNames}</div>
+                ${needOrder>0 ? `<div class="vsr-sub" style="color:var(--accent);">${needOrder} 家待叫貨</div>` : ''}
+              </div>
+              <span class="vsr-chevron done-chevron">›</span>
+            </button>
+            <div class="done-rows" style="display:none;">${doneRows.map(r => r.html).join('')}</div>
+          </div>`;
+    }
     bar.innerHTML = barHtml;
   }
 
@@ -1575,9 +1679,6 @@ function renderOverview(){
   const statUnordered = allVisible.filter(v => vendorState(v, viewDow) === 'done' && !ordered[viewDow][v]).length;
   const statOrdered = allVisible.filter(v => !!ordered[viewDow][v]).length;
 
-  document.getElementById('statPending').textContent = statPending;
-  document.getElementById('statProgress').textContent = statUnordered;
-  document.getElementById('statDone').textContent = statOrdered;
   const _sub=document.getElementById('subtitle'); if(_sub) _sub.textContent = `週${DAY_NAMES[viewDow]} · ${statOrdered}/${allVisible.length} 廠商已叫貨`;
   // 進度依身分切換：員工看「點貨進度」(已送出/全部)、管理員看「叫貨進度」(已叫貨/全部)
   const statSubmitted = statUnordered + statOrdered;
@@ -1585,16 +1686,16 @@ function renderOverview(){
   const progPct = allVisible.length > 0 ? Math.round(progNum / allVisible.length * 100) : 0;
   const progLabelEl = document.getElementById('progressLabel');
   const progPctEl = document.getElementById('progressPct');
-  if(progLabelEl) progLabelEl.textContent = isAdmin ? '叫貨進度' : '點貨進度';
-  if(progPctEl) progPctEl.textContent = `${progNum}/${allVisible.length}　${progPct}%`;
+  if(progLabelEl) progLabelEl.textContent = isAdmin ? '今日叫貨' : '今日點貨';
+  if(progPctEl) progPctEl.textContent = `${progNum} / ${allVisible.length} 家完成`;
   const _spill=document.getElementById('summaryPill'); if(_spill) _spill.textContent = `摘要 ${progNum}/${allVisible.length}`;
   document.getElementById('progressFill').style.width = progPct + '%';
+  // 沒有任何進貨廠商的那天，整條進度行隱藏
+  { const _cap=document.getElementById('progressCaption'); const _pb=document.querySelector('.progress-bar');
+    const _hide = allVisible.length===0;
+    if(_cap) _cap.style.display = _hide ? 'none' : 'flex';
+    if(_pb) _pb.style.display = _hide ? 'none' : ''; }
 
-  // 歸零的統計卡變淡
-  document.querySelector('.stat.danger').classList.toggle('dimmed', statPending === 0);
-  document.querySelector('.stat.warn').classList.toggle('dimmed', statUnordered === 0);
-  // 已叫貨：還沒開始叫（全0）時也變淡，全叫完才顯眼
-  document.querySelector('.stat.ok').classList.toggle('dimmed', statOrdered === 0);
 
   // ── 完成提醒 banner（固定文案，安靜宣告）──
   const banner = document.getElementById('completionBanner');
@@ -5211,6 +5312,13 @@ window.addEventListener('offline', () => showSyncStatus(false));
 
 // iOS Safari fix: event delegation for dynamic content
 document.addEventListener('click', function(e) {
+  // 單行日期導覽控件（箭頭/週點/日期/回今天）
+  const njs = e.target.closest('.nav-js');
+  if (njs) {
+    const onclick = njs.getAttribute('onclick');
+    if (onclick) { try { eval(onclick); } catch(err) {} }
+    return;
+  }
   // vendor status row
   const row = e.target.closest('.vendor-status-row');
   if (row) {
@@ -5229,6 +5337,13 @@ document.addEventListener('click', function(e) {
 
 // Also add touchend for iOS
 document.addEventListener('touchend', function(e) {
+  const njs = e.target.closest('.nav-js');
+  if (njs) {
+    e.preventDefault();
+    const onclick = njs.getAttribute('onclick');
+    if (onclick) { try { eval(onclick); } catch(err) {} }
+    return;
+  }
   const row = e.target.closest('.vendor-status-row');
   if (row) {
     e.preventDefault();
