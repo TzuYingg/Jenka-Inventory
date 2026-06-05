@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getDatabase, ref, set, get, onValue, update, remove, push } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
+import { getDatabase, ref, set, get, onValue, update, remove, push, onChildAdded } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
 
 const firebaseConfig={
   apiKey:"AIzaSyDoSPSDr6DfQNa7DHV9Z4xl0Dkc36kd69o",
@@ -25,7 +25,7 @@ const firebaseConfig={
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-window._fb = {db, ref, set, get, onValue, update, remove, push};
+window._fb = {db, ref, set, get, onValue, update, remove, push, onChildAdded};
 window._fbReady = true;
 window.dispatchEvent(new Event('fbReady'));
 </script>
@@ -344,6 +344,30 @@ window.dispatchEvent(new Event('fbReady'));
   .wk-cell:not(.opt):not(.has-value){border:1px solid #DBB4A6;background:#F3E3DC;color:#A2503C;}
   .wk-cell:not(.opt):not(.has-value)::placeholder{color:#A2503C;opacity:1;font-family:'Noto Sans TC',sans-serif;font-size:11px;}
   .wk-cell.opt::placeholder{color:var(--ink3);}
+  /* ── 快訊彈幕 ── */
+  #danmakuLayer{position:fixed;left:0;right:0;top:60px;height:46%;overflow:hidden;pointer-events:none;z-index:120;}
+  .danmaku-item{position:absolute;right:0;white-space:nowrap;padding:6px 14px;border-radius:20px;background:rgba(43,40,36,.82);color:#FCFAF6;font-size:15px;font-weight:500;font-family:'Noto Sans TC',sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.18);animation:dmFly linear forwards;will-change:transform;}
+  @keyframes dmFly{from{transform:translateX(100vw);}to{transform:translateX(calc(-100% - 24px));}}
+  #danmakuFab{position:fixed;right:16px;bottom:84px;width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:22px;box-shadow:0 4px 14px rgba(191,91,61,.42);z-index:170;cursor:pointer;display:block;touch-action:manipulation;}
+  #danmakuFab:active{transform:scale(.94);}
+  #danmakuBackdrop{position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:300;opacity:0;pointer-events:none;transition:opacity .25s;}
+  #danmakuBackdrop.open{opacity:1;pointer-events:auto;}
+  #danmakuSheet{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top-left-radius:18px;border-top-right-radius:18px;box-shadow:0 -4px 20px rgba(0,0,0,.16);z-index:310;transform:translateY(110%);transition:transform .26s cubic-bezier(.2,.8,.2,1);padding:14px 16px calc(18px + env(safe-area-inset-bottom));max-height:74%;overflow:auto;}
+  #danmakuSheet.open{transform:translateY(0);}
+  .dm-sheet-head{display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:600;color:var(--ink);margin-bottom:12px;}
+  .dm-close{background:none;border:none;font-size:16px;color:var(--ink3);cursor:pointer;padding:4px 8px;}
+  .dm-chips{display:flex;flex-wrap:wrap;gap:8px;}
+  .dm-chip{padding:10px 14px;border-radius:22px;border:1px solid var(--border);background:var(--tag-bg);color:var(--ink);font-size:14px;font-family:'Noto Sans TC',sans-serif;cursor:pointer;touch-action:manipulation;}
+  .dm-chip:active{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .dm-free{display:flex;gap:8px;margin-top:14px;}
+  .dm-free input{flex:1;min-width:0;height:40px;border:1px solid var(--border);border-radius:10px;padding:0 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;}
+  .dm-free button,.dm-edit-add button{height:40px;padding:0 16px;border:none;border-radius:10px;background:var(--ink);color:#fff;font-family:'Noto Sans TC',sans-serif;font-size:14px;cursor:pointer;white-space:nowrap;}
+  .dm-edit-toggle{margin-top:14px;width:100%;height:38px;border:1px dashed var(--border);border-radius:10px;background:none;color:var(--ink2);font-family:'Noto Sans TC',sans-serif;font-size:13px;cursor:pointer;}
+  #danmakuEditWrap{margin-top:10px;}
+  .dm-edit-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid var(--border);border-radius:9px;margin-bottom:6px;font-size:13px;color:var(--ink);}
+  .dm-edit-row button{background:none;border:none;color:var(--danger);font-size:12px;cursor:pointer;}
+  .dm-edit-add{display:flex;gap:8px;margin-top:6px;}
+  .dm-edit-add input{flex:1;min-width:0;height:38px;border:1px solid var(--border);border-radius:9px;padding:0 12px;font-family:'Noto Sans TC',sans-serif;font-size:13px;background:var(--cream);color:var(--ink);outline:none;}
   .admin-day-input:focus{border-color:var(--admin-accent);}
   .admin-day-input.has-value{border-color:var(--accent);background:#FCFAF6;}
   .admin-safe-row{display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);flex-wrap:wrap;}
@@ -5254,6 +5278,124 @@ function setBottomActive(page){
     });
   });
 }
+
+/* ===================== 快訊彈幕 Danmaku ===================== */
+let DANMAKU_DEFAULT = ['蛋快沒了','麵包不夠用','客人爆多🔥','今天人手不夠','大家辛苦了💪','今天的狗很乖🐕'];
+let DANMAKU_PRESETS = DANMAKU_DEFAULT.slice();
+let _danmakuInited = false, _danmakuLane = 0;
+const _dmEsc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function initDanmaku(){
+  if (_danmakuInited || !window._fb) return;
+  _danmakuInited = true;
+  const { db, ref, onValue, onChildAdded } = window._fb;
+  onValue(ref(db,'jenka/danmakuPresets'), snap => {
+    const v = snap.val();
+    DANMAKU_PRESETS = (Array.isArray(v) && v.length) ? v.slice() : DANMAKU_DEFAULT.slice();
+    renderDanmakuChips();
+  });
+  const startTs = Date.now();
+  onChildAdded(ref(db,'jenka/danmaku'), snap => {
+    const m = snap.val();
+    if (!m || !m.text) return;
+    if ((m.ts||0) < startTs - 4000) return; // 略過進場前的舊訊息
+    flyDanmaku(m.text);
+  });
+}
+
+function flyDanmaku(text){
+  const layer = document.getElementById('danmakuLayer');
+  if (!layer) return;
+  const el = document.createElement('div');
+  el.className = 'danmaku-item';
+  el.textContent = text;
+  const lanes = 5;
+  const lane = _danmakuLane % lanes; _danmakuLane++;
+  el.style.top = (8 + lane*46) + 'px';
+  const dur = 7 + Math.random()*2;
+  el.style.animationDuration = dur + 's';
+  layer.appendChild(el);
+  el.addEventListener('animationend', () => el.remove());
+  setTimeout(() => { if (el.parentNode) el.remove(); }, (dur+1.5)*1000);
+}
+
+function sendDanmaku(text){
+  text = (text||'').trim();
+  if (!text) return;
+  if (window._fb){
+    const { db, ref, push, get, remove } = window._fb;
+    push(ref(db,'jenka/danmaku'), { text, ts: Date.now(), by: (typeof currentUser!=='undefined' && currentUser && currentUser.name) || '' });
+    // 清掉 90 秒前的舊訊息，避免節點長大
+    get(ref(db,'jenka/danmaku')).then(snap => {
+      const all = snap.val() || {}; const cut = Date.now() - 90000;
+      Object.keys(all).forEach(k => { if ((all[k]&&all[k].ts||0) < cut) remove(ref(db,'jenka/danmaku/'+k)); });
+    }).catch(()=>{});
+  } else {
+    flyDanmaku(text); // 離線也至少本機飛一下
+  }
+  closeDanmakuSheet();
+  if (typeof showToast === 'function') showToast('已送出彈幕');
+}
+function sendDanmakuIdx(i){ sendDanmaku(DANMAKU_PRESETS[i]); }
+function sendDanmakuFree(){
+  const inp = document.getElementById('danmakuFreeInput');
+  if (!inp) return;
+  const t = inp.value.trim();
+  if (!t) return;
+  inp.value = '';
+  sendDanmaku(t);
+}
+
+function openDanmakuSheet(){
+  renderDanmakuChips();
+  document.getElementById('danmakuSheet').classList.add('open');
+  document.getElementById('danmakuBackdrop').classList.add('open');
+}
+function closeDanmakuSheet(){
+  const s = document.getElementById('danmakuSheet'); if (s) s.classList.remove('open');
+  const b = document.getElementById('danmakuBackdrop'); if (b) b.classList.remove('open');
+  const w = document.getElementById('danmakuEditWrap'); if (w) w.style.display = 'none';
+}
+
+function renderDanmakuChips(){
+  const box = document.getElementById('danmakuChips');
+  if (box) box.innerHTML = DANMAKU_PRESETS.map((t,i) => `<button class="dm-chip" onclick="sendDanmakuIdx(${i})">${_dmEsc(t)}</button>`).join('');
+  const isAdmin = (typeof currentUser!=='undefined') && currentUser && currentUser.role === 'admin';
+  const editBtn = document.getElementById('danmakuEditBtn');
+  if (editBtn) editBtn.style.display = isAdmin ? 'block' : 'none';
+  const list = document.getElementById('danmakuEditList');
+  if (list) list.innerHTML = DANMAKU_PRESETS.map((t,i) => `<div class="dm-edit-row"><span>${_dmEsc(t)}</span><button onclick="removeDanmakuPreset(${i})">刪</button></div>`).join('');
+}
+function toggleDanmakuEdit(){
+  const w = document.getElementById('danmakuEditWrap');
+  if (!w) return;
+  w.style.display = (w.style.display === 'none' || !w.style.display) ? 'block' : 'none';
+  renderDanmakuChips();
+}
+function saveDanmakuPresets(){
+  if (!window._fb) return;
+  const { db, ref, set } = window._fb;
+  set(ref(db,'jenka/danmakuPresets'), DANMAKU_PRESETS).catch(e => console.warn('danmaku presets save error', e));
+}
+function addDanmakuPreset(){
+  const inp = document.getElementById('danmakuNewPreset');
+  if (!inp) return;
+  const t = inp.value.trim();
+  if (!t) return;
+  DANMAKU_PRESETS.push(t);
+  inp.value = '';
+  saveDanmakuPresets();
+  renderDanmakuChips();
+}
+function removeDanmakuPreset(i){
+  DANMAKU_PRESETS.splice(i,1);
+  saveDanmakuPresets();
+  renderDanmakuChips();
+}
+
+if (window._fbReady) initDanmaku();
+else window.addEventListener('fbReady', initDanmaku);
+/* =================== 快訊彈幕 end =================== */
 </script>
 
 <!-- BOTTOM TAB BAR -->
@@ -5265,5 +5407,23 @@ function setBottomActive(page){
 </div>
 
 </div><!-- /appContent -->
+
+<!-- 快訊彈幕 -->
+<div id="danmakuLayer"></div>
+<button id="danmakuFab" onclick="openDanmakuSheet()" aria-label="喊話">📣</button>
+<div id="danmakuBackdrop" onclick="closeDanmakuSheet()"></div>
+<div id="danmakuSheet">
+  <div class="dm-sheet-head"><span>喊話 · 快訊彈幕</span><button class="dm-close" onclick="closeDanmakuSheet()">✕</button></div>
+  <div id="danmakuChips" class="dm-chips"></div>
+  <div class="dm-free">
+    <input id="danmakuFreeInput" placeholder="自己打一句…" maxlength="24" onkeydown="if(event.key==='Enter')sendDanmakuFree()">
+    <button onclick="sendDanmakuFree()">送出</button>
+  </div>
+  <button id="danmakuEditBtn" class="dm-edit-toggle" onclick="toggleDanmakuEdit()" style="display:none;">✏️ 編輯短句</button>
+  <div id="danmakuEditWrap" style="display:none;">
+    <div id="danmakuEditList"></div>
+    <div class="dm-edit-add"><input id="danmakuNewPreset" placeholder="新增短句" maxlength="24"><button onclick="addDanmakuPreset()">加入</button></div>
+  </div>
+</div>
 </body>
 </html>
