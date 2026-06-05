@@ -599,6 +599,23 @@ window.dispatchEvent(new Event('fbReady'));
   .cal-cell:active{background:var(--tint);}
   .cal-cell.today{color:var(--accent);font-weight:700;}
   .cal-cell.sel{background:var(--ink);color:#fff;font-weight:700;}
+
+  /* ═══ 點貨表（極簡・KaKa 定案）：只留品名(上排靠左)＋數量(下排靠右) ═══ */
+  .item{border:1px solid var(--border);padding:13px 16px 14px;margin-bottom:0;box-shadow:none;}
+  .item.status-ok,.item.status-warn,.item.status-danger,.item.status-empty{border-left:1px solid var(--border);}
+  .item-top{display:flex;align-items:center;margin-bottom:11px;}
+  .item-top .item-name{font-size:15px;font-weight:600;color:var(--ink);line-height:1.3;}
+  .item-controls{justify-content:flex-end;gap:6px;flex-wrap:wrap;}
+  .vendor-detail-head{padding:18px 0 14px;margin-bottom:6px;border-bottom:1px solid var(--border);}
+  .vdh-bar{display:flex;align-items:center;justify-content:space-between;min-height:30px;margin-bottom:14px;}
+  .vdh-bar .back-btn{border:none;background:none;padding:2px;font-size:14px;color:var(--ink2);font-family:'Noto Sans TC',sans-serif;cursor:pointer;-webkit-tap-highlight-color:rgba(0,0,0,.05);}
+  .vdh-bar .back-btn:active{color:var(--ink);}
+  .vdh-title-row{display:flex;align-items:center;gap:10px;}
+  .vdh-title-row .vsh-title{font-size:20px;font-weight:700;letter-spacing:.5px;line-height:1.1;}
+  .vdh-dot{width:9px;height:9px;}
+  .vdh-status{font-size:12px;font-weight:600;color:var(--ink3);margin-left:1px;}
+  .vdh-status.st-ok{color:var(--ok);}
+  .vdh-status.st-warn{color:var(--warn);}
 </style>
 </head>
 <body>
@@ -693,19 +710,20 @@ window.dispatchEvent(new Event('fbReady'));
     <!-- VENDOR DETAIL -->
     <div id="vendorView" style="display:none;">
       <div class="vendor-section">
-        <div class="vendor-section-header">
-          <div class="vsh-left">
-            <div class="vsh-title" id="vendorViewTitle"></div>
-            <span class="section-badge" id="vendorViewBadge"></span>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;">
+        <div class="vendor-detail-head">
+          <div class="vdh-bar">
+            <button class="back-btn" onclick="backToOverview()">‹ 返回</button>
             <span id="vendorLineBtn" style="display:none;">
               <a id="vendorLineLinkEl" href="#" target="_blank"
-                style="display:flex;align-items:center;gap:4px;padding:5px 10px;background:#06C755;color:#fff;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;">
+                style="display:flex;align-items:center;gap:5px;padding:6px 14px;background:#06C755;color:#fff;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;">
                 LINE
               </a>
             </span>
-            <button class="back-btn" onclick="backToOverview()">← 返回</button>
+          </div>
+          <div class="vdh-title-row">
+            <span class="status-dot vdh-dot" id="vendorStatusDot"></span>
+            <div class="vsh-title" id="vendorViewTitle"></div>
+            <span class="vdh-status" id="vendorViewStatus"></span>
           </div>
         </div>
         <div id="recheckNotice" class="recheck-notice hidden"></div>
@@ -1776,9 +1794,14 @@ function renderVendorDetail(){
   const isUnlocked=state==='unlocked';
   const vitems=ITEMS_DEF.filter(i=>i.vendor===activeVendor&&i.active!==false&&calcOrderAmt(i,viewDow)!==null).sort((a,b)=>(a.sort||0)-(b.sort||0));
   document.getElementById('vendorViewTitle').textContent=activeVendor;
-  const badge=document.getElementById('vendorViewBadge');
-  badge.textContent='今日進貨';
-  badge.className='section-badge badge-fixed';
+  // 廠商狀態：圓點＋純文字（取代舊 badge）
+  const vdot=document.getElementById('vendorStatusDot');
+  const vst=document.getElementById('vendorViewStatus');
+  if(vdot&&vst){
+    if(isUnlocked){vst.textContent='請重新點貨';vst.className='vdh-status st-warn';vdot.className='status-dot vdh-dot dot-warn';}
+    else if(isSubmitted){vst.textContent='已送出';vst.className='vdh-status st-ok';vdot.className='status-dot vdh-dot dot-ok';}
+    else{vst.textContent='待點貨';vst.className='vdh-status';vdot.className='status-dot vdh-dot dot-empty';}
+  }
   // LINE 連結按鈕（管理員才顯示）
   const isAdmin = currentUser && currentUser.role === 'admin';
   const lineBtn = document.getElementById('vendorLineBtn');
@@ -1828,14 +1851,6 @@ function renderVendorDetail(){
   }
 
   document.getElementById('vendorItemList').innerHTML=vitems.map(item=>{
-    const st=getItemStatus(item);
-    const oAmt=calcOrderAmt(item,viewDow);
-    let otagText='';
-    let otagCls='order-tag';
-    if(oAmt===null){otagText=`今日不叫`;otagCls='order-tag zero';}
-    else if(oAmt===0){otagText=`庫存充足`;otagCls='order-tag ok';}
-    else if(qty[item.id]===''){otagText=`未填 上限${oAmt}${oUnitOf(item)}`;otagCls='order-tag need';}
-    else{otagText=`叫 ${oAmt}${oUnitOf(item)}`;otagCls='order-tag need';}
     const locked=isSubmitted&&!isUnlocked;
     const step=item.step||1;
     const maxLimit=safeQty[item.id]||0;
@@ -1859,19 +1874,17 @@ function renderVendorDetail(){
       const isSel=!isNaN(curVal)&&Math.abs(curVal-v)<0.001;
       return`<button class="qty-preset${isSel?' selected':''}" onclick="setQty(${item.id},${v})" ${locked?'disabled':''}>${v}</button>`;
     }).join('');
-    return`<div style="margin-bottom:18px;" id="item-wrap-${item.id}">
-      <div class="item status-${st}${locked?' submitted-item':''}" id="item-${item.id}" data-offset="${initOffset}" data-max="${allPresets.length}">
-        <div class="item-name" style="margin-bottom:7px;">${item.name}</div>
+    return`<div style="margin-bottom:10px;" id="item-wrap-${item.id}">
+      <div class="item${locked?' submitted-item':''}" id="item-${item.id}" data-offset="${initOffset}" data-max="${allPresets.length}">
+        <div class="item-top">
+          <span class="item-name">${item.name}</span>
+        </div>
         <div class="item-controls">
           <button class="qty-btn" onclick="slidePresets(${item.id},-1)" ${locked||!canLeft?'disabled':''} id="btn-left-${item.id}" style="opacity:${canLeft?1:0.25};">‹</button>
           <div id="presets-${item.id}" style="display:flex;gap:5px;">${presetsHtml}</div>
           <button class="qty-btn" onclick="slidePresets(${item.id},1)" ${locked||!canRight?'disabled':''} id="btn-right-${item.id}" style="opacity:${canRight?1:0.25};">›</button>
           <span class="qty-unit">${item.unit}</span>
         </div>
-      </div>
-      <div id="info-${item.id}" style="display:flex;align-items:center;gap:5px;padding:3px 4px 0;min-height:14px;">
-        <span class="status-dot dot-${st}" id="dot-${item.id}"></span>
-        <span class="stock-chip-wrap" id="chip-${item.id}">${stockChip(st)}</span>
       </div>
     </div>`;
   }).join('');
@@ -1885,24 +1898,10 @@ function onCheckerChange(){
 var updateQty = function(id,val){
   qty[id]=String(val);
   const item=ITEMS_DEF.find(i=>i.id===id);
-  const st=getItemStatus(item);
   const state=vendorState(item.vendor,viewDow);
   const locked=state==='done';
   const el=document.getElementById(`item-${id}`);
-  if(el)el.className=`item status-${st}${locked?' submitted-item':''}`;
-  const dot=document.getElementById(`dot-${id}`);
-  if(dot)dot.className=`status-dot dot-${st}`;
-  const chip=document.getElementById(`chip-${id}`);
-  if(chip)chip.innerHTML=stockChip(st);
-  const oAmt=calcOrderAmt(item,viewDow);
-  const oEl=document.getElementById(`otag-${id}`);
-  if(oEl){
-    let t='';
-    if(oAmt===null)t=`<span class="order-tag zero">今日不叫</span>`;
-    else if(oAmt===0)t=`<span class="order-tag ok">庫存充足</span>`;
-    else t=`<span class="order-tag need">叫 ${oAmt}${oUnitOf(item)}</span>`;
-    oEl.innerHTML=t;
-  }
+  if(el)el.className=`item${locked?' submitted-item':''}`;
   // 更新進度提示（微進度）
   if(activeVendor) updateVendorProgress();
 }
