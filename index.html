@@ -879,7 +879,7 @@ window.dispatchEvent(new Event('fbReady'));
           <div style="font-size:12px;color:#3A6BC4;line-height:1.6;">
             <strong>同步系統品項</strong><br>
             <span style="font-size:11px;color:var(--ink3);">將開發者新增的品項、以及換算等新功能同步進來；你自己在後台新增或修改過的設定不受影響</span><br>
-            <span style="font-size:11px;color:#3A6BC4;font-weight:700;font-family:'DM Mono',monospace;">目前版本：v9 · 庫存分類加「食材」（2026.06.07）</span>
+            <span style="font-size:11px;color:#3A6BC4;font-weight:700;font-family:'DM Mono',monospace;">目前版本：v10 · 庫存批次建立主清單（2026.06.07）</span>
           </div>
           <button onclick="confirmResetAllItems()" style="flex-shrink:0;padding:6px 14px;border-radius:20px;border:1.5px solid #3A6BC4;background:#E8EFFF;color:#3A6BC4;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;white-space:nowrap;">同步品項</button>
         </div>
@@ -1165,8 +1165,9 @@ window.dispatchEvent(new Event('fbReady'));
         <h1>庫存追蹤</h1>
         <div style="font-size:12px;color:var(--ink3);margin-top:2px;font-family:'DM Mono',monospace;">追蹤品項庫存狀況</div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
         <button id="stockScheduleBtn" onclick="showSchedulePanel()" style="display:none;font-size:12px;background:var(--cream);color:var(--ink2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">請員工清點</button>
+        <button id="stockBatchBtn" onclick="showBatchAddStock()" style="display:none;font-size:12px;background:var(--cream);color:var(--ink2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">批次建立</button>
         <button id="stockPresetBtn" onclick="manageStockPresets()" style="display:none;font-size:12px;background:var(--cream);color:var(--ink2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">品項範本</button>
         <button id="stockAddBtn" onclick="showAddStockItem()" style="display:none;font-size:12px;background:var(--active);color:#fff;border:none;border-radius:20px;padding:6px 14px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">+ 新增品項</button>
       </div>
@@ -4137,6 +4138,8 @@ function initStockPage() {
   if (presetBtn) presetBtn.style.display = isAdmin ? '' : 'none';
   const schedBtn = document.getElementById('stockScheduleBtn');
   if (schedBtn) schedBtn.style.display = isAdmin ? '' : 'none';
+  const batchBtn = document.getElementById('stockBatchBtn');
+  if (batchBtn) batchBtn.style.display = isAdmin ? '' : 'none';
   loadStockData();
   renderStockPage();
 }
@@ -4835,6 +4838,56 @@ window.confirmAddStockItem = function() {
   set(newRef, rec);
   closeModal();
   showToast(`已新增：${name}`);
+};
+
+// 批次建立：一次貼上整份清單建好主清單（一次性建檔，之後只用選的）
+function showBatchAddStock() {
+  if (!currentUser || currentUser.role !== 'admin') return;
+  const modal = document.getElementById('modal');
+  const overlay = document.getElementById('overlay');
+  modal.innerHTML = `
+    <h2>批次建立追蹤品項</h2>
+    <div style="font-size:12px;color:var(--ink2);margin:8px 0 10px;line-height:1.85;">
+      一行一個品項，用「｜」分隔，順序：<br>
+      <code style="background:var(--tag-bg);padding:1px 6px;border-radius:5px;font-family:'DM Mono',monospace;">名稱｜分類｜單位｜提醒線｜備到｜廠商</code><br>
+      分類：<b>食材／耗材／包材／清潔／其他</b>（沒寫＝其他）。單位沒寫＝個。提醒線、備到、廠商可留空。<br>
+      <span style="color:var(--ink3);">已存在的同名品項會自動略過，不會重複建立。</span>
+    </div>
+    <textarea id="batchStockText" placeholder="醬油｜食材｜瓶｜2｜6｜廣弘&#10;鋁箔紙｜耗材｜捲｜1｜4&#10;外帶杯｜包材｜個&#10;洗碗精｜清潔｜瓶｜1｜3"
+      style="width:100%;height:200px;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'DM Mono',monospace;font-size:12px;background:var(--cream);color:var(--ink);outline:none;resize:vertical;line-height:1.9;"></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-order" onclick="confirmBatchAddStock()">建立</button>
+    </div>`;
+  overlay.classList.add('open');
+  setTimeout(() => document.getElementById('batchStockText')?.focus(), 100);
+}
+
+window.confirmBatchAddStock = function() {
+  if (!window._fb) return;
+  const raw = (document.getElementById('batchStockText') || { value: '' }).value;
+  const existing = new Set(Object.values(stockItems).map(i => (i.name || '').trim()));
+  const { db, ref, push, set } = window._fb;
+  let created = 0, skipped = 0, dupInBatch = new Set();
+  raw.split('\n').forEach(line => {
+    const s = line.trim(); if (!s) return;
+    const parts = s.split(/[｜|]/).map(x => x.trim());
+    const name = parts[0]; if (!name) return;
+    if (existing.has(name) || dupInBatch.has(name)) { skipped++; return; }
+    dupInBatch.add(name);
+    const category = normStockCat(parts[1]);
+    const unit = parts[2] || '個';
+    const thr = parts[3]; const threshold = (thr && !isNaN(parseFloat(thr))) ? parseFloat(thr) : null;
+    const res = parts[4]; const reserveMax = (res && !isNaN(parseFloat(res))) ? parseFloat(res) : null;
+    const vendor = parts[5] || '';
+    const rec = { name, unit, note: '', threshold, category, createdAt: Date.now() };
+    if (reserveMax != null) rec.reserveMax = reserveMax;
+    if (vendor) rec.vendor = vendor;
+    set(push(ref(db, 'jenka/stockAlerts/items')), rec);
+    created++;
+  });
+  closeModal();
+  showToast(`已建立 ${created} 項${skipped ? `，略過 ${skipped} 項（已存在）` : ''}`);
 };
 
 window.deleteStockItem = function(itemId) {
