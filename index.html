@@ -457,6 +457,8 @@ window.dispatchEvent(new Event('fbReady'));
   .stock-status-low{background:var(--warn-soft);color:var(--warn);}
   .stock-status-danger{background:var(--danger-soft);color:var(--danger);}
   .stock-status-ordered{background:var(--ok-soft);color:var(--ok);}
+  .stock-status-assign{background:var(--accent-soft);color:var(--accent);}
+  .stock-cattag{font-size:10px;color:var(--ink3);background:var(--tint);padding:1px 7px;border-radius:7px;margin-left:6px;font-weight:500;}
   .stock-history{padding:0 16px 12px;border-top:1px solid var(--border);}
   .stock-history-item{padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;}
   .stock-history-item:last-child{border-bottom:none;}
@@ -590,10 +592,14 @@ window.dispatchEvent(new Event('fbReady'));
   .dn-today-row{display:flex;justify-content:center;margin-top:-2px;}
   .nav-arrow{width:30px;height:30px;border:none;background:none;color:var(--ink2);font-size:20px;line-height:1;cursor:pointer;border-radius:8px;font-family:'DM Mono',monospace;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;appearance:none;-webkit-appearance:none;outline:none;flex-shrink:0;}
   .nav-arrow:active{background:var(--tint);}
-  .wk-dots{display:flex;align-items:center;gap:7px;}
-  .wk-dot{width:7px;height:7px;min-width:7px;border-radius:50%;border:none;padding:0;background:var(--line);cursor:pointer;-webkit-tap-highlight-color:transparent;touch-action:manipulation;appearance:none;-webkit-appearance:none;outline:none;transition:transform .12s,background .12s;}
-  .wk-dot.today{box-shadow:0 0 0 2px var(--cream),0 0 0 3px var(--ink3);}
-  .wk-dot.sel{background:var(--accent);transform:scale(1.3);}
+  .wk-dots{display:flex;align-items:flex-start;gap:4px;}
+  .wk-day{display:flex;flex-direction:column;align-items:center;gap:6px;padding:2px 6px;border:none;background:none;cursor:pointer;font-family:'DM Mono',monospace;-webkit-tap-highlight-color:transparent;touch-action:manipulation;appearance:none;-webkit-appearance:none;outline:none;}
+  .wk-day-lbl{font-size:12px;color:var(--ink3);font-weight:500;line-height:1;transition:color .12s;}
+  .wk-day-bar{width:14px;height:3px;border-radius:2px;background:transparent;transition:background .12s;}
+  .wk-day.today .wk-day-lbl{color:var(--accent);font-weight:700;}
+  .wk-day.today .wk-day-bar{background:var(--accent);}
+  .wk-day.sel .wk-day-lbl{color:var(--ink);font-weight:700;}
+  .wk-day.sel .wk-day-bar{background:var(--ink);}
   .nav-date{border:none;background:none;font-size:17px;font-weight:700;color:var(--ink);cursor:pointer;font-family:'Noto Sans TC',sans-serif;padding:2px 4px;letter-spacing:.5px;white-space:nowrap;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;appearance:none;-webkit-appearance:none;outline:none;}
   .dn-md{color:var(--ink3);font-weight:400;font-size:13px;margin-left:3px;letter-spacing:.3px;font-family:'DM Mono',monospace;}
   .nav-today{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);cursor:pointer;font-family:'Noto Sans TC',sans-serif;white-space:nowrap;-webkit-tap-highlight-color:rgba(0,0,0,.05);touch-action:manipulation;appearance:none;outline:none;}
@@ -635,10 +641,20 @@ window.dispatchEvent(new Event('fbReady'));
   .stock-sec{display:flex;align-items:center;gap:7px;margin:18px 2px 9px;}
   .stock-sec:first-child{margin-top:4px;}
   .stock-sec .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-  .stock-sec .dot-count{background:var(--ok);}
+  .stock-sec .dot-count{background:var(--accent);}
   .stock-sec .dot-order{background:var(--danger);}
   .stock-sec .dot-done{background:var(--ink3);}
   .stock-sec .dot-other{background:#D8D2C6;}
+  /* 追蹤品項：常駐主清單標題 ＋ 分類小節 */
+  .stock-track-label{font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);margin:20px 2px 6px;}
+  .stock-track-hint{font-weight:400;letter-spacing:0;margin-left:6px;color:var(--ink3);}
+  .stock-cat-sec{display:flex;align-items:center;gap:8px;margin:10px 2px 8px;padding-bottom:6px;border-bottom:1px solid var(--border);cursor:pointer;color:var(--ink2);}
+  .stock-cat-ico{flex-shrink:0;color:var(--ink2);}
+  .stock-cat-sec .lbl{font-size:13px;font-weight:700;color:var(--ink);}
+  .stock-cat-sec .cnt{font-family:'DM Mono',monospace;font-size:12px;color:var(--ink3);}
+  .stock-cat-sec .stock-cat-chev{margin-left:auto;font-size:12px;color:var(--ink3);}
+  .stock-cat-pill{font-size:13px;padding:7px 14px;border-radius:20px;border:1px solid var(--border);background:var(--cream);color:var(--ink2);font-family:'Noto Sans TC',sans-serif;cursor:pointer;touch-action:manipulation;}
+  .stock-cat-pill.on{background:var(--ink);color:#fff;border-color:var(--ink);}
   .stock-sec .lbl{font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);}
   .stock-sec .cnt{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink3);}
   .stock-sec .stock-sec-chev{margin-left:auto;font-size:12px;color:var(--ink3);}
@@ -863,7 +879,7 @@ window.dispatchEvent(new Event('fbReady'));
           <div style="font-size:12px;color:#3A6BC4;line-height:1.6;">
             <strong>同步系統品項</strong><br>
             <span style="font-size:11px;color:var(--ink3);">將開發者新增的品項、以及換算等新功能同步進來；你自己在後台新增或修改過的設定不受影響</span><br>
-            <span style="font-size:11px;color:#3A6BC4;font-weight:700;font-family:'DM Mono',monospace;">目前版本：v3 · 蔬菜顆→斤換算（2026.06.04）</span>
+            <span style="font-size:11px;color:#3A6BC4;font-weight:700;font-family:'DM Mono',monospace;">目前版本：v9 · 庫存分類加「食材」（2026.06.07）</span>
           </div>
           <button onclick="confirmResetAllItems()" style="flex-shrink:0;padding:6px 14px;border-radius:20px;border:1.5px solid #3A6BC4;background:#E8EFFF;color:#3A6BC4;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;white-space:nowrap;">同步品項</button>
         </div>
@@ -1150,7 +1166,7 @@ window.dispatchEvent(new Event('fbReady'));
         <div style="font-size:12px;color:var(--ink3);margin-top:2px;font-family:'DM Mono',monospace;">追蹤品項庫存狀況</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;">
-        <button id="stockScheduleBtn" onclick="showSchedulePanel()" style="display:none;font-size:12px;background:var(--cream);color:var(--ink2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">排定</button>
+        <button id="stockScheduleBtn" onclick="showSchedulePanel()" style="display:none;font-size:12px;background:var(--cream);color:var(--ink2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">請員工清點</button>
         <button id="stockPresetBtn" onclick="manageStockPresets()" style="display:none;font-size:12px;background:var(--cream);color:var(--ink2);border:1px solid var(--border);border-radius:20px;padding:6px 14px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">品項範本</button>
         <button id="stockAddBtn" onclick="showAddStockItem()" style="display:none;font-size:12px;background:var(--active);color:#fff;border:none;border-radius:20px;padding:6px 14px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;">+ 新增品項</button>
       </div>
@@ -1297,6 +1313,9 @@ const todayDow=now.getDay();
 let viewDow=todayDow;
 let weekOffset=0; // 0=本週，-1=上週，+1=下週…（用於日期條前後切換）
 let activeVendor=null;
+// 「已完成」折疊區展開狀態：null=預設（展開）、true/false=使用者手動選擇
+// 在 backToOverview（切換日期／送出後返回／重進分頁）時重設為 null＝回到預設展開
+let _doneOpen=null;
 const qty={};
 ITEMS_DEF.forEach(i=>qty[i.id]='');
 
@@ -1433,6 +1452,7 @@ function openVendor(vendor){
 }
 function backToOverview(){
   activeVendor=null;
+  _doneOpen=null;   // 回到總覽＝回到預設（展開），讓送出後／換日後立即看得到已完成廠商
   document.getElementById('overviewView').style.display='block';
   document.getElementById('vendorView').style.display='none';
   document.getElementById('overviewBar').style.display='flex';
@@ -1461,11 +1481,12 @@ function renderDayStrip(){
   wb.classList.add('datenav');
   const d=viewDate(viewDow);
   const dateLabel=`週${DAY_NAMES[viewDow]}<span class="dn-md">${d.getMonth()+1}/${d.getDate()}</span>`;
-  // 第一行：‹ 週四 6/5 ›（點日期開月曆）
-  const dots=[0,1,2,3,4,5,6].map(dow=>{
+  // 週一起頭（一→日）；今天=陶土，正在看的那天=墨；看今天時兩者重疊，今天優先
+  const dots=[1,2,3,4,5,6,0].map(dow=>{
     const isSel = dow===viewDow;
     const isToday = weekOffset===0 && dow===todayDow;
-    return `<button class="wk-dot nav-js${isSel?' sel':''}${isToday?' today':''}" onclick="switchDay(${dow})" aria-label="週${DAY_NAMES[dow]}"></button>`;
+    const cls = isToday ? ' today' : (isSel ? ' sel' : '');
+    return `<button class="wk-day nav-js${cls}" onclick="switchDay(${dow})" aria-label="週${DAY_NAMES[dow]}"><span class="wk-day-lbl">${DAY_NAMES[dow]}</span><span class="wk-day-bar"></span></button>`;
   }).join('');
   // 第二行：7 顆週點補方位感；翻離今天時再補「回今天」
   const backToday = !isViewingToday() ? `<div class="dn-today-row"><button class="nav-today nav-js" onclick="goToday()">回今天</button></div>` : '';
@@ -1596,6 +1617,7 @@ function toggleDoneSection(e){
   const open = rows.style.display !== 'none';
   rows.style.display = open ? 'none' : '';
   if(chev) chev.textContent = open ? '›' : '⌄';
+  _doneOpen = !open;   // 記住手動選擇，重繪時不再被收掉
 }
 
 function renderOverview(){
@@ -1725,6 +1747,8 @@ function renderOverview(){
       const doneNames = doneRows.map(r => r.vendor);
       const shownNames = doneNames.slice(0,3).join('、') + (doneNames.length>3 ? ` +${doneNames.length-3}` : '');
       const needOrder = doneRows.filter(r => !ordered[viewDow][r.vendor]).length;
+      // 預設展開（_doneOpen===null）；使用者手動收合/展開後沿用其選擇，重繪不再強制收合
+      const isOpen = _doneOpen===null ? true : _doneOpen;
       barHtml += secLabel('已完成', doneRows.length, 'var(--ok)')
         + `<div class="done-collapse">
             <button class="vendor-status-row done-summary" onclick="toggleDoneSection(event)" style="width:100%;text-align:left;font-family:'Noto Sans TC',sans-serif;">
@@ -1733,9 +1757,9 @@ function renderOverview(){
                 <div class="vsr-name" style="font-weight:500;color:var(--ink2);">${shownNames}</div>
                 ${needOrder>0 ? `<div class="vsr-sub" style="color:var(--accent);">${needOrder} 家待叫貨</div>` : ''}
               </div>
-              <span class="vsr-chevron done-chevron">›</span>
+              <span class="vsr-chevron done-chevron">${isOpen?'⌄':'›'}</span>
             </button>
-            <div class="done-rows" style="display:none;">${doneRows.map(r => r.html).join('')}</div>
+            <div class="done-rows" style="${isOpen?'':'display:none;'}">${doneRows.map(r => r.html).join('')}</div>
           </div>`;
     }
     bar.innerHTML = barHtml;
@@ -1815,8 +1839,13 @@ function calcOrderAmt(item,dow){
   if(multiple>1) amt=Math.ceil(amt/multiple)*multiple;
   // 換算品項：進位到 0.5 叫貨單位，避免出現零碎小數（可用 item.oRound 調整）
   if(f!==1){ const r=item.oRound||0.5; amt=Math.ceil(amt/r)*r; }
-  // 最高叫貨上限：僅未換算品項套用（換算品項的叫貨量已被需備量自然封頂，safe 僅作點貨上限）
-  if(f===1){ const maxLimit=safeQty[item.id]; if(maxLimit && amt>maxLimit) amt=maxLimit; }
+  else {
+    // 非換算品項（整單位，如 包／罐／條）：取整到「增減」級距，避免需備量或現有量帶小數時跑出 0.05 這類零頭
+    // 預設 step=1 → 整數；像德國香腸 step=0.5 → 以 0.5 為單位。四捨五入：差量小於半個級距視為足夠（免叫），達半個級距以上才進到整數。
+    const s=item.step||1; amt=Math.round(amt/s)*s;
+    // 最高叫貨上限：僅未換算品項套用（換算品項的叫貨量已被需備量自然封頂，safe 僅作點貨上限）
+    const maxLimit=safeQty[item.id]; if(maxLimit && amt>maxLimit) amt=maxLimit;
+  }
   amt=Math.round(amt*100)/100;          // 清除浮點誤差
   return amt;
 }
@@ -2632,7 +2661,7 @@ function renderAdminItems(){
   const headCells=isOptIn
     ?`<div class="wk-h">${optLabel}</div>`
     :cols.map(d=>`<div class="wk-h">週${DAY_NAMES[d]}</div>`).join('');
-  const stepOf=item=>item.factor?(item.oStep||0.5):(item.step||1);
+  const stepOf=item=>(item.factor&&item.factor!==1)?(item.oStep||0.5):(item.step||1);
   const rowHtml=vitems.map(item=>{
     let cells;
     if(isOptIn){
@@ -3622,10 +3651,10 @@ function showOrderView(vendor){
         <div style="font-weight:500;font-size:13px;">${item.name}${item.orderName&&item.orderName!==item.name?`<br><span style="font-weight:400;font-size:10px;color:var(--ink3);">叫貨：${item.orderName}</span>`:''}</div>
         <div style="text-align:center;min-width:56px;font-size:13px;color:var(--ink2);">${cur} <span style="font-size:11px;color:var(--ink3);">${item.unit}</span></div>
         <div style="display:flex;align-items:center;gap:4px;min-width:96px;justify-content:center;">
-          <button onclick="adjOrderQty('${adjKey}',${item.id},-${item.factor?(item.oStep||0.5):(item.step||1)},'${oUnitOf(item)}','${vendor}')" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--cream);cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;font-family:monospace;flex-shrink:0;">−</button>
+          <button onclick="adjOrderQty('${adjKey}',${item.id},-${(item.factor&&item.factor!==1)?(item.oStep||0.5):(item.step||1)},'${oUnitOf(item)}','${vendor}')" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--cream);cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;font-family:monospace;flex-shrink:0;">−</button>
           <span id="adj-${adjKey}-${item.id}" style="font-size:13px;font-weight:600;min-width:28px;text-align:center;color:var(--accent);">${adjVal}</span>
           <span style="font-size:11px;color:var(--ink3);">${oUnitOf(item)}</span>
-          <button onclick="adjOrderQty('${adjKey}',${item.id},${item.factor?(item.oStep||0.5):(item.step||1)},'${oUnitOf(item)}','${vendor}')" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--cream);cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;font-family:monospace;flex-shrink:0;">+</button>
+          <button onclick="adjOrderQty('${adjKey}',${item.id},${(item.factor&&item.factor!==1)?(item.oStep||0.5):(item.step||1)},'${oUnitOf(item)}','${vendor}')" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--cream);cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;font-family:monospace;flex-shrink:0;">+</button>
         </div>
       </div>`;
     }).join('');
@@ -4065,6 +4094,24 @@ let _scheduledByDay = {};    // { dateKey: { itemId: {by,createdAt,ordered,order
 let _stockDayKeys = [];
 let _stockSubscribed = false;
 window._stockReopened = window._stockReopened || new Set(); // 使用者刻意「重新回報」而打開表單的已叫貨品項
+window._stockCatCollapsed = window._stockCatCollapsed || new Set(); // 「追蹤品項」分類收合狀態（預設展開）
+
+// 庫存分類（固定五類）＋ 線條圖示（簡潔線條、無 emoji）
+const STOCK_CATS = ['食材','耗材','包材','清潔','其他'];
+// 舊分類正規化：「調味料」併入「食材」；不在清單內 → 其他
+function normStockCat(c){ if(c==='調味料') return '食材'; return STOCK_CATS.includes(c) ? c : '其他'; }
+function stockCatIcon(cat){
+  cat = normStockCat(cat);
+  const head='<svg class="stock-cat-ico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">';
+  const p={
+    '食材':'<path d="M12 8c-1.3-2.4-4-2.6-5.5-1C5 8.6 5.2 12 6.8 14.6 7.9 16.4 9.1 17.5 10.5 17.5c.7 0 1-.3 1.5-.3s.8.3 1.5.3c1.4 0 2.6-1.1 3.7-2.9 1.6-2.6 1.8-6 .3-7.6C16 5.4 13.3 5.6 12 8z"/><path d="M12 8c.2-1.4 1.1-2.5 2.5-3"/>',
+    '耗材':'<path d="M6 4h12l-1.3 15.4a1 1 0 0 1-1 .9H8.3a1 1 0 0 1-1-.9z"/><path d="M5.4 4h13.2"/>',
+    '包材':'<path d="M12 3 3 7.5v9L12 21l9-4.5v-9z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/>',
+    '清潔':'<path d="M12 3.5s5.5 5.7 5.5 9.5a5.5 5.5 0 0 1-11 0c0-3.8 5.5-9.5 5.5-9.5z"/>',
+    '其他':'<path d="M3.6 12.4l8-8a1 1 0 0 1 .7-.3H19a1 1 0 0 1 1 1v6.7a1 1 0 0 1-.3.7l-8 8a1 1 0 0 1-1.4 0l-6.7-6.7a1 1 0 0 1 0-1.4z"/><circle cx="15.4" cy="8.6" r="1.1"/>'
+  };
+  return head+(p[cat]||p['其他'])+'</svg>';
+}
 
 // 已叫貨品項按「重新回報」：打開回報表單（刻意動作）
 function reopenStockReport(itemId){
@@ -4180,21 +4227,26 @@ function renderStockTracker(){
   const el = document.getElementById('stockTracker');
   if(!el) return;
   if(weekOffset!==0){ el.innerHTML=''; return; } // 只在本週今天顯示摘要；預覽週不顯示
+  const hasItems = Object.keys(stockItems).length > 0;
+  if(!hasItems){ el.innerHTML=''; return; }       // 完全沒有追蹤品項才隱藏
   let nCount=0, nOrder=0, nDone=0;
   Object.keys(stockItems).forEach(id=>{ const s=stockStationOf(id); if(s==='count')nCount++; else if(s==='order')nOrder++; else if(s==='done')nDone++; });
-  if(nCount+nOrder+nDone===0){ el.innerHTML=''; return; }   // 無待辦則不顯示，總覽保持乾淨
   const stat=(dotColor,label,n,numColor)=>`<span style="display:inline-flex;align-items:center;gap:5px;">
       <span style="width:7px;height:7px;border-radius:50%;background:${dotColor};flex-shrink:0;"></span>
       <span style="font-size:12px;color:var(--ink2);">${label}</span>
       <span style="font-family:'DM Mono',monospace;font-size:12.5px;color:${numColor};font-weight:500;">${n}</span>
     </span>`;
-  el.innerHTML = `<div class="ov-section-label" style="margin:14px 0 0;">庫存</div>
-    <button class="vendor-status-row" onclick="switchTab('stock')" style="width:100%;text-align:left;font-family:'Noto Sans TC',sans-serif;">
-      <div class="vsr-left" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-        ${stat('var(--ok)','待清點',nCount,nCount>0?'var(--ok)':'var(--ink3)')}
+  // 有待辦 → 顯示三站數字；平時無待辦 → 顯示引導句，讓員工知道缺料可隨時來這裡回報
+  const inner = (nCount+nOrder+nDone>0)
+    ? `<div class="vsr-left" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        ${stat('var(--accent)','請清點',nCount,nCount>0?'var(--accent)':'var(--ink3)')}
         ${stat('var(--danger)','待叫貨',nOrder,nOrder>0?'var(--danger)':'var(--ink3)')}
         ${stat('#D8D2C6','已處理',nDone,'var(--ink3)')}
-      </div>
+      </div>`
+    : `<div class="vsr-left"><div class="vsr-name" style="font-weight:500;color:var(--ink2);">庫存追蹤</div><div class="vsr-sub" style="color:var(--ink3);">缺料隨時回報</div></div>`;
+  el.innerHTML = `<div class="ov-section-label" style="margin:14px 0 0;">庫存</div>
+    <button class="vendor-status-row" onclick="switchTab('stock')" style="width:100%;text-align:left;font-family:'Noto Sans TC',sans-serif;">
+      ${inner}
       <span class="vsr-chevron">›</span>
     </button>`;
 }
@@ -4350,7 +4402,7 @@ function renderStockPage() {
             <span style="font-size:13px;color:var(--ink2);">${item.unit}</span>
             <button onclick="submitStockReport('${itemId}')" style="flex:1;height:36px;background:var(--ink);color:#fff;border:none;border-radius:9px;font-family:'Noto Sans TC',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;cursor:pointer;touch-action:manipulation;">回報數量</button>
           </div>
-          <button onclick="quickStockReport('${itemId}')" title="不確定庫存數量，直接通知老闆" style="width:100%;height:34px;background:var(--accent-soft);color:var(--accent);border:none;border-radius:9px;font-family:'Noto Sans TC',sans-serif;font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation;">不確定庫存數量</button>
+          <button onclick="quickStockReport('${itemId}')" title="數不清楚就直接通知老闆" style="width:100%;height:34px;background:var(--accent-soft);color:var(--accent);border:none;border-radius:9px;font-family:'Noto Sans TC',sans-serif;font-size:12px;font-weight:600;cursor:pointer;touch-action:manipulation;">數不清楚 · 直接回報「快沒了」</button>
         </div>
       </div>
       ${historyHtml ? `<div class="stock-history">${historyHtml}</div>` : ''}`;
@@ -4367,7 +4419,7 @@ function renderStockPage() {
     // 頂行右側內容
     let right = '';
     if (st === 'count') {
-      right = `<span class="stock-status-badge stock-status-ok">待清點</span>`;
+      right = `<span class="stock-status-badge stock-status-assign">請清點</span>`;
     } else if (st === 'order') {
       const u = stockUrgency(item, open);
       const cls = u === 'danger' ? 'stock-status-danger' : 'stock-status-low';
@@ -4383,16 +4435,18 @@ function renderStockPage() {
       right = `<span class="stock-status-badge stock-status-ok">尚未回報</span>`;
     }
 
-    const thr = (item.threshold != null && item.threshold !== '') ? `　·　水位 ${item.threshold}${item.unit}` : '';
-    const reserveTxt = (item.reserveMax != null && item.reserveMax !== '') ? `　·　需備 ${item.reserveMax}${item.unit}` : '';
+    const thr = (item.threshold != null && item.threshold !== '') ? `　·　提醒線 ${item.threshold}` : '';
+    const reserveTxt = (item.reserveMax != null && item.reserveMax !== '') ? `　·　備到 ${item.reserveMax}` : '';
     const vendorTxt = item.vendor ? `　·　${item.vendor}` : '';
+    // 行動區卡片（待清點／待叫貨／已處理）加小分類標籤；追蹤清單已照分類分組故不重複
+    const catTag = (st !== 'other' && item.category) ? `<span class="stock-cattag">${normStockCat(item.category)}</span>` : '';
     const originTxt = (st === 'count') ? `<div class="stock-origin"><span class="d"></span>老闆排定今天清點</div>` :
       (st === 'order' ? `<div class="stock-origin neutral"><span class="d"></span>${(open && open.direct) ? '直接叫貨' : ((_scheduledByDay[tk] && _scheduledByDay[tk][itemId]) ? '清點後流入' : '員工回報')}</div>` : '');
 
     return `<div class="stock-item-card station-${st}">
       <div class="stock-item-header" onclick="toggleStockCard('${itemId}')">
         <div style="min-width:0;">
-          <div class="stock-item-name">${item.name}</div>
+          <div class="stock-item-name">${item.name}${catTag}</div>
           <div class="stock-item-meta">${item.unit}${item.note ? '　' + item.note : ''}${thr}${reserveTxt}${vendorTxt}</div>
           ${originTxt}
         </div>
@@ -4419,15 +4473,26 @@ function renderStockPage() {
   }
 
   let html = '';
-  if (buckets.count.length) html += sectionHead('dot-count', '待清點', buckets.count.length) + buckets.count.map(([id, it]) => card(id, it, 'count')).join('');
+  if (buckets.count.length) html += sectionHead('dot-count', '老闆請今天清點', buckets.count.length) + buckets.count.map(([id, it]) => card(id, it, 'count')).join('');
   if (buckets.order.length) html += sectionHead('dot-order', '待叫貨', buckets.order.length) + buckets.order.map(([id, it]) => card(id, it, 'order')).join('');
   if (buckets.done.length) {
     html += sectionHead('dot-done', '今日已處理', buckets.done.length, { key: 'done' });
     if (window._stockSecOpen.has('done')) html += buckets.done.map(([id, it]) => card(id, it, 'done')).join('');
   }
   if (buckets.other.length) {
-    html += sectionHead('dot-other', '其他品項', buckets.other.length, { key: 'other' });
-    if (window._stockSecOpen.has('other')) html += buckets.other.map(([id, it]) => card(id, it, 'other')).join('');
+    // 追蹤品項：常駐主清單，照分類分組（可收合，預設展開）
+    html += `<div class="stock-track-label">追蹤品項<span class="stock-track-hint">· 點一下回報</span></div>`;
+    const byCat = {};
+    buckets.other.forEach(([id, it]) => { const c = normStockCat(it.category); (byCat[c] = byCat[c] || []).push([id, it]); });
+    STOCK_CATS.forEach(cat => {
+      const arr = byCat[cat]; if (!arr || !arr.length) return;
+      const collapsed = window._stockCatCollapsed.has(cat);
+      html += `<div class="stock-cat-sec" onclick="toggleStockCat('${cat}')">
+        ${stockCatIcon(cat)}<span class="lbl">${cat}</span><span class="cnt">${arr.length}</span>
+        <span class="stock-cat-chev">${collapsed ? '⌄' : '⌃'}</span>
+      </div>`;
+      if (!collapsed) html += arr.map(([id, it]) => card(id, it, 'other')).join('');
+    });
   }
   listEl.innerHTML = html;
 }
@@ -4439,11 +4504,18 @@ function toggleStockCard(itemId) {
   else window._stockExpanded.add(itemId);
   renderStockPage();
 }
-// 展開/收合區段（今日已處理／其他品項）
+// 展開/收合區段（今日已處理）
 function toggleStockSection(key) {
   if (!window._stockSecOpen) window._stockSecOpen = new Set();
   if (window._stockSecOpen.has(key)) window._stockSecOpen.delete(key);
   else window._stockSecOpen.add(key);
+  renderStockPage();
+}
+// 展開/收合「追蹤品項」分類（預設展開，記在 _stockCatCollapsed）
+function toggleStockCat(cat) {
+  if (!window._stockCatCollapsed) window._stockCatCollapsed = new Set();
+  if (window._stockCatCollapsed.has(cat)) window._stockCatCollapsed.delete(cat);
+  else window._stockCatCollapsed.add(cat);
   renderStockPage();
 }
 
@@ -4617,6 +4689,7 @@ function openStockItemMenu(itemId) {
       ${open ? `<button style="${rowStyle}" onclick="markStockOrdered('${itemId}');closeModal();">標記叫貨</button>` : ''}
       ${open ? `<button style="${rowStyle}" onclick="dismissStockReport('${itemId}');closeModal();">不需補（解除待補貨）</button>` : ''}
       <button style="${rowStyle}" onclick="closeModal();scheduleStockOrder('${itemId}');">排定叫貨</button>
+      <button style="${rowStyle}" onclick="closeModal();changeStockCat('${itemId}');">改分類</button>
       <button style="${rowStyle}color:var(--danger);" onclick="closeModal();deleteStockItem('${itemId}');">刪除品項</button>
     </div>
     <div class="modal-actions">
@@ -4629,52 +4702,54 @@ function showAddStockItem() {
   if (!currentUser || currentUser.role !== 'admin') return;
   const modal = document.getElementById('modal');
   const overlay = document.getElementById('overlay');
+  window._newStockCat = '食材';
+  const catPills = STOCK_CATS.map(c => `<button type="button" class="stock-cat-pill${c==='食材'?' on':''}" data-cat="${c}" onclick="setNewStockCat('${c}')">${c}</button>`).join('');
   const presetChips = (stockPresets && stockPresets.length) ? `
       <div>
-        <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">品項範本（點一下帶入）</div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">從範本帶入（點一下自動填名稱與單位）</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;">
-          ${stockPresets.map((p,i)=>`<button type="button" onclick="applyStockPreset(${i})" style="font-size:12px;padding:5px 12px;border:1px solid var(--border);border-radius:16px;background:var(--cream);color:var(--ink2);font-family:'Noto Sans TC',sans-serif;cursor:pointer;touch-action:manipulation;">${p.name}</button>`).join('')}
+          ${stockPresets.map((p,i)=>`<button type="button" onclick="applyStockPreset(${i})" style="font-size:12px;padding:5px 12px;border:1px dashed var(--accent);border-radius:16px;background:var(--accent-soft);color:var(--accent);font-family:'Noto Sans TC',sans-serif;cursor:pointer;touch-action:manipulation;">${p.name} ＋</button>`).join('')}
         </div>
       </div>` : '';
+  const inStyle = "width:100%;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;";
+  const numStyle = "width:100%;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-family:'DM Mono',monospace;font-size:14px;background:var(--cream);color:var(--ink);outline:none;";
   modal.innerHTML = `
     <h2>新增追蹤品項</h2>
-    <div style="display:flex;flex-direction:column;gap:12px;margin:16px 0;">
+    <div style="display:flex;flex-direction:column;gap:14px;margin:16px 0;">
+      <div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:7px;">分類</div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap;">${catPills}</div>
+      </div>
       ${presetChips}
       <div>
         <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">品項名稱</div>
-        <input id="stockNewName" type="text" placeholder="例：蛋餅皮"
-          style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
+        <input id="stockNewName" type="text" placeholder="例：鋁箔紙" style="${inStyle}">
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div>
-          <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">單位</div>
-          <input id="stockNewUnit" type="text" placeholder="包、盒、個..."
-            style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
-        </div>
-        <div>
-          <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">提醒水位（選填）</div>
-          <input id="stockNewThreshold" type="number" min="0" step="1" placeholder="剩幾就急缺"
-            style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-family:'DM Mono',monospace;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
+      <div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">單位</div>
+        <input id="stockNewUnit" type="text" placeholder="包、盒、瓶、罐…" style="${inStyle}max-width:150px;">
+      </div>
+      <div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:7px;">庫存量設定（選填，但建議填）</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <input id="stockNewThreshold" type="number" min="0" step="1" placeholder="例 2" style="${numStyle}">
+            <div style="font-size:10.5px;color:var(--ink3);line-height:1.5;margin-top:4px;">低於多少要提醒<br>（剩這麼少就標紅）</div>
+          </div>
+          <div>
+            <input id="stockNewReserve" type="number" min="0" step="1" placeholder="例 6" style="${numStyle}">
+            <div style="font-size:10.5px;color:var(--ink3);line-height:1.5;margin-top:4px;">平常要備到多少<br>（補到這量，當建議叫量）</div>
+          </div>
         </div>
       </div>
       <div>
+        <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">廠商（選填）</div>
+        <input id="stockNewVendor" type="text" placeholder="向誰叫，例：廣弘" style="${inStyle}">
+      </div>
+      <div>
         <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">備註（選填）</div>
-        <input id="stockNewNote" type="text" placeholder="例：快沒提醒老闆"
-          style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
+        <input id="stockNewNote" type="text" placeholder="例：放二樓倉庫" style="${inStyle}">
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div>
-          <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">需備量（選填）</div>
-          <input id="stockNewReserve" type="number" min="0" step="1" placeholder="要補到多少"
-            style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-family:'DM Mono',monospace;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
-        </div>
-        <div>
-          <div style="font-size:12px;color:var(--ink3);margin-bottom:6px;">廠商（選填）</div>
-          <input id="stockNewVendor" type="text" placeholder="向誰叫"
-            style="width:100%;height:38px;border:1.5px solid var(--border);border-radius:8px;padding:0 12px;font-family:'Noto Sans TC',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;">
-        </div>
-      </div>
-      <div style="font-size:10.5px;color:var(--ink3);line-height:1.6;margin-top:-4px;">水位＝剩幾算急缺（提示色）；需備量＝要補到多少（填了才會自動算建議叫量）。</div>
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">取消</button>
@@ -4682,6 +4757,10 @@ function showAddStockItem() {
     </div>`;
   overlay.classList.add('open');
   setTimeout(() => document.getElementById('stockNewName')?.focus(), 100);
+}
+function setNewStockCat(c){
+  window._newStockCat = c;
+  document.querySelectorAll('.stock-cat-pill').forEach(b => b.classList.toggle('on', b.getAttribute('data-cat')===c));
 }
 
 // 點品項範本標籤 → 自動填入新增表單
@@ -4748,8 +4827,9 @@ window.confirmAddStockItem = function() {
   if (!name) { showToast('請填寫品項名稱'); return; }
   if (!window._fb) return;
   const { db, ref, push, set } = window._fb;
+  const category = STOCK_CATS.includes(window._newStockCat) ? window._newStockCat : '其他';
   const newRef = push(ref(db, 'jenka/stockAlerts/items'));
-  const rec = { name, unit, note, threshold, createdAt: Date.now() };
+  const rec = { name, unit, note, threshold, category, createdAt: Date.now() };
   if (reserveMax!=null) rec.reserveMax = reserveMax;
   if (vendor) rec.vendor = vendor;
   set(newRef, rec);
@@ -4779,6 +4859,27 @@ window.confirmDeleteStockItem = function(itemId) {
   remove(ref(db, `jenka/stockAlerts/items/${itemId}`));
   closeModal();
   showToast('✓ 已刪除品項');
+};
+
+// 改分類（既有品項預設歸「其他」，可在此重新歸類）
+window.changeStockCat = function(itemId){
+  if (!currentUser || currentUser.role !== 'admin') return;
+  const item = stockItems[itemId]; if(!item) return;
+  const modal=document.getElementById('modal'); const overlay=document.getElementById('overlay');
+  const cur = normStockCat(item.category);
+  modal.innerHTML = `<h2>改分類</h2>
+    <div style="font-size:13px;color:var(--ink3);margin:4px 0 16px;">${item.name}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      ${STOCK_CATS.map(c=>`<button class="stock-cat-pill${c===cur?' on':''}" onclick="applyStockCat('${itemId}','${c}')">${c}</button>`).join('')}
+    </div>
+    <div class="modal-actions" style="margin-top:18px;"><button class="btn-cancel" onclick="closeModal()" style="width:100%;">取消</button></div>`;
+  overlay.classList.add('open');
+};
+window.applyStockCat = function(itemId,c){
+  if(!window._fb) return;
+  const { db, ref, update } = window._fb;
+  update(ref(db, `jenka/stockAlerts/items/${itemId}`), { category: c });
+  closeModal(); showToast('已改分類：'+c);
 };
 
 // ══════════════════════════════════════════
