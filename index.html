@@ -219,7 +219,7 @@ window.dispatchEvent(new Event('fbReady'));
   .qty-btn{width:32px;height:32px;border-radius:8px;border:0.5px solid var(--border);background:var(--cream);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--ink2);user-select:none;flex-shrink:0;}
   .qty-btn:active{background:var(--border);}
   .qty-preset{min-width:38px;height:32px;padding:0 8px;border-radius:8px;border:0.5px solid var(--border);background:var(--cream);cursor:pointer;font-size:12px;font-family:'DM Mono',monospace;color:var(--ink2);user-select:none;}
-  .qty-preset.selected{border:1.5px solid #5F8268;background:#E9EFE9;color:#5F8268;font-weight:600;}
+  .qty-preset.selected{border:1px solid var(--ink);background:var(--ink);color:#fff;font-weight:600;}
   .qty-preset:active{opacity:.7;}
   .qty-unit{font-size:11px;color:var(--ink3);min-width:16px;}
 
@@ -781,7 +781,7 @@ window.dispatchEvent(new Event('fbReady'));
             <button class="back-btn" onclick="backToOverview()">‹ 返回</button>
             <span id="vendorLineBtn" style="display:none;">
               <a id="vendorLineLinkEl" href="#" target="_blank"
-                style="display:flex;align-items:center;gap:5px;padding:6px 14px;background:#06C755;color:#fff;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;">
+                style="display:flex;align-items:center;gap:5px;padding:5px 13px;background:none;border:1px solid #06C755;color:#06C755;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;">
                 LINE
               </a>
             </span>
@@ -793,7 +793,7 @@ window.dispatchEvent(new Event('fbReady'));
           </div>
         </div>
         <div id="recheckNotice" class="recheck-notice hidden"></div>
-        <div id="vendorNoteBar" style="display:none;margin:0 0 10px;background:#FFF8EE;border:1px solid #F0D49A;border-radius:10px;padding:8px 14px;font-size:12px;color:#8B5A00;"></div>
+        <div id="vendorNoteBar" style="display:none;margin:0 0 10px;background:var(--tint);border:none;border-radius:10px;padding:9px 13px;font-size:12.5px;color:var(--ink2);line-height:1.6;"></div>
         <div class="checker-card">
           <div class="checker-card-title">點貨資訊</div>
           <div class="checker-fields">
@@ -879,7 +879,7 @@ window.dispatchEvent(new Event('fbReady'));
           <div style="font-size:12px;color:#3A6BC4;line-height:1.6;">
             <strong>同步系統品項</strong><br>
             <span style="font-size:11px;color:var(--ink3);">將開發者新增的品項、以及換算等新功能同步進來；你自己在後台新增或修改過的設定不受影響</span><br>
-            <span style="font-size:11px;color:#3A6BC4;font-weight:700;font-family:'DM Mono',monospace;">目前版本：v10 · 庫存批次建立主清單（2026.06.07）</span>
+            <span style="font-size:11px;color:#3A6BC4;font-weight:700;font-family:'DM Mono',monospace;">目前版本：v13 · 點貨頁與確認送出改版（2026.06.07）</span>
           </div>
           <button onclick="confirmResetAllItems()" style="flex-shrink:0;padding:6px 14px;border-radius:20px;border:1.5px solid #3A6BC4;background:#E8EFFF;color:#3A6BC4;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;white-space:nowrap;">同步品項</button>
         </div>
@@ -1932,7 +1932,7 @@ function renderVendorDetail(){
     const note = vendorNotes[activeVendor];
     if (note) {
       noteEl.style.display = 'block';
-      noteEl.textContent = '📌 ' + note;
+      noteEl.textContent = '備註：' + note;
     } else {
       noteEl.style.display = 'none';
     }
@@ -2170,34 +2170,42 @@ function submitVendor(){
   const timeStr=formatTime(new Date());
   const isRecheck=state==='unlocked';
 
-  let html=`<h2>${activeVendor} 叫貨單</h2>
-    <div class="modal-sub">週${DAY_NAMES[viewDow]}${isRecheck?' · 重新點貨':''}</div>
-    <div class="modal-meta"><span>${checker}</span><span>${timeStr}</span>${isRecheck?'<span style="color:var(--warn)">⚠️ 重新點貨</span>':''}</div>`;
+  let html=`<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+      <div>
+        <h2 style="margin:0;">${activeVendor}</h2>
+        <div class="modal-sub" style="margin-top:3px;">叫貨單 · 週${DAY_NAMES[viewDow]}</div>
+      </div>
+      <button onclick="closeModal()" aria-label="關閉" style="width:30px;height:30px;border:none;background:none;color:var(--ink3);font-size:21px;line-height:1;cursor:pointer;flex-shrink:0;">✕</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12.5px;color:var(--ink2);">
+      <span>${checker}</span><span style="color:var(--ink3);">·</span><span style="color:var(--ink3);">${timeStr}</span>
+      ${isRecheck?'<span style="display:flex;align-items:center;gap:6px;margin-left:6px;color:var(--warn);"><span style="width:7px;height:7px;border-radius:50%;background:var(--warn);"></span>重新點貨</span>':''}
+    </div>`;
   if(needItems.length>0){
-    html+=`<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);text-transform:uppercase;padding:4px 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px;">需叫貨 ${needItems.length} 項</div>`;
+    html+=`<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);text-transform:uppercase;margin:20px 0 2px;padding-bottom:8px;border-bottom:1px solid var(--border);">送出內容 ${needItems.length} 項</div>`;
     html+=needItems.map(item=>{
       const o=calcOrderAmt(item,viewDow);
-      const cur=qty[item.id]!==''?`現有 ${qty[item.id]}${item.unit}`:'未盤點';
-      return`<div class="order-item"><div><span style="font-weight:500">${item.name}</span><br>
-        <span style="color:var(--ink3);font-size:11px">${cur}</span></div>
-        <div class="need">叫 ${o}${oUnitOf(item)}</div></div>`;
+      const cur=qty[item.id]!==''?`現有 ${qty[item.id]} ${item.unit}`:'未盤點';
+      return`<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);">
+        <div style="min-width:0;"><div style="font-size:14px;font-weight:500;">${item.name}</div><div style="font-size:11px;color:var(--ink3);margin-top:2px;">${cur}</div></div>
+        <div style="font-size:13.5px;color:var(--ink);font-family:'DM Mono',monospace;flex-shrink:0;">${o} ${oUnitOf(item)}</div>
+      </div>`;
     }).join('');
   }
   if(okItems.length>0){
-    html+=`<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);text-transform:uppercase;padding:12px 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px;">庫存充足 ${okItems.length} 項</div>`;
-    html+=okItems.map(i=>`<div class="order-item"><div>${i.name}</div><div class="need ok">✓</div></div>`).join('');
+    html+=`<div style="font-size:11.5px;color:var(--ink3);margin-top:14px;padding-top:12px;border-top:1px solid var(--border);line-height:1.6;">庫存充足 ${okItems.length} 項：${okItems.map(i=>i.name).join('、')}</div>`;
   }
   if(needItems.length===0&&okItems.length===0)html+=`<div class="no-need">今日所有品項庫存充足</div>`;
 
   // ── 備註欄位 ──
-  html+=`<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+  html+=`<div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);">
     <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);text-transform:uppercase;margin-bottom:6px;">備註（選填）</div>
     <textarea id="submitNote" placeholder="有額外狀況可在此留言給老闆..." style="width:100%;height:72px;border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'Noto Sans TC',sans-serif;font-size:13px;background:var(--cream);color:var(--ink);outline:none;resize:none;line-height:1.6;"></textarea>
   </div>`;
 
-  html+=`<div class="modal-actions">
-    <button class="btn-cancel" onclick="closeModal()">返回修改</button>
-    <button class="btn-order" onclick="confirmVendorSubmit('${activeVendor}','${checker}','${timeStr}',${isRecheck})">確認送出</button>
+  html+=`<div style="display:flex;align-items:center;justify-content:flex-end;gap:14px;margin-top:18px;">
+    <button onclick="closeModal()" style="font-size:13px;color:var(--ink3);background:none;border:none;cursor:pointer;text-decoration:underline;text-underline-offset:2px;font-family:'Noto Sans TC',sans-serif;">返回修改</button>
+    <button onclick="confirmVendorSubmit('${activeVendor}','${checker}','${timeStr}',${isRecheck})" style="height:46px;padding:0 30px;background:var(--ink);border:none;border-radius:13px;color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;font-family:'Noto Sans TC',sans-serif;cursor:pointer;">確認送出</button>
   </div>`;
   document.getElementById('modal').innerHTML=html;
   document.getElementById('overlay').classList.add('open');
@@ -3603,28 +3611,38 @@ function showOrderView(vendor){
   const exportTxt=buildExportText(vendor,viewDow);
   const isRe=sub.history&&sub.history.length>1;
 
-  let html=`<h2>${vendor} 點貨內容</h2>
-    <div class="modal-sub">${sub.checker} · ${sub.time}${isRe?' · 已重點':''}</div>`;
-
-  // 備註顯示
-  if(sub.note){
-    html+=`<div style="background:#F5F0FF;border:1px solid #D0B8FF;border-radius:10px;padding:10px 14px;margin:10px 0 4px;font-size:13px;color:var(--ink2);line-height:1.6;">
-      <span style="font-size:11px;font-weight:700;color:#7B5EA7;letter-spacing:1px;">備註</span><br>${sub.note}
+  // 頂部：廠商名 ＋ 誰/時間 ＋ 右上關閉
+  let html=`<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+      <div>
+        <h2 style="margin:0;">${vendor}</h2>
+        <div class="modal-sub" style="margin-top:3px;">${sub.checker} · ${sub.time}${isRe?' · 已重點':''}</div>
+      </div>
+      <button onclick="closeModal()" aria-label="關閉" style="width:30px;height:30px;border:none;background:none;color:var(--ink3);font-size:21px;line-height:1;cursor:pointer;flex-shrink:0;">✕</button>
     </div>`;
-  }
 
-  // 叫貨狀態卡片
+  // 狀態：一行 圓點＋純文字
   if(isOrdered){
-    html+=`<div style="background:#E8F5EE;border:1px solid var(--ok);border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--ok);font-weight:500;">
-      ✓ 已叫貨　${ordered[viewDow][vendor].time}
+    html+=`<div style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13px;">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--ok);flex-shrink:0;"></span>
+      <span style="color:var(--ink);font-weight:500;">已叫貨</span>
+      <span style="color:var(--ink3);">· ${ordered[viewDow][vendor].time}</span>
     </div>`;
   } else {
-    html+=`<div style="background:#FFF8EE;border:1px solid #F0D49A;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--warn);">
-      ⏳ 尚未叫貨，請複製下方文字傳給廠商
+    html+=`<div style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:13px;">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--warn);flex-shrink:0;"></span>
+      <span style="color:var(--ink);font-weight:500;">尚未叫貨</span>
+      <span style="color:var(--ink3);">· 複製下方文字傳給廠商</span>
     </div>`;
   }
 
-  // 需叫貨品項（含老闆調整欄）
+  // 備註：中性色
+  if(sub.note){
+    html+=`<div style="background:var(--tint);border-radius:10px;padding:9px 12px;margin-top:12px;font-size:12.5px;color:var(--ink2);line-height:1.6;">
+      <span style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--ink3);margin-right:6px;">備註</span>${sub.note}
+    </div>`;
+  }
+
+  // 需叫貨品項（含老闆調整欄）— 兩欄
   if(needItems.length>0){
     // 初始化老闆調整量（以計算出的叫貨量為預設）
     const adjKey = `orderAdj_${vendor}_${viewDow}`;
@@ -3636,56 +3654,54 @@ function showOrderView(vendor){
       });
     }
 
-    html+=`<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);text-transform:uppercase;padding:4px 0 8px;border-bottom:1px solid var(--border);margin-bottom:4px;">需叫貨 ${needItems.length} 項</div>`;
-
-    html+=`<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:0 0 6px;border-bottom:1px solid var(--border);margin-bottom:4px;">
-      <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;">品項</span>
-      <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;text-align:center;min-width:56px;">現有數量</span>
-      <span style="font-size:10px;color:var(--ink3);letter-spacing:.5px;text-align:center;min-width:96px;">實際叫貨</span>
-    </div>`;
+    html+=`<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);text-transform:uppercase;margin:20px 0 2px;padding-bottom:8px;border-bottom:1px solid var(--border);">需叫貨 ${needItems.length} 項</div>`;
 
     html+=needItems.map(item=>{
-      const o = calcOrderAmt(item, viewDow);
       const cur = qty[item.id]!==''?qty[item.id]:'—';
-      const adjVal = window._orderAdj[adjKey][item.id] ?? o;
-      return`<div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);">
-        <div style="font-weight:500;font-size:13px;">${item.name}${item.orderName&&item.orderName!==item.name?`<br><span style="font-weight:400;font-size:10px;color:var(--ink3);">叫貨：${item.orderName}</span>`:''}</div>
-        <div style="text-align:center;min-width:56px;font-size:13px;color:var(--ink2);">${cur} <span style="font-size:11px;color:var(--ink3);">${item.unit}</span></div>
-        <div style="display:flex;align-items:center;gap:4px;min-width:96px;justify-content:center;">
-          <button onclick="adjOrderQty('${adjKey}',${item.id},-${(item.factor&&item.factor!==1)?(item.oStep||0.5):(item.step||1)},'${oUnitOf(item)}','${vendor}')" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--cream);cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;font-family:monospace;flex-shrink:0;">−</button>
-          <span id="adj-${adjKey}-${item.id}" style="font-size:13px;font-weight:600;min-width:28px;text-align:center;color:var(--accent);">${adjVal}</span>
+      const adjVal = window._orderAdj[adjKey][item.id] ?? calcOrderAmt(item, viewDow);
+      const stepUnit = (item.factor&&item.factor!==1)?(item.oStep||0.5):(item.step||1);
+      const subline = `現有 ${cur} ${item.unit}` + (item.orderName&&item.orderName!==item.name?` · 叫貨：${item.orderName}`:'');
+      return`<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);">
+        <div style="min-width:0;">
+          <div style="font-weight:500;font-size:14px;">${item.name}</div>
+          <div style="font-size:11px;color:var(--ink3);margin-top:2px;">${subline}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+          <button onclick="adjOrderQty('${adjKey}',${item.id},-${stepUnit},'${oUnitOf(item)}','${vendor}')" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--cream);color:var(--ink2);cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;font-family:monospace;">−</button>
+          <span id="adj-${adjKey}-${item.id}" style="font-size:14px;font-weight:600;min-width:24px;text-align:center;color:var(--accent);font-family:'DM Mono',monospace;">${adjVal}</span>
           <span style="font-size:11px;color:var(--ink3);">${oUnitOf(item)}</span>
-          <button onclick="adjOrderQty('${adjKey}',${item.id},${(item.factor&&item.factor!==1)?(item.oStep||0.5):(item.step||1)},'${oUnitOf(item)}','${vendor}')" style="width:26px;height:26px;border-radius:50%;border:1px solid var(--border);background:var(--cream);cursor:pointer;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center;font-family:monospace;flex-shrink:0;">+</button>
+          <button onclick="adjOrderQty('${adjKey}',${item.id},${stepUnit},'${oUnitOf(item)}','${vendor}')" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--cream);color:var(--ink2);cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;font-family:monospace;">+</button>
         </div>
       </div>`;
     }).join('');
+    // 老闆：手動調整後，按了「儲存調整」才寫進系統（不自動存）
+    if(isAdmin){
+      html+=`<div style="display:flex;align-items:center;justify-content:flex-end;gap:14px;margin-top:11px;">
+        <button onclick="resetOrderAdj('${vendor}')" style="font-size:12px;color:var(--ink3);background:none;border:none;cursor:pointer;text-decoration:underline;text-underline-offset:2px;font-family:'Noto Sans TC',sans-serif;">回系統建議</button>
+        <button onclick="saveOrderAdj('${vendor}')" style="font-size:12px;font-weight:600;color:#fff;background:var(--ink);border:none;border-radius:9px;padding:7px 16px;cursor:pointer;font-family:'Noto Sans TC',sans-serif;">儲存調整</button>
+      </div>
+      <div style="font-size:10.5px;color:var(--ink3);margin-top:6px;line-height:1.5;">改完按「儲存調整」才會存進系統，重整或換裝置也會記得；沒存則仍以系統建議量為準。</div>`;
+    }
   }
-
-  // 充足品項（收合）
   if(okItems.length>0){
-    html+=`<div style="font-size:11px;color:var(--ink3);margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
-      庫存充足 ${okItems.length} 項：${okItems.map(i=>i.name).join('、')}
-    </div>`;
+    html+=`<div style="font-size:11.5px;color:var(--ink3);margin-top:14px;padding-top:12px;border-top:1px solid var(--border);line-height:1.6;">庫存充足 ${okItems.length} 項：${okItems.map(i=>i.name).join('、')}</div>`;
   }
 
-  // 叫貨文字區
-  html+=`<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);">
-    <div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);text-transform:uppercase;margin-bottom:8px;">叫貨文字</div>
-    <div class="export-box" id="exportBoxView">${exportTxt||'今日庫存充足，無需叫貨'}</div>
-    <div class="export-actions">
-      <button class="btn-copy" id="copyBtnView" onclick="copyText('exportBoxView','copyBtnView')">複製文字</button>
+  // 叫貨文字（標題列右側＝輕量 複製 · 傳LINE）
+  html+=`<div style="display:flex;align-items:center;justify-content:space-between;margin:20px 0 8px;">
+      <span style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);text-transform:uppercase;">叫貨文字</span>
+      <span style="display:flex;align-items:center;gap:4px;">
+        <button id="copyBtnView" onclick="copyText('exportBoxView','copyBtnView')" style="background:none;border:none;color:var(--ink3);font-size:12.5px;font-weight:500;cursor:pointer;font-family:'Noto Sans TC',sans-serif;padding:4px 6px;">複製</button>
+        ${isAdmin && vendorContacts[vendor] ? `<span style="color:var(--border);">·</span><a href="${vendorContacts[vendor]}" target="_blank" style="color:#06C755;font-size:12.5px;font-weight:600;text-decoration:none;padding:4px 6px;">傳 LINE</a>` : ''}
+      </span>
     </div>
-    ${isAdmin && vendorContacts[vendor] ? `
-    <a href="${vendorContacts[vendor]}" target="_blank"
-      style="display:block;margin-top:10px;padding:11px;background:#06C755;color:#fff;border-radius:10px;text-align:center;font-size:14px;font-weight:600;text-decoration:none;">
-      開啟 LINE 傳給廠商
-    </a>` : ''}
-  </div>`;
+    <div class="export-box" id="exportBoxView">${exportTxt||'今日庫存充足，無需叫貨'}</div>`;
 
-  html+=`<div class="modal-actions" style="margin-top:14px;">
-    <button class="btn-cancel" onclick="closeModal()">關閉</button>
-    ${!isOrdered?`<button class="btn-order" onclick="markOrdered('${vendor}');closeModal();">叫貨完成</button>`
-    :`<button class="btn-order" style="background:#7A6A58;cursor:default;opacity:.85;" disabled>✓ 已叫貨完成</button>`}
+  // 底部：右下單一主按鈕（膠囊）
+  html+=`<div style="display:flex;justify-content:flex-end;margin-top:18px;">
+    ${!isOrdered
+      ? `<button onclick="markOrdered('${vendor}');closeModal();" style="height:46px;padding:0 30px;background:var(--ink);border:none;border-radius:13px;color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;font-family:'Noto Sans TC',sans-serif;cursor:pointer;">叫貨完成</button>`
+      : `<button disabled style="height:46px;padding:0 26px;background:var(--ok);border:none;border-radius:13px;color:#fff;font-size:15px;font-weight:700;letter-spacing:1px;font-family:'Noto Sans TC',sans-serif;opacity:.9;cursor:default;display:inline-flex;align-items:center;gap:9px;"><span style="width:6px;height:11px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);"></span>已叫貨完成</button>`}
   </div>`;
 
   document.getElementById('modal').innerHTML=html;
@@ -3732,6 +3748,21 @@ function updateExportBoxView(vendor) {
   });
   if(sub.note) txt += `\n備註：${sub.note}`;
   box.textContent = txt.trimEnd();
+}
+
+// ── 老闆手動調整叫貨量：儲存／還原 ──
+function saveOrderAdj(vendor){
+  if(!currentUser || currentUser.role!=='admin') return;
+  fbSave(viewDow);   // 連同當日資料一併寫入 jenka/${date}/orderAdj
+  showToast(`✓ 已儲存 ${vendor} 的叫貨調整`);
+}
+function resetOrderAdj(vendor){
+  if(!currentUser || currentUser.role!=='admin') return;
+  const adjKey = `orderAdj_${vendor}_${viewDow}`;
+  if(window._orderAdj) delete window._orderAdj[adjKey];  // 清掉手動值
+  fbSave(viewDow);                                        // 寫回（已不含此廠商的調整）
+  showOrderView(vendor);                                  // 重新渲染 → 以系統建議量重新初始化
+  showToast('已回到系統建議量');
 }
 
 // ── 已叫貨 ──
@@ -5448,6 +5479,15 @@ function fbSave(dow) {
   if (!window._fb) return;
   const { db, ref, set } = window._fb;
   const key = dateKey(dow);
+  // 老闆手動調整的叫貨量（按「儲存調整」或其他存檔時一併寫入；存在 jenka/${date}/orderAdj/${vendor}）
+  const oadj = {};
+  const pre = 'orderAdj_', suf = '_' + dow;
+  Object.keys(window._orderAdj || {}).forEach(k => {
+    if (k.startsWith(pre) && k.endsWith(suf)) {
+      const vendor = k.slice(pre.length, k.length - suf.length);
+      if (vendor) oadj[vendor] = window._orderAdj[k];
+    }
+  });
   const data = {
     submitted: submitted[dow] || {},
     ordered: ordered[dow] || {},
@@ -5458,7 +5498,8 @@ function fbSave(dow) {
     safeQty,
     orderQty,
     unlockedRecheck: unlockedRecheck[dow] || {},
-    optInToday: optInToday[dow] || {}
+    optInToday: optInToday[dow] || {},
+    orderAdj: oadj
   };
   set(ref(db, `jenka/${key}`), data).catch(e => console.warn('FB write error', e));
 }
@@ -5571,6 +5612,11 @@ function fbInitRest() {
         if (data.ordered) ordered[d] = data.ordered;
         if (data.unlockedRecheck) unlockedRecheck[d] = data.unlockedRecheck;
         if (data.optInToday) optInToday[d] = data.optInToday;
+        // 載入老闆已儲存的手動叫貨量調整（讓重整／換裝置後仍記得）
+        if (data.orderAdj) {
+          if (!window._orderAdj) window._orderAdj = {};
+          Object.entries(data.orderAdj).forEach(([ven, obj]) => { window._orderAdj['orderAdj_' + ven + '_' + d] = obj; });
+        }
         
         // qty 只同步今天
         if (d === viewDow && data.qty) Object.assign(qty, data.qty);
