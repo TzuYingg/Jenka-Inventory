@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>庄腳點貨 · 測試資料清理工具</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F3ED; --surface:#FCFAF6; --ink:#2B2824; --ink2:#6B665C; --ink3:#9C978C;
+    --line:#E7E2D8; --tint:#F0ECE3; --accent:#BF5B3D;
+    --ok:#5F8268; --okbg:#E9EFE9; --warn:#B6863C; --warnbg:#F6EEDD;
+    --danger:#A2503C; --dangerbg:#F3E3DC;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:'Noto Sans TC',sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased;padding:24px 16px 80px;}
+  .wrap{max-width:680px;margin:0 auto;}
+  header{margin-bottom:20px;}
+  h1{font-size:20px;font-weight:700;letter-spacing:.5px;}
+  .sub{font-size:12px;color:var(--ink3);font-family:'DM Mono',monospace;margin-top:4px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 16px;margin-bottom:14px;}
+  .note{background:var(--warnbg);border:1px solid #E7CE94;border-radius:12px;padding:12px 14px;font-size:13px;color:#6E5320;margin-bottom:14px;line-height:1.7;}
+  .note b{color:var(--accent);}
+  .sec-label{font-size:11px;font-weight:700;letter-spacing:1.4px;color:var(--ink3);text-transform:uppercase;margin:0 0 10px;}
+  .protected-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;}
+  .protected-row:last-child{border-bottom:none;}
+  .protected-row .lock{width:24px;text-align:center;}
+  .protected-row .pname{font-weight:500;flex:1;}
+  .protected-row .pcount{font-size:12px;color:var(--ink3);font-family:'DM Mono',monospace;}
+  .pill{display:inline-block;font-size:11px;padding:1px 9px;border-radius:10px;background:var(--okbg);color:var(--ok);font-weight:600;}
+  .toolbar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;}
+  .toolbar .spacer{flex:1;}
+  .mini-btn{font-size:12px;padding:6px 12px;border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--ink2);cursor:pointer;font-family:'Noto Sans TC',sans-serif;}
+  .mini-btn:hover{background:var(--tint);}
+  .date-row{display:flex;align-items:center;gap:12px;padding:12px 12px;border:1px solid var(--line);border-radius:12px;margin-bottom:8px;background:var(--surface);cursor:pointer;transition:border-color .15s,background .15s;}
+  .date-row:hover{border-color:#D8D2C6;}
+  .date-row.checked{border-color:var(--danger);background:var(--dangerbg);}
+  .date-row.future{opacity:.6;}
+  .cbx{width:20px;height:20px;flex-shrink:0;accent-color:var(--danger);cursor:pointer;}
+  .date-main{flex:1;min-width:0;}
+  .date-d{font-weight:600;font-size:15px;font-family:'DM Mono',monospace;}
+  .date-w{font-size:12px;color:var(--ink3);margin-left:8px;}
+  .date-sum{font-size:12px;color:var(--ink2);margin-top:2px;}
+  .chip{display:inline-block;font-size:11px;padding:1px 8px;border-radius:8px;background:var(--tint);color:var(--ink2);margin-right:4px;}
+  .tag-future{font-size:10px;padding:1px 8px;border-radius:8px;background:var(--okbg);color:var(--ok);font-weight:600;}
+  .empty{text-align:center;color:var(--ink3);padding:30px 0;font-size:14px;}
+  .status{font-size:13px;color:var(--ink2);padding:10px 0;}
+  .err{color:var(--danger);}
+  /* 底部刪除列 */
+  .footbar{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+    padding:14px 16px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -4px 16px rgba(0,0,0,.05);}
+  .footbar-inner{max-width:680px;margin:0 auto;display:flex;align-items:center;gap:12px;}
+  .sel-count{font-size:13px;color:var(--ink2);flex:1;}
+  .sel-count b{color:var(--danger);font-family:'DM Mono',monospace;}
+  .btn-danger{background:var(--danger);color:#fff;border:none;border-radius:12px;padding:12px 22px;font-size:15px;font-weight:700;
+    font-family:'Noto Sans TC',sans-serif;cursor:pointer;}
+  .btn-danger:disabled{background:#CDBFB8;cursor:not-allowed;}
+  /* 確認彈窗 */
+  .overlay{position:fixed;inset:0;background:rgba(28,26,20,.55);display:none;align-items:center;justify-content:center;padding:20px;z-index:50;}
+  .overlay.open{display:flex;}
+  .modal{background:var(--surface);border-radius:18px;padding:22px 20px;max-width:440px;width:100%;max-height:80vh;overflow-y:auto;}
+  .modal h2{font-size:17px;font-weight:700;margin-bottom:6px;}
+  .modal p{font-size:13px;color:var(--ink2);margin-bottom:12px;}
+  .del-list{background:var(--dangerbg);border-radius:10px;padding:10px 12px;font-size:12px;font-family:'DM Mono',monospace;color:var(--danger);margin-bottom:14px;max-height:160px;overflow-y:auto;line-height:1.9;}
+  .keep-note{background:var(--okbg);border-radius:10px;padding:9px 12px;font-size:12px;color:var(--ok);margin-bottom:14px;}
+  .confirm-chk{display:flex;align-items:flex-start;gap:9px;font-size:13px;color:var(--ink);margin-bottom:16px;cursor:pointer;}
+  .confirm-chk input{width:18px;height:18px;margin-top:1px;accent-color:var(--danger);flex-shrink:0;}
+  .modal-actions{display:flex;gap:10px;}
+  .btn-cancel{flex:1;background:var(--tint);color:var(--ink2);border:none;border-radius:12px;padding:12px;font-size:15px;font-weight:600;font-family:'Noto Sans TC',sans-serif;cursor:pointer;}
+  .modal-actions .btn-danger{flex:1.4;}
+  .done-box{background:var(--okbg);border:1px solid var(--ok);border-radius:12px;padding:14px;font-size:14px;color:var(--ok);text-align:center;display:none;margin-bottom:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>測試資料清理工具</h1>
+    <div class="sub">JenKa Inventory · 一次性使用後請刪除此檔</div>
+  </header>
+
+  <div class="note">
+    這個工具<b>只會刪除「以日期命名的每日紀錄」</b>（點貨／叫貨／當日庫存回報／留言）。<br>
+    廠商、品項、帳號、排程、需備量等<b>所有設定都不會被動到</b>，程式層面已鎖死，無法在這裡刪到設定。
+  </div>
+
+  <div class="done-box" id="doneBox"></div>
+
+  <div class="card">
+    <div class="sec-label">🔒 永遠保留（無法刪除）</div>
+    <div id="protectedList"><div class="status">連線中…</div></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label">每日紀錄 · 勾選要刪除的日期</div>
+    <div class="toolbar" id="toolbar" style="display:none;">
+      <button class="mini-btn" onclick="selectBeforeToday()">勾選今天以前</button>
+      <button class="mini-btn" onclick="selectAll()">全選</button>
+      <button class="mini-btn" onclick="clearAll()">全部取消</button>
+      <span class="spacer"></span>
+      <button class="mini-btn" onclick="reload()">重新整理</button>
+    </div>
+    <div id="dateList"><div class="status">讀取每日紀錄中…</div></div>
+  </div>
+</div>
+
+<div class="footbar">
+  <div class="footbar-inner">
+    <div class="sel-count">已選取 <b id="selCount">0</b> 天</div>
+    <button class="btn-danger" id="deleteBtn" disabled onclick="openConfirm()">刪除選取的紀錄</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2>確認刪除</h2>
+    <p>即將<strong>永久刪除</strong>以下日期的每日紀錄，此動作無法復原：</p>
+    <div class="del-list" id="delList"></div>
+    <div class="keep-note">✓ 廠商・品項・帳號・排程・需備量等設定不會被刪除。</div>
+    <label class="confirm-chk">
+      <input type="checkbox" id="ackChk" onchange="document.getElementById('confirmDelBtn').disabled=!this.checked;">
+      <span>我了解這些每日紀錄將被永久刪除，且無法復原。</span>
+    </label>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeConfirm()">取消</button>
+      <button class="btn-danger" id="confirmDelBtn" disabled onclick="doDelete()">確認刪除</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+import { getDatabase, ref, get, remove } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
+
+const firebaseConfig={
+  apiKey:"AIzaSyDoSPSDr6DfQNa7DHV9Z4xl0Dkc36kd69o",
+  authDomain:"jenka-inventory.firebaseapp.com",
+  databaseURL:"https://jenka-inventory-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"jenka-inventory",
+  storageBucket:"jenka-inventory.firebasestorage.app",
+  messagingSenderId:"1051643046922",
+  appId:"1:1051643046922:web:f0c0a053aabe88581643f3"
+};
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+
+const DATE_RE=/^\d{4}-\d{2}-\d{2}$/;          // 唯一可刪除的鍵格式：YYYY-MM-DD
+const DAY_NAMES=['日','一','二','三','四','五','六'];
+const selected=new Set();
+let allDates=[];
+
+function todayKey(){
+  const d=new Date();
+  const p=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+}
+function weekdayOf(dateStr){
+  const [y,m,d]=dateStr.split('-').map(Number);
+  return DAY_NAMES[new Date(y,m-1,d).getDay()];
+}
+
+async function load(){
+  document.getElementById('doneBox').style.display='none';
+  try{
+    const snap=await get(ref(db,'jenka'));
+    if(!snap.exists()){ render({}); return; }
+    render(snap.val());
+  }catch(e){
+    document.getElementById('protectedList').innerHTML=`<div class="status err">連線失敗：${e.message}<br>請確認網路與 Firebase 設定。</div>`;
+    document.getElementById('dateList').innerHTML='';
+  }
+}
+
+function render(data){
+  // ── 保留清單 ──
+  const items=Array.isArray(data.allItems)?data.allItems.filter(Boolean):(data.allItems?Object.keys(data.allItems).length:0);
+  const itemCount=Array.isArray(data.allItems)?items.length:(items||0);
+  const acctCount=data.accounts?Object.keys(data.accounts).length:0;
+  const sa=data.stockAlerts||{};
+  const stockItemCount=sa.items?Object.keys(sa.items).length:0;
+  const protRows=[
+    {n:'全域設定 global',d:'排程・需備量・店家資訊・廠商',c:''},
+    {n:'品項定義 allItems',d:'',c:`${itemCount} 個品項`},
+    {n:'登入帳號 accounts',d:'',c:`${acctCount} 個帳號`},
+    {n:'庫存追蹤品項 stockAlerts/items',d:'',c:`${stockItemCount} 項`},
+  ];
+  document.getElementById('protectedList').innerHTML=protRows.map(r=>`
+    <div class="protected-row">
+      <span class="lock">🔒</span>
+      <span class="pname">${r.n}${r.d?`<br><span style="font-size:11px;color:var(--ink3);font-weight:400;">${r.d}</span>`:''}</span>
+      <span class="pcount">${r.c}</span>
+      <span class="pill">保留</span>
+    </div>`).join('');
+
+  // ── 每日紀錄：彙整所有日期 ──
+  const topDates=Object.keys(data).filter(k=>DATE_RE.test(k));
+  const repDates=Object.keys(sa.reports||{}).filter(k=>DATE_RE.test(k));
+  const schDates=Object.keys(sa.scheduled||{}).filter(k=>DATE_RE.test(k));
+  const set=new Set([...topDates,...repDates,...schDates]);
+  allDates=[...set].sort().reverse();
+
+  const today=todayKey();
+  selected.clear();
+
+  if(allDates.length===0){
+    document.getElementById('dateList').innerHTML='<div class="empty">目前沒有任何每日紀錄。</div>';
+    document.getElementById('toolbar').style.display='none';
+    updateFoot();
+    return;
+  }
+  document.getElementById('toolbar').style.display='flex';
+
+  document.getElementById('dateList').innerHTML=allDates.map(dt=>{
+    const top=data[dt]||{};
+    const subC=top.submitted?Object.keys(top.submitted).length:0;
+    const ordC=top.ordered?Object.keys(top.ordered).length:0;
+    const repC=(sa.reports&&sa.reports[dt])?Object.keys(sa.reports[dt]).length:0;
+    const isFuture=dt>=today;
+    const chips=[];
+    if(subC)chips.push(`<span class="chip">送出 ${subC} 廠商</span>`);
+    if(ordC)chips.push(`<span class="chip">叫貨 ${ordC}</span>`);
+    if(repC)chips.push(`<span class="chip">庫存回報 ${repC}</span>`);
+    if(!chips.length)chips.push(`<span class="chip" style="color:var(--ink3);">無內容</span>`);
+    return `<div class="date-row${isFuture?' future':''}" data-date="${dt}" onclick="toggleRow('${dt}')">
+      <input type="checkbox" class="cbx" data-cbx="${dt}" onclick="event.stopPropagation();toggleRow('${dt}')">
+      <div class="date-main">
+        <div><span class="date-d">${dt}</span><span class="date-w">週${weekdayOf(dt)}</span>${isFuture?' <span class="tag-future">今天/未來</span>':''}</div>
+        <div class="date-sum">${chips.join('')}</div>
+      </div>
+    </div>`;
+  }).join('');
+  // 預設勾選今天以前
+  selectBeforeToday();
+}
+
+function setRow(dt,on){
+  if(on)selected.add(dt);else selected.delete(dt);
+  const row=document.querySelector(`.date-row[data-date="${dt}"]`);
+  const cb=document.querySelector(`.cbx[data-cbx="${dt}"]`);
+  if(row)row.classList.toggle('checked',on);
+  if(cb)cb.checked=on;
+}
+window.toggleRow=function(dt){ setRow(dt,!selected.has(dt)); updateFoot(); };
+window.selectBeforeToday=function(){ const t=todayKey(); allDates.forEach(dt=>setRow(dt,dt<t)); updateFoot(); };
+window.selectAll=function(){ allDates.forEach(dt=>setRow(dt,true)); updateFoot(); };
+window.clearAll=function(){ allDates.forEach(dt=>setRow(dt,false)); updateFoot(); };
+window.reload=function(){ load(); };
+
+function updateFoot(){
+  document.getElementById('selCount').textContent=selected.size;
+  document.getElementById('deleteBtn').disabled=selected.size===0;
+}
+
+window.openConfirm=function(){
+  if(selected.size===0)return;
+  const dates=[...selected].sort();
+  document.getElementById('delList').textContent=dates.join('\n');
+  document.getElementById('ackChk').checked=false;
+  document.getElementById('confirmDelBtn').disabled=true;
+  document.getElementById('overlay').classList.add('open');
+};
+window.closeConfirm=function(){ document.getElementById('overlay').classList.remove('open'); };
+
+window.doDelete=async function(){
+  const btn=document.getElementById('confirmDelBtn');
+  btn.disabled=true; btn.textContent='刪除中…';
+  // 二次防呆：只刪符合日期格式的鍵
+  const dates=[...selected].filter(dt=>DATE_RE.test(dt));
+  let ok=0,fail=0;
+  for(const dt of dates){
+    try{
+      await Promise.all([
+        remove(ref(db,`jenka/${dt}`)),
+        remove(ref(db,`jenka/stockAlerts/reports/${dt}`)),
+        remove(ref(db,`jenka/stockAlerts/scheduled/${dt}`)),
+      ]);
+      ok++;
+    }catch(e){ fail++; console.error('刪除失敗',dt,e); }
+  }
+  closeConfirm();
+  btn.textContent='確認刪除';
+  const box=document.getElementById('doneBox');
+  box.style.display='block';
+  box.innerHTML=`✓ 已刪除 ${ok} 天的每日紀錄${fail?`（${fail} 天失敗，請查看主控台）`:''}。設定資料完整保留。`;
+  await load();
+};
+
+load();
+</script>
+</body>
+</html>
