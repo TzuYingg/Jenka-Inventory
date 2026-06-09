@@ -1823,13 +1823,23 @@ function recalcFactor(item){
     item.factor=1; // 同單位或缺重量 → 不換算
   }
 }
+// 取得品項在某日的「點貨數量」：優先讀送出當下凍結的快照(qtySnap)，沒有才回退即時 qty。
+// 這樣顯示與叫貨量都綁在送出紀錄上，不會因別台裝置整包覆蓋當日資料而被洗掉。
+function countedQty(item,dow){
+  const vend=item.vendor;
+  const sub=submitted[dow]&&submitted[dow][vend];
+  const snap=sub&&sub.qtySnap;
+  if(snap&&snap[item.id]!==undefined&&snap[item.id]!==null&&snap[item.id]!=='') return snap[item.id];
+  return qty[item.id];
+}
 function calcOrderAmt(item,dow){
   const target=orderQty[item.id]?.[dow]; // 每日需備量（換算品項以叫貨單位計，例：番茄 4 斤）
   if(target===null||target===undefined)return null;
   const f=item.factor||1;               // 點貨單位→叫貨單位 換算係數；未設定=1，行為與原本完全相同
-  const cur=parseFloat(qty[item.id]);
+  const cntRaw=countedQty(item,dow);    // 快照優先，回退即時 qty
+  const cur=parseFloat(cntRaw);
   let amt;
-  if(isNaN(cur)||qty[item.id]==='') amt=target;
+  if(isNaN(cur)||cntRaw===''||cntRaw===undefined||cntRaw===null) amt=target;
   else amt=Math.max(0,target-cur*f);    // 員工數的現有量（點貨單位）換算成叫貨單位後再相減
   if(amt<=0) return 0;
   // 最小叫貨量
@@ -2217,8 +2227,12 @@ var confirmVendorSubmit = function(vendor,checker,time,isRecheck){
   const history=prev?[...prev.history]:[];
   if(isRecheck&&prev)history.push({checker:prev.checker,time:prev.time,type:'recheck-original',note:prev.note||''});
   history.push({checker,time,type:isRecheck?'recheck':'original',note});
-  submitted[viewDow][vendor]={checker,time,history,note};
+  // 凍結本次點貨數量快照，綁在這筆送出紀錄（之後共用 qty 被覆蓋也不影響顯示與計算）
+  const qtySnap={};
+  ITEMS_DEF.filter(i=>i.vendor===vendor).forEach(i=>{ qtySnap[i.id]=qty[i.id]; });
+  submitted[viewDow][vendor]={checker,time,history,note,qtySnap};
   if(unlockedRecheck[viewDow])unlockedRecheck[viewDow][vendor]=false;
+  if(typeof fbSave==='function') fbSave(viewDow);   // 立即寫回送出紀錄＋快照
   closeModal();
   showToast(`✓ ${vendor} 點貨完成`);
   setTimeout(()=>backToOverview(),600);
@@ -3657,7 +3671,8 @@ function showOrderView(vendor){
     html+=`<div style="font-size:11px;font-weight:700;letter-spacing:1.2px;color:var(--ink3);text-transform:uppercase;margin:20px 0 2px;padding-bottom:8px;border-bottom:1px solid var(--border);">需叫貨 ${needItems.length} 項</div>`;
 
     html+=needItems.map(item=>{
-      const cur = qty[item.id]!==''?qty[item.id]:'—';
+      const cntRaw = countedQty(item, viewDow);
+      const cur = (cntRaw!==''&&cntRaw!==undefined&&cntRaw!==null)?cntRaw:'—';
       const adjVal = window._orderAdj[adjKey][item.id] ?? calcOrderAmt(item, viewDow);
       const stepUnit = (item.factor&&item.factor!==1)?(item.oStep||0.5):(item.step||1);
       const subline = `現有 ${cur} ${item.unit}` + (item.orderName&&item.orderName!==item.name?` · 叫貨：${item.orderName}`:'');
