@@ -494,6 +494,11 @@ window.dispatchEvent(new Event('fbReady'));
   .hist-item-name{color:var(--ink2);}
   .hist-item-qty{font-family:'DM Mono',monospace;font-weight:500;color:var(--accent);}
   .hist-item-qty.zero{color:var(--ink3);}
+  .hist-item-qty.count{color:var(--ink);}
+  .hist-seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-left:auto;flex-shrink:0;}
+  .hist-seg-btn{font-size:11px;padding:3px 11px;background:none;border:none;color:var(--ink3);cursor:pointer;font-family:inherit;line-height:1.6;}
+  .hist-seg-btn.on{background:var(--accent);color:#fff;font-weight:600;}
+  .hist-empty-line{font-size:11px;color:var(--ink3);padding:4px 0;}
   .hist-empty{text-align:center;padding:40px 20px;color:var(--ink3);font-size:13px;line-height:1.8;}
 
   /* 趨勢圖 */
@@ -5123,6 +5128,7 @@ async function queryHistory() {
 
   const data = await fetchDateRange(fromStr, toStr);
   histCachedResults = [];
+  let _histCard = 0;
 
   // 整理每天資料
   const days = Object.keys(data).sort();
@@ -5168,7 +5174,7 @@ async function queryHistory() {
         } else {
           ordAmt = Math.max(0, target - cur * f);
         }
-        if (ordAmt <= 0) return { itemName: item.name, unit: oUnitOf(item), qty: 0, cur, vendor, itemId: item.id };
+        if (ordAmt <= 0) return { itemName: item.name, unit: oUnitOf(item), qty: 0, cur, vendor, itemId: item.id, countUnit: item.unit, countRaw: rawCur };
         // 最小叫貨量
         const minOrder = item.minOrder || 0;
         if (minOrder > 0 && ordAmt < minOrder) ordAmt = minOrder;
@@ -5180,35 +5186,55 @@ async function queryHistory() {
         // 最高叫貨上限：僅未換算品項套用（換算品項已被需備量自然封頂）
         if (f === 1) { const maxLimit = snapSafe[item.id] || safeQty[item.id] || 0; if (maxLimit && ordAmt > maxLimit) ordAmt = maxLimit; }
         ordAmt = Math.round(ordAmt * 100) / 100;
-        return { itemName: item.name, unit: oUnitOf(item), qty: ordAmt, cur, vendor, itemId: item.id };
+        return { itemName: item.name, unit: oUnitOf(item), qty: ordAmt, cur, vendor, itemId: item.id, countUnit: item.unit, countRaw: rawCur };
       }).filter(Boolean);
 
       const needItems = itemRows.filter(r => r.qty > 0);
       const isOrdered = !!ord[vendor];
+      const cardId = _histCard++;
 
-      // 加入匯出資料
+      // 點貨明細：列出當次有輸入數字的品項（快照優先），以點貨單位顯示
+      const countItems = vitems.map(item => {
+        const rc = (s.qtySnap && s.qtySnap[item.id] !== undefined && s.qtySnap[item.id] !== '' && s.qtySnap[item.id] !== null) ? s.qtySnap[item.id] : qtySnap[item.id];
+        if (rc === undefined || rc === '' || rc === null) return null;
+        return { itemName: item.name, cnt: rc, unit: item.unit };
+      }).filter(Boolean);
+
+      // 加入匯出資料（叫貨量＋點貨量）
       itemRows.forEach(r => {
         histCachedResults.push({
           date: dateKey, dayLabel, vendor, checker: s.checker, time: s.time,
-          itemName: r.itemName, unit: r.unit, orderedQty: r.qty, isOrdered
+          itemName: r.itemName, unit: r.unit, orderedQty: r.qty, isOrdered,
+          countQty: (r.countRaw === undefined || r.countRaw === null) ? '' : r.countRaw,
+          countUnit: r.countUnit
         });
       });
 
-      vendorRows += `<div class="hist-vendor-row">
-        <div class="hist-vendor-name">
-          ${vendor}
-          ${isOrdered ? '<span style="font-size:10px;background:#E8F5EE;color:var(--ok);padding:1px 7px;border-radius:10px;">已叫貨</span>' : ''}
-        </div>
-        <div class="hist-vendor-checker">👤 ${s.checker} · ${s.time}</div>
-        <div class="hist-item-list">
-          ${needItems.length ? needItems.map(r =>
+      const orderListHtml = needItems.length ? needItems.map(r =>
             `<div class="hist-item-row">
               <span class="hist-item-name">${r.itemName}</span>
               <span class="hist-item-qty">${r.qty} ${r.unit}</span>
             </div>`).join('') :
-            '<div style="font-size:11px;color:var(--ink3);padding:4px 0;">庫存充足，無需叫貨</div>'
-          }
+            '<div class="hist-empty-line">庫存充足，無需叫貨</div>';
+      const countListHtml = countItems.length ? countItems.map(r =>
+            `<div class="hist-item-row">
+              <span class="hist-item-name">${r.itemName}</span>
+              <span class="hist-item-qty count">${r.cnt} ${r.unit}</span>
+            </div>`).join('') :
+            '<div class="hist-empty-line">此次未記錄數量</div>';
+
+      vendorRows += `<div class="hist-vendor-row" id="histcard-${cardId}">
+        <div class="hist-vendor-name">
+          ${vendor}
+          ${isOrdered ? '<span style="font-size:10px;background:#E8F5EE;color:var(--ok);padding:1px 7px;border-radius:10px;">已叫貨</span>' : ''}
+          <span class="hist-seg">
+            <button class="hist-seg-btn hist-seg-order on" onclick="histToggleDetail(${cardId},'order')">叫貨</button>
+            <button class="hist-seg-btn hist-seg-count" onclick="histToggleDetail(${cardId},'count')">點貨</button>
+          </span>
         </div>
+        <div class="hist-vendor-checker">👤 ${s.checker} · ${s.time}</div>
+        <div class="hist-item-list hist-detail-order">${orderListHtml}</div>
+        <div class="hist-item-list hist-detail-count" style="display:none;">${countListHtml}</div>
       </div>`;
     });
 
@@ -5232,10 +5258,24 @@ async function queryHistory() {
   }
 }
 
+// ── 歷史卡：叫貨／點貨明細切換 ──
+function histToggleDetail(id, mode){
+  const card = document.getElementById('histcard-' + id);
+  if (!card) return;
+  const o = card.querySelector('.hist-detail-order');
+  const c = card.querySelector('.hist-detail-count');
+  if (o) o.style.display = mode === 'order' ? 'block' : 'none';
+  if (c) c.style.display = mode === 'count' ? 'block' : 'none';
+  const bo = card.querySelector('.hist-seg-order');
+  const bc = card.querySelector('.hist-seg-count');
+  if (bo) bo.classList.toggle('on', mode === 'order');
+  if (bc) bc.classList.toggle('on', mode === 'count');
+}
+
 // ── 匯出 CSV ──
 function exportHistoryCSV() {
   if (!histCachedResults.length) return;
-  const header = ['日期', '星期', '廠商', '點貨人', '點貨時間', '品項', '叫貨量', '單位', '已叫貨'];
+  const header = ['日期', '星期', '廠商', '點貨人', '點貨時間', '品項', '點貨量', '點貨單位', '叫貨量', '叫貨單位', '已叫貨'];
   const rows = histCachedResults.map(r => {
     const d = new Date(r.date + 'T00:00:00');
     return [
@@ -5245,6 +5285,8 @@ function exportHistoryCSV() {
       r.checker,
       r.time,
       r.itemName,
+      (r.countQty === undefined || r.countQty === null) ? '' : r.countQty,
+      r.countUnit || '',
       r.orderedQty,
       r.unit,
       r.isOrdered ? '是' : '否'
@@ -5256,7 +5298,7 @@ function exportHistoryCSV() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `叫貨明細_${document.getElementById('histDateFrom').value}_${document.getElementById('histDateTo').value}.csv`;
+  a.download = `點貨叫貨明細_${document.getElementById('histDateFrom').value}_${document.getElementById('histDateTo').value}.csv`;
   a.click();
   URL.revokeObjectURL(url);
   showToast('✓ 已匯出 CSV，可用 Excel 開啟');
