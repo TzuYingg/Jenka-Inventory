@@ -5159,9 +5159,11 @@ async function queryHistory() {
         const target = snapOrderQty?.[item.id]?.[dow]; // 每日需備量（換算品項以叫貨單位計）
         if (target === null || target === undefined) return null;
         const f = item.factor || 1; // 點貨單位→叫貨單位 換算係數
-        const cur = parseFloat(qtySnap[item.id]);
+        // 優先讀送出當下的快照(s.qtySnap)，沒有才回退當日 qty 大包（舊資料相容）
+        const rawCur = (s.qtySnap && s.qtySnap[item.id] !== undefined && s.qtySnap[item.id] !== '' && s.qtySnap[item.id] !== null) ? s.qtySnap[item.id] : qtySnap[item.id];
+        const cur = parseFloat(rawCur);
         let ordAmt;
-        if (isNaN(cur) || qtySnap[item.id] === '' || qtySnap[item.id] === undefined) {
+        if (isNaN(cur) || rawCur === '' || rawCur === undefined || rawCur === null) {
           ordAmt = target;
         } else {
           ordAmt = Math.max(0, target - cur * f);
@@ -5303,13 +5305,16 @@ async function queryTrend() {
       const dow = cur.getDay();
 
       targetItems.forEach(item => {
-        if (!dayData.submitted[item.vendor]) return; // 這天沒送出
+        const subRec = dayData.submitted[item.vendor];
+        if (!subRec) return; // 這天沒送出
         const dow2 = cur.getDay();
         const target = snapOQ?.[item.id]?.[dow2];
         if (target === null || target === undefined) return;
-        const curQ = parseFloat(qtySnap[item.id]);
+        // 優先讀送出快照，沒有才回退當日 qty 大包
+        const rawQ = (subRec.qtySnap && subRec.qtySnap[item.id] !== undefined && subRec.qtySnap[item.id] !== '' && subRec.qtySnap[item.id] !== null) ? subRec.qtySnap[item.id] : qtySnap[item.id];
+        const curQ = parseFloat(rawQ);
         let ordAmt;
-        if (isNaN(curQ) || qtySnap[item.id] === '' || qtySnap[item.id] === undefined) {
+        if (isNaN(curQ) || rawQ === '' || rawQ === undefined || rawQ === null) {
           ordAmt = target;
         } else {
           ordAmt = Math.max(0, target - curQ);
@@ -5492,7 +5497,7 @@ function todayKey() { return dateKey(todayDow); }
 // 將當天所有狀態寫入 Firebase
 function fbSave(dow) {
   if (!window._fb) return;
-  const { db, ref, set } = window._fb;
+  const { db, ref, update } = window._fb;
   const key = dateKey(dow);
   // 老闆手動調整的叫貨量（按「儲存調整」或其他存檔時一併寫入；存在 jenka/${date}/orderAdj/${vendor}）
   const oadj = {};
@@ -5506,7 +5511,6 @@ function fbSave(dow) {
   const data = {
     submitted: submitted[dow] || {},
     ordered: ordered[dow] || {},
-    qty: qty,
     weeklySchedule,
     checkerNames,
     adminPin,
@@ -5516,7 +5520,18 @@ function fbSave(dow) {
     optInToday: optInToday[dow] || {},
     orderAdj: oadj
   };
-  set(ref(db, `jenka/${key}`), data).catch(e => console.warn('FB write error', e));
+  // 用 update 淺合併：不碰未列出的子節點（qty / chatMessages / announcement），避免整包 set 把它們連帶清掉
+  update(ref(db, `jenka/${key}`), data).catch(e => console.warn('FB write error', e));
+  // qty 只「合併寫入本機有非空值」的品項；空白一律不送出。
+  // 這樣別台沒點到的品項不會被你這台的空白洗掉——根因修補。
+  const qtyPatch = {};
+  Object.keys(qty).forEach(id => {
+    const v = qty[id];
+    if (v !== '' && v !== null && v !== undefined) qtyPatch[id] = v;
+  });
+  if (Object.keys(qtyPatch).length) {
+    update(ref(db, `jenka/${key}/qty`), qtyPatch).catch(e => console.warn('FB qty merge error', e));
+  }
 }
 
 // 儲存全域設定（排程、叫貨量、點貨人、PIN）
