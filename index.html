@@ -884,7 +884,7 @@ window.dispatchEvent(new Event('fbReady'));
           <div style="font-size:12px;color:#3A6BC4;line-height:1.6;">
             <strong>同步系統品項</strong><br>
             <span style="font-size:11px;color:var(--ink3);">將開發者新增的品項、以及換算等新功能同步進來；你自己在後台新增或修改過的設定不受影響</span><br>
-            <span style="font-size:11px;color:#3A6BC4;font-weight:700;font-family:'DM Mono',monospace;">目前版本：v13 · 點貨頁與確認送出改版（2026.06.07）</span>
+            <span style="font-size:11px;color:#3A6BC4;font-weight:700;font-family:'DM Mono',monospace;">目前版本：v14 · 蔬菜/南北貨可排程＋員工也能自行開啟（2026.06.12）</span>
           </div>
           <button onclick="confirmResetAllItems()" style="flex-shrink:0;padding:6px 14px;border-radius:20px;border:1.5px solid #3A6BC4;background:#E8EFFF;color:#3A6BC4;font-size:12px;font-weight:700;cursor:pointer;font-family:'Noto Sans TC',sans-serif;touch-action:manipulation;white-space:nowrap;">同步品項</button>
         </div>
@@ -1325,9 +1325,19 @@ let _doneOpen=null;
 const qty={};
 ITEMS_DEF.forEach(i=>qty[i.id]='');
 
-// optInToday[dow][vendor] = true/false — 管理員今日開啟需點貨
+// optInToday[dow][vendor] = true/false — 當日手動開啟需點貨
 const optInToday={};
 for(let d=0;d<7;d++) optInToday[d]={};
+// opt-in 廠商（蔬菜/南北貨）「今日是否啟用」：
+//  ① 當天有排到 每日排程 → 固定出現（免開）
+//  ② 或 當天被手動按「今日需點貨」開啟（管理員或員工皆可）
+function isOptInOn(vendor,dow){
+  return ((weeklySchedule[dow]||[]).includes(vendor)) || !!(optInToday[dow]&&optInToday[dow][vendor]);
+}
+// 這個 opt-in 廠商今天是「手動開啟」的嗎（用來決定是否顯示「取消」與「今日點貨」標）
+function isOptInManual(vendor,dow){
+  return !!(optInToday[dow]&&optInToday[dow][vendor]) && !((weeklySchedule[dow]||[]).includes(vendor));
+}
 const submitted={};
 for(let d=0;d<7;d++) submitted[d]={};
 // unlockedRecheck[dow][vendor] = bool
@@ -1582,7 +1592,7 @@ function renderPreviewOverview(isAdmin){
   if(typeof syncAnnounceUI==='function') syncAnnounceUI();
   // 排定處理廠商（唯讀；固定週排程）
   const bar=document.getElementById('vendorStatusBar');
-  const fixed=(weeklySchedule[viewDow]||[]).filter(v=>!OPT_IN_VENDORS.includes(v));
+  const fixed=(weeklySchedule[viewDow]||[]);
   let html='';
   if(fixed.length===0){
     html=`<div class="no-vendor-state"><div style="font-size:30px">🗓️</div><p>這天沒有固定廠商<br>如需臨時叫貨可設公告提醒</p></div>`;
@@ -1593,7 +1603,7 @@ function renderPreviewOverview(isAdmin){
       <div class="vsr-left"><div class="vsr-name">${v}</div><div class="vsr-sub">固定排程</div></div>
       <div class="vsr-right"><span class="vsr-badge" style="background:var(--tint);color:var(--ink2);">排定</span></div>
     </div>`).join('');
-    html+=`<div style="font-size:11px;color:var(--ink3);padding:8px 2px 0;">蔬菜、南北貨等不定期廠商，當天由管理員開啟</div>`;
+    html+=`<div style="font-size:11px;color:var(--ink3);padding:8px 2px 0;">未排程的蔬菜、南北貨，可於當天在點貨頁自行開啟</div>`;
   }
   bar.innerHTML=html;
   // 該日排定叫貨（追蹤品項）
@@ -1634,14 +1644,13 @@ function renderOverview(){
   const previewNotice=document.getElementById('previewNotice'); if(previewNotice) previewNotice.style.display='none';
   const schedVendors = weeklySchedule[viewDow] || [];
 
-  // 員工只看到排程廠商 + 已開啟的 opt-in 廠商
-  // 管理員看到排程廠商 + 全部 opt-in 廠商（含開關）
-  const activeOptIn = OPT_IN_VENDORS.filter(v => optInToday[viewDow][v]);
-  // 週排程中移除 OPT_IN_VENDORS（避免重複），OPT_IN_VENDORS 走獨立邏輯
+  // opt-in 廠商（蔬菜/南北貨）：當天有排程 or 被手動開啟 → 視為啟用，固定顯示
+  const activeOptIn = OPT_IN_VENDORS.filter(v => isOptInOn(v, viewDow));
+  // 週排程中移除 OPT_IN_VENDORS（避免重複），opt-in 走獨立邏輯
   const visibleScheduled = schedVendors.filter(v => !OPT_IN_VENDORS.includes(v));
-  const vendors = isAdmin
-    ? [...visibleScheduled, ...OPT_IN_VENDORS]
-    : [...visibleScheduled, ...activeOptIn];
+  // 所有人（含員工）都看得到全部 opt-in 廠商：
+  //   已啟用 → 正常顯示；未啟用 → 顯示「今日需點貨」開關（員工也能自己開）
+  const vendors = [...visibleScheduled, ...OPT_IN_VENDORS];
 
 
   const bar = document.getElementById('vendorStatusBar');
@@ -1650,19 +1659,19 @@ function renderOverview(){
   } else {
     const rows = vendors.map(v => {
       const isOptIn = OPT_IN_VENDORS.includes(v);
-      const isEnabled = optInToday[viewDow][v];
+      const isEnabled = isOptInOn(v, viewDow);
       const state = isOptIn && !isEnabled ? 'opt-off' : vendorState(v, viewDow);
       const vitems = ITEMS_DEF.filter(i => i.vendor === v);
       const filled = vitems.filter(i => qty[i.id] !== '').length;
       const sub = submitted[viewDow][v];
 
-      // opt-in 廠商且未開啟 → 只有管理員能看到，顯示開關卡（歸入待點區）
-      if(isOptIn && !isEnabled && isAdmin){
-        return {group:'pending', html:`<div class="vendor-status-row opt-off-row" style="border:1.5px dashed var(--border);background:var(--cream);opacity:0.75;">
+      // opt-in 廠商且今天未啟用 → 顯示「今日需點貨」開關卡（管理員與員工皆可開）
+      if(isOptIn && !isEnabled){
+        return {group:'pending', html:`<div class="vendor-status-row opt-off-row" style="border:1.5px dashed var(--border);background:var(--cream);opacity:0.85;">
           <div class="vsr-icon" style="background:var(--tag-bg);font-size:13px;">🔕</div>
           <div class="vsr-left">
             <div class="vsr-name" style="color:var(--ink3);">${v}</div>
-            <div class="vsr-sub" style="color:var(--ink3);">今日未啟用 · 員工不會看到</div>
+            <div class="vsr-sub" style="color:var(--ink3);">今日尚未開啟 · 需要就按右側開啟</div>
           </div>
           <div class="vsr-right">
             <button class="btn-opt-in-toggle" onclick="toggleOptIn(${viewDow},'${v}')">今日需點貨</button>
@@ -1712,11 +1721,11 @@ function renderOverview(){
       return {group: state==='done'?'done':'pending', vendor:v, dl, html:`<button class="vendor-status-row${rowCls ? ' '+rowCls : ''}${ordered[viewDow][v] ? ' ordered' : ''}" onclick="openVendor('${v}')" style="width:100%;text-align:left;font-family:'Noto Sans TC',sans-serif;">
         <div class="vsr-icon ${iconCls}">${icon}</div>
         <div class="vsr-left">
-          <div class="vsr-name">${v}${isOptIn && isEnabled ? '<span style="font-size:9px;background:#E8EFFF;color:#3A6BC4;padding:1px 6px;border-radius:8px;margin-left:6px;font-weight:400;">今日點貨</span>' : ''}</div>
+          <div class="vsr-name">${v}${isOptIn && isOptInManual(v,viewDow) ? '<span style="font-size:9px;background:#E8EFFF;color:#3A6BC4;padding:1px 6px;border-radius:8px;margin-left:6px;font-weight:400;">今日點貨</span>' : ''}</div>
           ${dlChip}
         </div>
         <div class="vsr-right">
-          ${isOptIn && isEnabled && isAdmin && state !== 'done'
+          ${isOptIn && isOptInManual(v,viewDow) && state !== 'done'
             ? `<button class="btn-opt-cancel" onclick="event.stopPropagation();toggleOptIn(${viewDow},'${v}')">取消</button>` : ''}
           ${state === 'done'
             ? `<span class="vsr-badge ${ordered[viewDow][v] ? 'badge-ordered-done' : 'badge-need-order'}"
@@ -2427,7 +2436,7 @@ function showDailySummary() {
   const overlay = document.getElementById('overlay');
 
   const schedVendors = (weeklySchedule[viewDow] || []).filter(v => !OPT_IN_VENDORS.includes(v));
-  const activeOptIn = OPT_IN_VENDORS.filter(v => optInToday[viewDow][v]);
+  const activeOptIn = OPT_IN_VENDORS.filter(v => isOptInOn(v, viewDow));
   const allVendors = [...schedVendors, ...activeOptIn];
 
   const d = new Date(now); d.setDate(now.getDate() - todayDow + viewDow);
@@ -5734,7 +5743,7 @@ markOrdered = function(vendor) {
   // 檢查是否全部叫貨完成
   const allVisible = [
     ...(weeklySchedule[viewDow] || []).filter(v => !OPT_IN_VENDORS.includes(v)),
-    ...OPT_IN_VENDORS.filter(v => optInToday[viewDow][v])
+    ...OPT_IN_VENDORS.filter(v => isOptInOn(v, viewDow))
   ];
   const submittedVendors = allVisible.filter(v => submitted[viewDow][v]);
   const allOrdered = submittedVendors.length > 0 &&
