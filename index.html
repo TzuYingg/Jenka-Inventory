@@ -1394,6 +1394,7 @@ function logoutAdmin(){setBottomActive('inventory');showPage('inventory');}
 
 // ── Pages ──
 function showPage(page){
+  if(page!=='admin' && typeof flushPendingSaves==='function') flushPendingSaves();
   document.getElementById('inventoryPage').style.display=page==='inventory'?'block':'none';
   document.getElementById('adminPage').style.display=page==='admin'?'block':'none';
   document.getElementById('historyPage').style.display=page==='history'?'block':'none';
@@ -2665,7 +2666,7 @@ function toggleScheduleVendor(dow,vendor){
   const c=document.getElementById(`scount-${dow}`);
   if(c)c.textContent=`${scheduleDraft[dow].length} 個廠商`;
 }
-var saveSchedule = function(){weeklySchedule=JSON.parse(JSON.stringify(scheduleDraft));const prev=orderQty;orderQty=buildDefaultOrders();ITEMS_DEF.forEach(item=>{if(OPT_IN_VENDORS.includes(item.vendor)&&prev[item.id]){for(let d=0;d<7;d++){if(prev[item.id][d]!=null)orderQty[item.id][d]=prev[item.id][d];}}});showToast('✓ 排程已儲存');}
+var saveSchedule = function(){weeklySchedule=JSON.parse(JSON.stringify(scheduleDraft));const prev=orderQty;orderQty=buildDefaultOrders();ITEMS_DEF.forEach(item=>{if(!prev[item.id])return;const isOptIn=OPT_IN_VENDORS.includes(item.vendor);for(let d=0;d<7;d++){if(prev[item.id][d]==null)continue;if(isOptIn){orderQty[item.id][d]=prev[item.id][d];}else if(orderQty[item.id][d]!=null){orderQty[item.id][d]=prev[item.id][d];}}});showToast('✓ 排程已儲存');}
 function resetSchedule(){scheduleDraft={0:['廣弘'],1:['豆漿','麵包','毓品'],2:[],3:['廣弘'],4:['豆漿','毓品','麵包'],5:[],6:[]};renderScheduleEditor();showToast('已重設為預設排程');}
 
 // ── Qty ──
@@ -2791,6 +2792,15 @@ let _qtyAutoTimer=null;
 function qtyAutoSave(){ if(_qtyAutoTimer)clearTimeout(_qtyAutoTimer); _qtyAutoTimer=setTimeout(()=>{ commitQtyQuiet(); showToast('叫貨量已自動儲存'); }, 800); }
 let _safeAutoTimer=null;
 function safeAutoSave(){ if(_safeAutoTimer)clearTimeout(_safeAutoTimer); _safeAutoTimer=setTimeout(()=>{ if(typeof fbSaveItemsDef==='function') fbSaveItemsDef(); }, 800); }
+// 離開後台／App 進背景時，把尚未觸發的自動存（800ms debounce）立刻補存，避免改完馬上關掉而漏存
+function flushPendingSaves(){
+  if(_qtyAutoTimer){ clearTimeout(_qtyAutoTimer); _qtyAutoTimer=null; commitQtyQuiet(); }
+  if(_safeAutoTimer){ clearTimeout(_safeAutoTimer); _safeAutoTimer=null; if(typeof fbSaveItemsDef==='function') fbSaveItemsDef(); }
+  if(typeof qtyTimer!=='undefined' && qtyTimer){ clearTimeout(qtyTimer); qtyTimer=null; if(typeof fbSave==='function') fbSave(viewDow); }
+}
+// App 進背景（切換 App／鎖屏）或關閉時，補存未觸發的自動存
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') flushPendingSaves(); });
+window.addEventListener('pagehide', ()=>{ flushPendingSaves(); });
 
 // 匯出後台設定備份（下載 JSON）
 function exportConfig(){
