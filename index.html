@@ -77,10 +77,16 @@ async function _registerToken(){
     const token = await getToken(window._push.messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
     if(!token) return null;
     window._push.token = token;
-    const u = (window.currentUser && (window.currentUser.id || window.currentUser.name)) || 'unknown';
-    const nm = (window.currentUser && window.currentUser.name) || u;
+    const cu = window.currentUser || {};
+    const uname = cu.username || 'unknown';
     const { db, ref, update } = window._fb;
-    await update(ref(db, 'jenka/fcmTokens/' + u), { token: token, name: nm, ts: Date.now() });
+    await update(ref(db, 'jenka/fcmTokens/' + uname), {
+      token: token,
+      username: uname,
+      name: cu.name || uname,
+      role: cu.role || 'unknown',
+      ts: Date.now()
+    });
     return token;
   }catch(e){ console.warn('[push] register fail', e); return null; }
 }
