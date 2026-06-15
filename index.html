@@ -57,16 +57,32 @@ async function _initMessaging(){
         if(window.showToast) window.showToast('🔔 ' + (d.title || '通知') + (d.body ? '：'+d.body : ''));
       }catch(e){}
     });
-    // 已授權過 → 等使用者登入後靜默刷新 token
-    if(Notification.permission === 'granted') _whenUserReady(_registerToken);
+    // 已授權過 → 持續監看，等真的登入帳號出現才註冊（絕不寫 unknown）
+    if(Notification.permission === 'granted') _watchUserForPush();
     _whenUserReady(_ensurePushBanner, 6);
   }catch(e){ console.warn('[push] init skip', e); }
 }
 
+let _lastPushUser = null;
+function _watchUserForPush(){
+  setInterval(function(){
+    try{
+      if(!window._push || !window._push.supported) return;
+      if(typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+      const cu = window.currentUser;
+      const uname = cu && cu.username;
+      if(uname && uname !== _lastPushUser){
+        _lastPushUser = uname;
+        _registerToken();
+      }
+    }catch(e){}
+  }, 2000);
+}
+
 function _whenUserReady(cb, tries){
   tries = (tries===undefined) ? 20 : tries;
-  if(window.currentUser && (window.currentUser.name || window.currentUser.id)) return cb();
-  if(tries <= 0) return cb();   // 找不到也先跑一次（會以 unknown 暫存）
+  if(window.currentUser && (window.currentUser.name || window.currentUser.username)) return cb();
+  if(tries <= 0) return cb();
   setTimeout(()=>_whenUserReady(cb, tries-1), 500);
 }
 
@@ -95,9 +111,11 @@ async function _registerToken(){
 window.enablePushNotifications = async function(){
   try{
     if(!window._push.supported){ if(window.showToast) window.showToast('此裝置／瀏覽器不支援推播'); return; }
+    if(!(window.currentUser && window.currentUser.username)){ if(window.showToast) window.showToast('請先登入再開啟通知'); return; }
     const perm = await Notification.requestPermission();
     if(perm !== 'granted'){ if(window.showToast) window.showToast('尚未允許通知，可到系統設定開啟'); return; }
     const t = await _registerToken();
+    if(t) _lastPushUser = window.currentUser.username;
     if(t){ if(window.showToast) window.showToast('✓ 已開啟推播通知'); }
     else { if(window.showToast) window.showToast('開啟失敗，請稍後再試'); }
     _ensurePushBanner();
