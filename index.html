@@ -19,6 +19,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
 import { getDatabase, ref, set, get, onValue, update, remove, push, onChildAdded } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
+import { getMessaging, getToken, onMessage, isSupported } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-messaging.js";
 
 const firebaseConfig={
   apiKey:"AIzaSyDoSPSDr6DfQNa7DHV9Z4xl0Dkc36kd69o",
@@ -35,6 +36,90 @@ const db = getDatabase(app);
 window._fb = {db, ref, set, get, onValue, update, remove, push, onChildAdded};
 window._fbReady = true;
 window.dispatchEvent(new Event('fbReady'));
+
+/* ─────────── 推播通知（FCM Web Push）─────────── */
+/* ⚠ 下面這把金鑰要去 Firebase 後台產生後貼上（產生方式見交付說明）。沒貼也不會讓 App 壞掉，只是推播不會啟用。 */
+const VAPID_KEY = "BHTNkqwrAxxFIUA4gLqVBkQzhzq43U-MUfJVxJOa7oDZkJHWohwquu-JpKNNOfrNUvQB_hFcnrkQf5bzCstZvXc";
+
+window._push = { supported:false, token:null };
+
+async function _initMessaging(){
+  try{
+    if(VAPID_KEY === "PASTE_WEB_PUSH_CERT_KEY_HERE") { console.warn('[push] VAPID 金鑰尚未填入，跳過推播初始化'); return; }
+    if(!('Notification' in window) || !('serviceWorker' in navigator)) return;
+    if(!(await isSupported())) return;
+    window._push.messaging = getMessaging(app);
+    window._push.supported = true;
+    // 前景（App 開著時）收到推播 → 用既有 toast 顯示
+    onMessage(window._push.messaging, (payload)=>{
+      try{
+        const d = payload.notification || payload.data || {};
+        if(window.showToast) window.showToast('🔔 ' + (d.title || '通知') + (d.body ? '：'+d.body : ''));
+      }catch(e){}
+    });
+    // 已授權過 → 等使用者登入後靜默刷新 token
+    if(Notification.permission === 'granted') _whenUserReady(_registerToken);
+    _whenUserReady(_ensurePushBanner, 6);
+  }catch(e){ console.warn('[push] init skip', e); }
+}
+
+function _whenUserReady(cb, tries){
+  tries = (tries===undefined) ? 20 : tries;
+  if(window.currentUser && (window.currentUser.name || window.currentUser.id)) return cb();
+  if(tries <= 0) return cb();   // 找不到也先跑一次（會以 unknown 暫存）
+  setTimeout(()=>_whenUserReady(cb, tries-1), 500);
+}
+
+async function _registerToken(){
+  try{
+    if(!window._push.supported) return null;
+    const reg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+    const token = await getToken(window._push.messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+    if(!token) return null;
+    window._push.token = token;
+    const u = (window.currentUser && (window.currentUser.id || window.currentUser.name)) || 'unknown';
+    const nm = (window.currentUser && window.currentUser.name) || u;
+    const { db, ref, update } = window._fb;
+    await update(ref(db, 'jenka/fcmTokens/' + u), { token: token, name: nm, ts: Date.now() });
+    return token;
+  }catch(e){ console.warn('[push] register fail', e); return null; }
+}
+
+// 由按鈕（使用者點擊）呼叫 —— iOS 規定必須是使用者手勢觸發
+window.enablePushNotifications = async function(){
+  try{
+    if(!window._push.supported){ if(window.showToast) window.showToast('此裝置／瀏覽器不支援推播'); return; }
+    const perm = await Notification.requestPermission();
+    if(perm !== 'granted'){ if(window.showToast) window.showToast('尚未允許通知，可到系統設定開啟'); return; }
+    const t = await _registerToken();
+    if(t){ if(window.showToast) window.showToast('✓ 已開啟推播通知'); }
+    else { if(window.showToast) window.showToast('開啟失敗，請稍後再試'); }
+    _ensurePushBanner();
+  }catch(e){ if(window.showToast) window.showToast('開啟失敗'); console.warn(e); }
+};
+
+// 開啟提醒的小橫幅（暫用 Rei 色票，之後可由 Rei 微調文案與位置）
+function _ensurePushBanner(){
+  try{
+    if(!window._push || !window._push.supported || !('Notification' in window)) return;
+    let bar = document.getElementById('pushBanner');
+    if(Notification.permission === 'granted'){ if(bar) bar.remove(); return; }
+    if(bar) return;
+    bar = document.createElement('div');
+    bar.id = 'pushBanner';
+    bar.style.cssText = 'position:fixed;left:10px;right:10px;bottom:calc(66px + env(safe-area-inset-bottom));z-index:900;background:#FCFAF6;border:1px solid #E7E2D8;border-radius:14px;padding:11px 13px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 18px rgba(43,40,36,.10);font-family:\'Noto Sans TC\',sans-serif;';
+    bar.innerHTML = '<div style="flex:1;font-size:12.5px;color:#2B2824;line-height:1.5;">開啟推播通知<br><span style="color:#9C978C;font-size:11px;">沒開 App 也收得到截止提醒</span></div>'
+      + '<button id="pushEnableBtn" style="background:#2B2824;color:#fff;border:none;border-radius:9px;padding:8px 15px;font-size:12.5px;font-weight:600;font-family:inherit;cursor:pointer;">開啟</button>'
+      + '<button id="pushDismissBtn" style="background:none;border:none;color:#9C978C;font-size:19px;line-height:1;padding:2px 4px;cursor:pointer;">×</button>';
+    document.body.appendChild(bar);
+    document.getElementById('pushEnableBtn').onclick = ()=> window.enablePushNotifications();
+    document.getElementById('pushDismissBtn').onclick = ()=> bar.remove();
+  }catch(e){ console.warn('[push] banner', e); }
+}
+window.refreshPushBanner = _ensurePushBanner;
+
+_initMessaging();
+
 </script>
 <style>
   :root {
