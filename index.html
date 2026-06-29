@@ -1978,8 +1978,8 @@ function calcOrderAmt(item,dow){
     // 非換算品項（整單位，如 包／罐／條）：取整到「增減」級距，避免需備量或現有量帶小數時跑出 0.05 這類零頭
     // 預設 step=1 → 整數；像德國香腸 step=0.5 → 以 0.5 為單位。四捨五入：差量小於半個級距視為足夠（免叫），達半個級距以上才進到整數。
     const s=item.step||1; amt=Math.round(amt/s)*s;
-    // 最高叫貨上限：僅未換算品項套用（換算品項的叫貨量已被需備量自然封頂，safe 僅作點貨上限）
-    const maxLimit=safeQty[item.id]; if(maxLimit && amt>maxLimit) amt=maxLimit;
+    // 不再以 safe（最高上限）默默封頂叫貨量：備貨量調多少就老實建議多少，避免悄悄少叫。
+    // 真正的物理上限改用選填的 item.cap，且只在點貨頁「提醒」不自動砍（見訂單列表 ⚠超過上限）。
   }
   amt=Math.round(amt*100)/100;          // 清除浮點誤差
   return amt;
@@ -3091,6 +3091,11 @@ function renderItemsAdmin() {
           <span class="irr-sw${item.irregular?' on':''}" onclick="toggleItemIrregular(${item.id})" title="不定期品項不進固定排程，可在排定時一鍵帶入"></span>
           ${item.irregular?`<span style="font-size:10px;color:${safeQty[item.id]>0?'var(--ink3)':'var(--danger)'};">${safeQty[item.id]>0?'需備量＝最高上限':'⚠ 請先填最高上限'}</span>`:''}
         </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+          <span style="font-size:11px;color:var(--ink2);white-space:nowrap;">叫貨上限</span>
+          <input class="iae-input" type="number" step="0.5" min="0" value="${item.cap??''}" placeholder="選填·留空＝不限" onchange="saveItemField(${item.id},'cap',this.value,this)" style="width:88px;height:30px;border:1px dashed var(--border);border-radius:7px;text-align:center;font-family:'DM Mono',monospace;font-size:13px;background:var(--cream);color:var(--ink);outline:none;">
+          <span style="font-size:10px;color:var(--ink3);line-height:1.4;">冰箱／廠商裝不下時才填，超過只提醒不自動砍</span>
+        </div>
         <div style="display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap;">
           <span style="font-size:10px;color:var(--ink3);white-space:nowrap;">叫貨語言</span>
           <input class="iae-input" value="${esc(item.oUnit||item.unit)}" onchange="saveItemField(${item.id},'oUnit',this.value,this)" style="width:50px;height:30px;border:1px solid var(--border);border-radius:7px;text-align:center;font-family:'Noto Sans TC',sans-serif;font-size:12px;background:var(--cream);color:var(--ink);outline:none;">
@@ -3140,6 +3145,14 @@ function saveItemField(id, field, value, el){
     recalcFactor(item); reRender=true;
   } else {
     const n = parseFloat(value);
+    // 叫貨上限（選填）：留空＝不限，可清除；其餘欄位維持原本「空白或負數即還原」的規則
+    if (field === 'cap'){
+      if (value==='' || isNaN(n) || n<=0){ delete item.cap; }
+      else { item.cap = n; }
+      fbSaveItemsDef();
+      if (el){ el.classList.add('saved-flash'); setTimeout(() => el.classList.remove('saved-flash'), 600); }
+      return;
+    }
     const revert = { safe: safeQty[id], step: item.step||1, minOrder: item.minOrder||1, multiple: item.multiple||0 };
     if (isNaN(n) || n < 0){ if(el) el.value = revert[field]; return; }
     if (field === 'safe'){
@@ -3652,6 +3665,7 @@ function fbSaveItemsDef() {
     ...(i.minOrder && i.minOrder !== 1 ? { minOrder: i.minOrder } : {}),
     ...(i.multiple && i.multiple > 1 ? { multiple: i.multiple } : {}),
     ...(i.irregular ? { irregular: true } : {}),
+    ...(i.cap != null && i.cap > 0 ? { cap: i.cap } : {}),
     ...(i.oUnit ? { oUnit: i.oUnit } : {}),
     ...(i.gramsPerUnit ? { gramsPerUnit: i.gramsPerUnit } : {}),
     ...(i.factor && i.factor !== 1 ? { factor: i.factor } : {}),
@@ -3808,7 +3822,7 @@ function showOrderView(vendor){
       const cur = (cntRaw!==''&&cntRaw!==undefined&&cntRaw!==null)?cntRaw:'—';
       const adjVal = window._orderAdj[adjKey][item.id] ?? calcOrderAmt(item, viewDow);
       const stepUnit = (item.factor&&item.factor!==1)?(item.oStep||0.5):(item.step||1);
-      const subline = `現有 ${cur} ${item.unit}` + (item.orderName&&item.orderName!==item.name?` · 叫貨：${item.orderName}`:'');
+      const subline = `現有 ${cur} ${item.unit}` + (item.orderName&&item.orderName!==item.name?` · 叫貨：${item.orderName}`:'') + ((item.cap>0 && adjVal>item.cap)?` · <span style="color:var(--warn);font-weight:600;">⚠ 超過上限 ${item.cap}${oUnitOf(item)}</span>`:'');
       return`<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);">
         <div style="min-width:0;">
           <div style="font-weight:500;font-size:14px;">${item.name}</div>
